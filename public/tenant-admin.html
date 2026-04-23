@@ -918,7 +918,7 @@ tr:hover td{background:rgba(22,163,74,.02);}
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 <script>
 // ===== APP LOGIC =====
-const API_BASE_URL = 'http://localhost:5000';
+const API_BASE_URL = window.location.origin;
 let TENANT_ID = '';
 let db = {};
 const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 phút

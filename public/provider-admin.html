@@ -845,13 +845,15 @@ function initDB() {
 }
 
 // ===== AUTH =====
+const API_BASE_URL = window.location.origin;
+
 async function doLogin() {
   const u = document.getElementById('login-user').value;
   const p = document.getElementById('login-pass').value;
   const errorEl = document.getElementById('login-error');
   
   try {
-    const response = await fetch('http://localhost:5000/api/auth/login', {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username: u, password: p, type: 'provider' })
@@ -911,14 +913,14 @@ async function initApp() {
   
   try {
     const [statsRes, tenantsRes, packagesRes, invoicesRes, invoiceStatsRes, ticketsRes, notificationsRes, monthlyRevenueRes] = await Promise.all([
-      fetch('http://localhost:5000/api/tenants/stats'),
-      fetch('http://localhost:5000/api/tenants'),
-      fetch('http://localhost:5000/api/packages'),
-      fetch('http://localhost:5000/api/invoices'),
-      fetch('http://localhost:5000/api/invoices/stats'),
-      fetch('http://localhost:5000/api/tickets'),
-      fetch('http://localhost:5000/api/notifications'),
-      fetch('http://localhost:5000/api/invoices/monthly-revenue')
+      fetch(`${API_BASE_URL}/api/tenants/stats`),
+      fetch(`${API_BASE_URL}/api/tenants`),
+      fetch(`${API_BASE_URL}/api/packages`),
+      fetch(`${API_BASE_URL}/api/invoices`),
+      fetch(`${API_BASE_URL}/api/invoices/stats`),
+      fetch(`${API_BASE_URL}/api/tickets`),
+      fetch(`${API_BASE_URL}/api/notifications`),
+      fetch(`${API_BASE_URL}/api/invoices/monthly-revenue`)
     ]);
 
     const stats = await statsRes.json();
@@ -1120,7 +1122,7 @@ async function toggleTenantStatus(id) {
   const newStatus = t.status==='active' ? 'suspended' : 'active';
   
   try {
-    const response = await fetch(`http://localhost:5000/api/tenants/${id}/status`, {
+    const response = await fetch(`${API_BASE_URL}/api/tenants/${id}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus })
@@ -1140,7 +1142,7 @@ async function renewTenant(id) {
   if (!confirm('Xác nhận gia hạn thêm 1 chu kỳ cho nhà thuê này? (Trạng thái sẽ được mở khóa và Hạn mức cộng thêm 1 chu kỳ)')) return;
   
   try {
-    const response = await fetch(`http://localhost:5000/api/tenants/${id}/renew`, {
+    const response = await fetch(`${API_BASE_URL}/api/tenants/${id}/renew`, {
       method: 'PUT'
     });
     const data = await response.json();
@@ -1159,7 +1161,7 @@ async function deleteTenant(id) {
   if (!confirm('Xác nhận xóa nhà thuê này?')) return;
   
   try {
-    const response = await fetch(`http://localhost:5000/api/tenants/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/tenants/${id}`, {
       method: 'DELETE'
     });
     const data = await response.json();
@@ -1259,7 +1261,7 @@ async function saveEditTenant() {
   };
 
   try {
-    const response = await fetch(`http://localhost:5000/api/tenants/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/tenants/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -1297,7 +1299,7 @@ async function addTenant() {
   };
 
   try {
-    const response = await fetch('http://localhost:5000/api/tenants', {
+    const response = await fetch(`${API_BASE_URL}/api/tenants`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newT)
@@ -1319,8 +1321,8 @@ async function addTenant() {
 async function refreshTenantData() {
   try {
     const [statsRes, tenantsRes] = await Promise.all([
-      fetch('http://localhost:5000/api/tenants/stats'),
-      fetch('http://localhost:5000/api/tenants')
+      fetch(`${API_BASE_URL}/api/tenants/stats`),
+      fetch(`${API_BASE_URL}/api/tenants`)
     ]);
 
     db.stats = await statsRes.json();
@@ -1408,7 +1410,7 @@ async function addPackage() {
   };
 
   try {
-    const response = await fetch('http://localhost:5000/api/packages', {
+    const response = await fetch(`${API_BASE_URL}/api/packages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newPkg)
@@ -1460,7 +1462,7 @@ async function saveEditPackage() {
   };
 
   try {
-    const response = await fetch(`http://localhost:5000/api/packages/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/packages/${id}`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(data)
@@ -1482,7 +1484,7 @@ async function deletePackage(id) {
   if (!confirm('Xác nhận xóa gói dịch vụ này? Lưu ý: Nếu có nhà thuê đang dùng gói này, việc xóa có thể gây lỗi hệ thống.')) return;
 
   try {
-    const response = await fetch(`http://localhost:5000/api/packages/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/packages/${id}`, {
       method: 'DELETE'
     });
     const data = await response.json();
@@ -1563,7 +1565,7 @@ async function updateInvoiceStatus(id, newStatus) {
   if (!confirm(msg)) return;
 
   try {
-    const response = await fetch(`http://localhost:5000/api/invoices/${id}/status`, {
+    const response = await fetch(`${API_BASE_URL}/api/invoices/${id}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus })
@@ -1723,7 +1725,7 @@ async function sendInvoice(id) {
       </div>
     `;
 
-    const response = await fetch('http://localhost:5000/api/invoices/send-email', {
+    const response = await fetch(`${API_BASE_URL}/api/invoices/send-email', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

@@ -1574,7 +1574,7 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
   <script>
     // ===== API CONFIGURATION =====
-    const API_BASE_URL = 'http://localhost:5000';
+    const API_BASE_URL = window.location.origin;
     const urlParams = new URLSearchParams(window.location.search);
     const TENANT_ID = urlParams.get('tenant') || 'tenant1';
     let tenantSettings = null;
