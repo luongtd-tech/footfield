@@ -41,84 +41,89 @@ const Tenant = {
     const vnTime = new Date(now.getTime() + (7 * 60 * 60 * 1000));
     const today = vnTime.toISOString().slice(0, 10);
 
-    // 2. Stat cards
-    const [[activeFields]] = await db.query("SELECT COUNT(*) as count FROM fields WHERE tenant_id = ? AND status = 'available'", [tenantId]);
-    const [[todayBookings]] = await db.query("SELECT COUNT(*) as count FROM bookings WHERE tenant_id = ? AND date = ? AND status != 'cancelled'", [tenantId, today]);
-    const [[todayRevenue]] = await db.query('SELECT SUM(total_price) as sum FROM bookings WHERE tenant_id = ? AND date = ? AND paid = 1', [tenantId, today]);
-    const [[totalCustomers]] = await db.query('SELECT COUNT(*) as count FROM customers WHERE tenant_id = ?', [tenantId]);
-    const [[vipCount]] = await db.query("SELECT COUNT(*) as count FROM customers WHERE tenant_id = ? AND status = 'vip'", [tenantId]);
-    const [[pendingBookings]] = await db.query("SELECT COUNT(*) as count FROM bookings WHERE tenant_id = ? AND status = 'pending'", [tenantId]);
-    const [[unreadNotifs]] = await db.query('SELECT COUNT(*) as count FROM notifications WHERE (tenant_id = ? OR tenant_id IS NULL) AND is_read = 0', [tenantId]);
+    try {
+      // 2. Stat cards
+      const [[activeFields]] = await db.query("SELECT COUNT(*) as count FROM fields WHERE tenant_id = ? AND status = 'available'", [tenantId]);
+      const [[todayBookings]] = await db.query("SELECT COUNT(*) as count FROM bookings WHERE tenant_id = ? AND date = ? AND status != 'cancelled'", [tenantId, today]);
+      const [[todayRevenue]] = await db.query('SELECT SUM(total_price) as sum FROM bookings WHERE tenant_id = ? AND date = ? AND paid = 1', [tenantId, today]);
+      const [[totalCustomers]] = await db.query('SELECT COUNT(*) as count FROM customers WHERE tenant_id = ?', [tenantId]);
+      const [[vipCount]] = await db.query("SELECT COUNT(*) as count FROM customers WHERE tenant_id = ? AND status = 'vip'", [tenantId]);
+      const [[pendingBookings]] = await db.query("SELECT COUNT(*) as count FROM bookings WHERE tenant_id = ? AND status = 'pending'", [tenantId]);
+      const [[unreadNotifs]] = await db.query('SELECT COUNT(*) as count FROM notifications WHERE (tenant_id = ? OR tenant_id IS NULL) AND is_read = 0', [tenantId]);
 
-    // Extra metrics for sub-texts
-    const [[maintenanceFields]] = await db.query("SELECT COUNT(*) as count FROM fields WHERE tenant_id = ? AND status = 'maintenance'", [tenantId]);
-    const [[confirmedToday]] = await db.query("SELECT COUNT(*) as count FROM bookings WHERE tenant_id = ? AND date = ? AND status IN ('confirmed', 'completed')", [tenantId, today]);
-    const [[paidTransactionsToday]] = await db.query('SELECT COUNT(*) as count FROM bookings WHERE tenant_id = ? AND date = ? AND paid = 1', [tenantId, today]);
+      // Extra metrics for sub-texts
+      const [[maintenanceFields]] = await db.query("SELECT COUNT(*) as count FROM fields WHERE tenant_id = ? AND status = 'maintenance'", [tenantId]);
+      const [[confirmedToday]] = await db.query("SELECT COUNT(*) as count FROM bookings WHERE tenant_id = ? AND date = ? AND status IN ('confirmed', 'completed')", [tenantId, today]);
+      const [[paidTransactionsToday]] = await db.query('SELECT COUNT(*) as count FROM bookings WHERE tenant_id = ? AND date = ? AND paid = 1', [tenantId, today]);
 
-    // 3. Revenue chart (last 7 days) - Ensuring all days are present
-    const [revenueRaw] = await db.query(`
-      SELECT DATE(date) as day, SUM(total_price) as revenue
-      FROM bookings
-      WHERE tenant_id = ? AND date >= DATE_SUB(?, INTERVAL 6 DAY) AND paid = 1
-      GROUP BY DATE(date)
-      ORDER BY day;
-    `, [tenantId, today]);
+      // 3. Revenue chart (last 7 days) - Ensuring all days are present
+      const [revenueRaw] = await db.query(`
+        SELECT DATE(date) as day, SUM(total_price) as revenue
+        FROM bookings
+        WHERE tenant_id = ? AND date >= DATE_SUB(?, INTERVAL 6 DAY) AND paid = 1
+        GROUP BY DATE(date)
+        ORDER BY day;
+      `, [tenantId, today]);
 
-    // Fill gaps for 7 days
-    const revenue7Days = [];
-    for (let i = 6; i >= 0; i--) {
-        const d = new Date(vnTime);
-        d.setDate(d.getDate() - i);
-        const dStr = d.toISOString().slice(0, 10);
-        const match = revenueRaw.find(r => {
-            const rDay = new Date(r.day).toISOString().slice(0, 10);
-            return rDay === dStr;
-        });
-        revenue7Days.push({
-            day: dStr,
-            revenue: match ? parseFloat(match.revenue) : 0
-        });
+      // Fill gaps for 7 days
+      const revenue7Days = [];
+      for (let i = 6; i >= 0; i--) {
+          const d = new Date(vnTime);
+          d.setDate(d.getDate() - i);
+          const dStr = d.toISOString().slice(0, 10);
+          const match = revenueRaw.find(r => {
+              const rDay = new Date(r.day).toISOString().slice(0, 10);
+              return rDay === dStr;
+          });
+          revenue7Days.push({
+              day: dStr,
+              revenue: match ? parseFloat(match.revenue) : 0
+          });
+      }
+
+      // 3. Today's bookings list
+      const [todayBookingsList] = await db.query(`
+        SELECT b.id, b.customer_name, b.start_time, b.end_time, b.status, f.name as field_name
+        FROM bookings b
+        JOIN fields f ON b.field_id = f.id
+        WHERE b.tenant_id = ? AND b.date = ?
+        ORDER BY b.start_time;
+      `, [tenantId, today]);
+
+      // 4. Fields status list
+      const [fieldsStatus] = await db.query('SELECT id, name, price_per_hour, status FROM fields WHERE tenant_id = ?', [tenantId]);
+
+      // 5. VIP customers (top 5 by spending)
+      const [vipCustomers] = await db.query(`
+        SELECT id, name, total_spent, total_bookings, status
+        FROM customers
+        WHERE tenant_id = ? AND status = 'vip'
+        ORDER BY total_spent DESC
+        LIMIT 5
+      `, [tenantId]);
+
+      return {
+        stats: {
+          activeFields: activeFields.count,
+          todayBookings: todayBookings.count,
+          todayRevenue: todayRevenue.sum || 0,
+          totalCustomers: totalCustomers.count,
+          vipCustomers: vipCount.count,
+          pendingBookings: pendingBookings.count,
+          unreadNotifications: unreadNotifs.count,
+          maintenanceFields: maintenanceFields.count,
+          confirmedToday: confirmedToday.count,
+          paidTransactionsToday: paidTransactionsToday.count
+        },
+        revenue7Days,
+        todayBookingsList,
+        fieldsStatus,
+        vipCustomers
+      };
+    } catch (error) {
+      console.error('Error in getDashboardData:', error);
+      throw new Error('Error in getDashboardData: ' + error.message);
     }
-
-    // 3. Today's bookings list
-    const [todayBookingsList] = await db.query(`
-      SELECT b.id, b.customer_name, b.start_time, b.end_time, b.status, f.name as field_name
-      FROM bookings b
-      JOIN fields f ON b.field_id = f.id
-      WHERE b.tenant_id = ? AND b.date = ?
-      ORDER BY b.start_time;
-    `, [tenantId, today]);
-
-    // 4. Fields status list
-    const [fieldsStatus] = await db.query('SELECT id, name, price_per_hour, status FROM fields WHERE tenant_id = ?', [tenantId]);
-
-    // 5. VIP customers (top 5 by spending)
-    const [vipCustomers] = await db.query(`
-      SELECT id, name, total_spent, total_bookings, status
-      FROM customers
-      WHERE tenant_id = ? AND status = 'vip'
-      ORDER BY total_spent DESC
-      LIMIT 5
-    `, [tenantId]);
-
-    return {
-      stats: {
-        activeFields: activeFields.count,
-        todayBookings: todayBookings.count,
-        todayRevenue: todayRevenue.sum || 0,
-        totalCustomers: totalCustomers.count,
-        vipCustomers: vipCount.count,
-        pendingBookings: pendingBookings.count,
-        unreadNotifications: unreadNotifs.count,
-        maintenanceFields: maintenanceFields.count,
-        confirmedToday: confirmedToday.count,
-        paidTransactionsToday: paidTransactionsToday.count
-      },
-      revenue7Days,
-      todayBookingsList,
-      fieldsStatus,
-      vipCustomers
-    };
   },
   findById: async (id) => {
     const [rows] = await db.query(`
