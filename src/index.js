@@ -70,3 +70,15 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   initCronJobs();
 });
+
+const knex = require('knex')(require('../knexfile')[process.env.NODE_ENV || 'development']);
+
+// Tự động chạy migration khi khởi động server
+knex.migrate.latest()
+  .then(() => {
+    console.log('Database migrated successfully!');
+    // Sau khi migrate xong mới chạy server (tùy chọn)
+  })
+  .catch((err) => {
+    console.error('Migration error:', err);
+  });
