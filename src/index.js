@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path'); // Đưa lên đầu
 require('dotenv').config();
 const db = require('./config/database');
 
@@ -26,9 +27,12 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public')); // Serve frontend files
 
-// Routes
+// --- PHẦN QUAN TRỌNG: PHỤC VỤ FILE TĨNH ---
+// Vì index.js nằm trong thư mục src/, nên ta dùng '../public' để nhảy ra ngoài thư mục gốc
+app.use(express.static(path.join(__dirname, '../public'))); 
+
+// Routes API
 app.use('/api/packages', packageRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/tenants', tenantRoutes);
@@ -44,9 +48,10 @@ app.use('/api/finance', financeRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 
-// Basic Route
+// --- CẤU HÌNH TRANG CHỦ ---
+// Xóa bỏ app.get('/') cũ trả về JSON, thay bằng cái này:
 app.get('/', (req, res) => {
-  res.json({ message: 'Welcome to FootField Backend API' });
+    res.sendFile(path.join(__dirname, '../public/tenant-admin.html'));
 });
 
 // Test DB Connection
@@ -64,13 +69,4 @@ app.get('/test-db', async (req, res) => {
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   initCronJobs();
-});
-
-
-const path = require('path');
-// Khai báo thư mục public chứa file html, css, js
-app.use(express.static(path.join(__dirname, '../public'))); 
-
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../public/tenant-admin.html'));
 });
