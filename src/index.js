@@ -77,7 +77,14 @@ const knex = require('knex')(require('../knexfile')[process.env.NODE_ENV || 'dev
 knex.migrate.latest()
   .then(() => {
     console.log('Database migrated successfully!');
-    // Sau khi migrate xong mới chạy server (tùy chọn)
+    return knex('admins').count('id as count');
+  })
+  .then((rows) => {
+    const count = rows[0].count || rows[0]['count(*)'] || 0;
+    if (count === 0) {
+      console.log('Database is empty, seeding initial data...');
+      return knex.seed.run();
+    }
   })
   .catch((err) => {
     console.error('Migration error:', err);
