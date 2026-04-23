@@ -124,6 +124,7 @@
       gap: 10px;
       cursor: pointer;
     }
+    .nav-right { display: flex; align-items: center; gap: 12px; }
 
     /* ✅ FIX: Logo dùng biến --nav-logo-img */
     .nav-logo-icon {
@@ -164,6 +165,25 @@
     .nav-link:hover {
       background: var(--bg2);
       color: var(--green);
+    }
+
+    .menu-toggle { display: none; font-size: 24px; cursor: pointer; color: var(--green); }
+
+    @media (max-width: 768px) {
+      nav { padding: 0 16px; }
+      .menu-toggle { display: block; }
+      .nav-links { 
+        display: none; position: absolute; top: 68px; left: 0; right: 0; 
+        background: #fff; flex-direction: column; padding: 16px; border-bottom: 1px solid var(--border);
+        box-shadow: var(--shadow);
+      }
+      .nav-links.show { display: flex; }
+      .hero { padding: 40px 16px; min-height: 300px; }
+      .hero h1 { font-size: 28px; }
+      .hero p { font-size: 14px; }
+      .section-title h2 { font-size: 24px; }
+      .field-grid { grid-template-columns: 1fr !important; }
+      .footer-grid { grid-template-columns: 1fr; gap: 32px; }
     }
 
     /* =============================================
@@ -1314,15 +1334,16 @@
   <nav>
     <div class="nav-inner">
       <div class="nav-logo" onclick="showPage('home')">
-        <!-- ✅ Logo dùng CSS var --nav-logo-img qua class .nav-logo-icon -->
-        <div class="nav-logo-icon"></div>
+        <div class="nav-logo-icon">⚽</div>
         <div class="nav-logo-text">VinhUniFootBall</div>
       </div>
-      <div class="nav-links">
-        <div class="nav-link" id="nl-home" onclick="showPage('home')">Trang chủ</div>
-        <div class="nav-link" id="nl-fields" onclick="showPage('fields')">Các sân</div>
-        <div class="nav-link" id="nl-booking" onclick="showPage('booking')">Đặt sân</div>
-        <div class="nav-link" id="nl-lookup" onclick="showPage('lookup')">Tra cứu</div>
+      <div class="nav-right">
+        <div class="nav-links" id="nav-links">
+          <div class="nav-link" onclick="showPage('home')">Trang chủ</div>
+          <div class="nav-link" onclick="showPage('fields')">Sân bóng</div>
+          <div class="nav-link" onclick="showPage('booking')">Đặt sân ngay</div>
+        </div>
+        <div class="menu-toggle" onclick="toggleNav()" style="display:none; cursor:pointer; font-size:24px;">☰</div>
       </div>
     </div>
   </nav>
@@ -2805,6 +2826,13 @@
         // Refresh slots ngay để đồng bộ trạng thái mới nhất
         setTimeout(() => updateTimeSlots(), 50);
       }
+      
+      // Close mobile nav after clicking
+      document.getElementById('nav-links')?.classList.remove('show');
+    }
+
+    function toggleNav() {
+      document.getElementById('nav-links').classList.toggle('show');
     }
 
     // ===== INIT =====
