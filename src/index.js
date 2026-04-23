@@ -48,10 +48,20 @@ app.use('/api/finance', financeRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 
-// --- CẤU HÌNH TRANG CHỦ ---
-// Xóa bỏ app.get('/') cũ trả về JSON, thay bằng cái này:
+// --- CẤU HÌNH CÁC TRANG HTML (Routes) ---
+// Trang chủ: Dành cho Chủ sân (Tenant Admin)
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/tenant-admin.html'));
+});
+
+// Trang Quản trị hệ thống: Dành cho Provider (Provider Admin)
+app.get('/admin', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/provider-admin.html'));
+});
+
+// Trang đặt sân: Dành cho khách hàng (Customer)
+app.get('/booking', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/customer.html'));
 });
 
 // Debug DB structure & Emergency Fix
