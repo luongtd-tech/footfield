@@ -4,8 +4,7 @@ require('dotenv').config();
  * @type { Object.<string, import("knex").Knex.Config> }
  */
 module.exports = {
-
-  // Cấu hình dùng khi chạy ở máy cá nhân (Localhost)
+  // Cấu hình cho môi trường lập trình tại máy (Local)
   development: {
     client: 'mysql2',
     connection: {
@@ -16,14 +15,14 @@ module.exports = {
       database: process.env.DB_NAME || 'footfield'
     },
     migrations: {
-      directory: './src/db/migrations' // Đường dẫn thư mục chứa file tạo bảng
+      directory: './src/db/migrations'
     },
     seeds: {
-      directory: './src/db/seeds' // Đường dẫn thư mục chứa dữ liệu mẫu
+      directory: './src/db/seeds'
     }
   },
 
-  // Cấu hình dùng khi deploy lên Render/Vercel (Production)
+  // Cấu hình cho môi trường chạy trên Render/Vercel (Production)
   production: {
     client: 'mysql2',
     connection: {
@@ -32,7 +31,7 @@ module.exports = {
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      // SSL là bắt buộc khi kết nối đến MySQL trên Aiven để tránh lỗi ETIMEDOUT
+      // SSL là bắt buộc để kết nối tới các dịch vụ Cloud như Aiven
       ssl: {
         rejectUnauthorized: false
       }
@@ -48,5 +47,4 @@ module.exports = {
       directory: './src/db/seeds'
     }
   }
-
 };
