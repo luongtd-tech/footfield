@@ -73,10 +73,21 @@ app.listen(PORT, () => {
 
 const knex = require('knex')(require('../knexfile')[process.env.NODE_ENV || 'development']);
 
-// Tự động chạy migration khi khởi động server
+// Tự động chạy migration và seed khi khởi động server
 knex.migrate.latest()
-  .then(() => {
+  .then(async () => {
     console.log('Database migrated successfully!');
+    
+    // HARD FIX: Đảm bảo bảng notifications có đủ cột bằng SQL thuần
+    try {
+      await db.query("ALTER TABLE notifications ADD COLUMN IF NOT EXISTS tenant_id VARCHAR(50) AFTER id");
+      await db.query("ALTER TABLE notifications ADD COLUMN IF NOT EXISTS is_read TINYINT(1) DEFAULT 0 AFTER type");
+      console.log('Notifications table hard-fixed successfully!');
+    } catch (err) {
+      console.log('Notifications hard-fix skipped or failed (might already exist):', err.message);
+    }
+
+    // Kiểm tra nếu chưa có admin thì mới chạy seed
     return knex('admins').count('id as count');
   })
   .then((rows) => {
