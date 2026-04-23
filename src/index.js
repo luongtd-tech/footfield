@@ -54,16 +54,22 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/tenant-admin.html'));
 });
 
-// Test DB Connection
-app.get('/test-db', async (req, res) => {
+// Debug DB structure
+app.get('/api/debug-db', async (req, res) => {
   try {
-    const [rows] = await db.query('SELECT 1 + 1 AS result');
-    res.json({ message: 'Database connected successfully!', result: rows[0].result });
+    const [columns] = await db.query('DESCRIBE notifications');
+    const [tables] = await db.query('SHOW TABLES');
+    res.json({ 
+      message: 'Database structure', 
+      tables: tables.map(t => Object.values(t)[0]),
+      notifications_columns: columns 
+    });
   } catch (error) {
-    console.error('Database connection error:', error);
-    res.status(500).json({ message: 'Database connection failed!', error: error.message });
+    res.status(500).json({ error: error.message });
   }
 });
+
+// Test DB Connection
 
 // Start Server
 app.listen(PORT, () => {
