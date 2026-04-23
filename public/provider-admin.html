@@ -1832,7 +1832,7 @@ async function updateTicketStatus(id, newStatus) {
   if (!confirm(`Xác nhận chuyển phiếu hỗ trợ sang trạng thái: ${statusLabels[newStatus] || newStatus}?`)) return;
 
   try {
-    const response = await fetch(`http://localhost:5000/api/tickets/${id}/status`, {
+    const response = await fetch(`${API_BASE_URL}/api/tickets/${id}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: newStatus })
@@ -1900,7 +1900,7 @@ async function sendNotif() {
   };
 
   try {
-    const response = await fetch('http://localhost:5000/api/notifications', {
+    const response = await fetch(`${API_BASE_URL}/api/notifications`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newNotif)
@@ -1908,7 +1908,7 @@ async function sendNotif() {
     const data = await response.json();
     if (data.success) {
       // Refresh notifications data
-      const notifsRes = await fetch('http://localhost:5000/api/notifications');
+      const notifsRes = await fetch(`${API_BASE_URL}/api/notifications`);
       db.notifications = await notifsRes.json();
       
       closeModal('modal-notif');
@@ -1926,13 +1926,13 @@ async function deleteNotif(id) {
   if (!confirm('Xóa thông báo này?')) return;
   
   try {
-    const response = await fetch(`http://localhost:5000/api/notifications/${id}`, {
+    const response = await fetch(`${API_BASE_URL}/api/notifications/${id}`, {
       method: 'DELETE'
     });
     const data = await response.json();
     if (data.success) {
       // Refresh notifications data
-      const notifsRes = await fetch('http://localhost:5000/api/notifications');
+      const notifsRes = await fetch(`${API_BASE_URL}/api/notifications`);
       db.notifications = await notifsRes.json();
       renderNotifications();
     } else {
