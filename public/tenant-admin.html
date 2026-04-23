@@ -1,0 +1,2664 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VinhUniFootBall – Quản Lý Cơ Sở</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#f8fafc; --bg2:#ffffff; --bg3:#f1f5f9;
+  --card:#ffffff; --border:#e2e8f0;
+  --accent:#16a34a; --accent2:#15803d; --accent3:#f59e0b;
+  --text:#0f172a; --text2:#64748b; --text3:#94a3b8;
+  --green:#16a34a; --red:#ef4444; --yellow:#f59e0b; --blue:#3b82f6; --purple:#8b5cf6;
+  --font:'Barlow',sans-serif; --mono:'Space Mono',monospace;
+  --radius:14px; --sidebar:260px;
+  --shadow:0 1px 3px rgba(0,0,0,.07),0 4px 12px rgba(0,0,0,.05);
+  --shadow-lg:0 4px 20px rgba(0,0,0,.1);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+@media print {
+  body * { visibility: hidden; }
+  #invoice-preview, #invoice-preview * { visibility: visible; }
+  #invoice-preview { position: absolute; left: 0; top: 0; width: 100%; border: none !important; box-shadow: none !important; }
+  .invoice-print { padding: 0 !important; box-shadow: none !important; border: none !important; width: 100% !important; margin: 0 !important; }
+  .sidebar, .topbar, .page-header, .grid-equal > div:first-child, .btn { display: none !important; }
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:100vh;}
+
+/* ===== LOGIN ===== */
+#login-page{display:flex;align-items:center;justify-content:center;min-height:100vh;
+  background:linear-gradient(135deg,#f0fdf4 0%,#dcfce7 30%,#f0f9ff 100%);}
+.login-wrap{width:420px;}
+.login-logo{text-align:center;margin-bottom:36px;}
+.login-logo .icon{font-size:64px;display:block;margin-bottom:16px;
+  animation:bounce 2s ease-in-out infinite;}
+@keyframes bounce{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-8px) rotate(5deg)}}
+.login-logo h1{font-size:28px;font-weight:800;color:var(--green);}
+.login-logo p{color:var(--text2);font-size:13px;margin-top:4px;}
+.login-card{background:var(--card);border-radius:20px;padding:36px;box-shadow:var(--shadow-lg);border:1px solid var(--border);}
+.login-card h2{font-size:20px;font-weight:700;margin-bottom:6px;}
+.login-card .sub{color:var(--text2);font-size:13px;margin-bottom:28px;}
+.form-group{margin-bottom:18px;}
+.form-group label{display:block;font-size:12px;font-weight:700;color:var(--text2);
+  text-transform:uppercase;letter-spacing:.6px;margin-bottom:8px;}
+.form-group input{width:100%;background:var(--bg3);border:1.5px solid var(--border);
+  border-radius:10px;padding:12px 16px;color:var(--text);font-family:var(--font);
+  font-size:14px;outline:none;transition:.2s;}
+.form-group input:focus{border-color:var(--accent);background:var(--bg2);box-shadow:0 0 0 3px rgba(22,163,74,.1);}
+.btn-login{width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;
+  padding:14px;font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer;transition:.2s;}
+.btn-login:hover{background:var(--accent2);transform:translateY(-1px);}
+.login-hint{margin-top:16px;text-align:center;font-size:12px;color:var(--text3);
+  font-family:var(--mono);background:var(--bg3);padding:10px;border-radius:8px;}
+.login-error{color:var(--red);font-size:13px;text-align:center;margin-top:12px;display:none;}
+
+/* ===== APP ===== */
+#app{display:none;}
+
+/* SIDEBAR */
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar);
+  background:var(--bg2);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;z-index:100;box-shadow:2px 0 8px rgba(0,0,0,.04);}
+.sidebar-logo{padding:20px;border-bottom:1px solid var(--border);}
+.logo-row{display:flex;align-items:center;gap:12px;}
+.logo-icon-box{width:44px;height:44px;background:linear-gradient(135deg,#16a34a,#15803d);
+  border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:24px;}
+.logo-name{font-size:14px;font-weight:800;color:var(--green);line-height:1.2;}
+.logo-sub{font-size:10px;color:var(--text2);}
+.sidebar-tenant{padding:14px 20px;background:linear-gradient(135deg,rgba(22,163,74,.05),rgba(22,163,74,.1));
+  border-bottom:1px solid var(--border);}
+.tenant-row{display:flex;align-items:center;gap:10px;}
+.tenant-ava{width:36px;height:36px;border-radius:10px;background:var(--green);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:14px;}
+.tenant-nm{font-size:13px;font-weight:700;}
+.tenant-pkg{font-size:10px;color:var(--green);font-weight:600;}
+.sidebar-nav{flex:1;padding:12px 0;overflow-y:auto;}
+.nav-section{padding:10px 20px 4px;font-size:10px;color:var(--text3);
+  text-transform:uppercase;letter-spacing:1.5px;font-weight:700;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:10px 20px;
+  cursor:pointer;transition:.15s;color:var(--text2);font-size:13px;font-weight:500;
+  border-left:3px solid transparent;margin:1px 0;}
+.nav-item:hover{background:rgba(22,163,74,.06);color:var(--text);border-radius:0 8px 8px 0;}
+.nav-item.active{background:rgba(22,163,74,.1);color:var(--green);border-left-color:var(--green);border-radius:0 8px 8px 0;font-weight:700;}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;
+  font-weight:700;padding:2px 7px;border-radius:20px;}
+.sidebar-footer{padding:16px 20px;border-top:1px solid var(--border);}
+.btn-logout{width:100%;background:rgba(239,68,68,.08);color:var(--red);
+  border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:10px;
+  font-family:var(--font);font-size:13px;font-weight:600;cursor:pointer;transition:.2s;}
+.btn-logout:hover{background:rgba(239,68,68,.15);}
+
+/* MAIN */
+.main{margin-left:var(--sidebar);min-height:100vh;}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);
+  padding:0 28px;height:62px;display:flex;align-items:center;justify-content:space-between;
+  box-shadow:0 1px 4px rgba(0,0,0,.04);}
+.topbar-title{font-size:16px;font-weight:700;}
+.topbar-actions{display:flex;align-items:center;gap:10px;}
+.topbar-btn{display:flex;align-items:center;gap:6px;padding:8px 14px;border-radius:8px;
+  font-family:var(--font);font-size:12px;font-weight:600;cursor:pointer;border:none;transition:.15s;
+  background:var(--bg3);color:var(--text2);}
+.topbar-btn:hover{background:var(--border);color:var(--text);}
+.topbar-btn.primary{background:var(--green);color:#fff;}
+.topbar-btn.primary:hover{background:var(--accent2);}
+.content{padding:24px 28px;}
+
+/* PAGES */
+.page{display:none;}
+.page.active{display:block;}
+
+/* PAGE HEADER */
+.page-header{margin-bottom:24px;}
+.ph-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;}
+.page-header h1{font-size:22px;font-weight:800;}
+.page-header p{color:var(--text2);font-size:13px;}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+.stat-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:18px;box-shadow:var(--shadow);transition:.2s;}
+.stat-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);}
+.stat-icon-box{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;
+  justify-content:center;font-size:18px;margin-bottom:12px;}
+.stat-icon-box.green{background:rgba(22,163,74,.1);}
+.stat-icon-box.blue{background:rgba(59,130,246,.1);}
+.stat-icon-box.yellow{background:rgba(245,158,11,.1);}
+.stat-icon-box.purple{background:rgba(139,92,246,.1);}
+.stat-icon-box.red{background:rgba(239,68,68,.1);}
+.stat-label{font-size:12px;color:var(--text2);font-weight:600;margin-bottom:4px;}
+.stat-value{font-size:26px;font-weight:800;font-family:var(--mono);}
+.stat-value.green{color:var(--green);}
+.stat-value.blue{color:var(--blue);}
+.stat-value.yellow{color:var(--yellow);}
+.stat-value.red{color:var(--red);}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:4px;}
+
+/* GRID */
+.grid-2{display:grid;grid-template-columns:2fr 1fr;gap:18px;margin-bottom:18px;}
+.grid-equal{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px;}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px;box-shadow:var(--shadow);}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+.card-title{font-size:14px;font-weight:700;}
+.card-action{font-size:12px;color:var(--green);cursor:pointer;font-weight:600;}
+.card-action:hover{text-decoration:underline;}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+th{padding:10px 14px;text-align:left;font-size:11px;color:var(--text2);
+  text-transform:uppercase;letter-spacing:.6px;font-weight:700;
+  border-bottom:2px solid var(--border);white-space:nowrap;}
+td{padding:12px 14px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:rgba(22,163,74,.02);}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;
+  border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap;}
+.badge-green{background:#dcfce7;color:#15803d;}
+.badge-red{background:#fee2e2;color:#b91c1c;}
+.badge-yellow{background:#fef3c7;color:#92400e;}
+.badge-blue{background:#dbeafe;color:#1d4ed8;}
+.badge-purple{background:#ede9fe;color:#6d28d9;}
+.badge-gray{background:#f1f5f9;color:#475569;}
+.badge-orange{background:#ffedd5;color:#c2410c;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;
+  border-radius:8px;font-family:var(--font);font-size:13px;font-weight:600;
+  cursor:pointer;border:none;transition:.15s;}
+.btn-primary{background:var(--green);color:#fff;}
+.btn-primary:hover{background:var(--accent2);}
+.btn-secondary{background:var(--bg3);color:var(--text);border:1px solid var(--border);}
+.btn-secondary:hover{background:var(--border);}
+.btn-danger{background:#fee2e2;color:var(--red);border:1px solid #fca5a5;}
+.btn-danger:hover{background:#fecaca;}
+.btn-sm{padding:5px 10px;font-size:12px;}
+.btn-warning{background:#fef3c7;color:#92400e;border:1px solid #fde68a;}
+
+/* FIELD CARDS */
+.field-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;}
+.field-card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  overflow:hidden;box-shadow:var(--shadow);transition:.2s;}
+.field-card:hover{box-shadow:var(--shadow-lg);transform:translateY(-2px);}
+.field-top{background:linear-gradient(135deg,#f0fdf4,#dcfce7);padding:16px;
+  display:flex;align-items:center;gap:12px;}
+.field-icon{font-size:36px;display:flex;align-items:center;justify-content:center;min-width:40px;}
+.field-icon img{width:40px;height:40px;border-radius:10px;object-fit:cover;box-shadow:var(--shadow);}
+.field-name{font-size:15px;font-weight:700;}
+.field-type{font-size:12px;color:var(--text2);margin-top:2px;}
+.field-body{padding:16px;}
+.field-stat-row{display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;}
+.field-actions{display:flex;gap:8px;}
+
+/* SCHEDULE */
+.schedule-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:12px;}
+.time-slot{padding:6px 4px;border-radius:6px;font-size:10px;text-align:center;cursor:pointer;
+  font-weight:600;transition:.15s;border:1px solid transparent;}
+.slot-available{background:#dcfce7;color:#15803d;border-color:#bbf7d0;}
+.slot-available:hover{background:#bbf7d0;}
+.slot-booked{background:#fee2e2;color:#b91c1c;border-color:#fca5a5;}
+.slot-maintenance{background:#f1f5f9;color:#94a3b8;border-color:#e2e8f0;cursor:not-allowed;}
+.day-header{font-size:10px;font-weight:700;color:var(--text2);text-align:center;padding:4px;text-transform:uppercase;}
+
+/* CUSTOMER CARD */
+.customer-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--border);}
+.customer-row:last-child{border-bottom:none;}
+.cust-ava{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#0891b2);
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0;}
+.cust-name{font-size:13px;font-weight:700;}
+.cust-info{font-size:11px;color:var(--text2);}
+.cust-stat{margin-left:auto;text-align:right;font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green);}
+.cust-stat-sub{font-size:10px;color:var(--text3);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.5);
+  display:none;align-items:center;justify-content:center;z-index:1000;backdrop-filter:blur(4px);}
+.modal-overlay.show{display:flex;}
+.modal{background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:28px;width:580px;max-width:92vw;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);}
+.modal-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+.modal-title{font-size:16px;font-weight:800;}
+.modal-close{background:var(--bg3);border:none;color:var(--text2);font-size:16px;
+  cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;transition:.15s;}
+.modal-close:hover{background:var(--border);color:var(--text);}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;padding-top:20px;border-top:1px solid var(--border);}
+
+/* FORM */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.form-full{grid-column:1/-1;}
+.input-group{display:flex;flex-direction:column;gap:6px;}
+.input-group label{font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.6px;}
+.input-group input,.input-group select,.input-group textarea{
+  background:var(--bg3);border:1.5px solid var(--border);border-radius:8px;
+  padding:10px 14px;color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:.2s;}
+.input-group input:focus,.input-group select:focus,.input-group textarea:focus{
+  border-color:var(--accent);background:var(--bg2);box-shadow:0 0 0 3px rgba(22,163,74,.08);}
+
+/* QR MODAL */
+.qr-box{background:var(--bg3);border-radius:16px;padding:32px;text-align:center;margin:16px 0;}
+.qr-code{font-size:80px;display:block;margin-bottom:12px;}
+.qr-id{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--green);letter-spacing:2px;}
+.qr-info{font-size:13px;color:var(--text2);margin-top:8px;}
+
+/* PAYMENT */
+.pay-methods{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:16px 0;}
+.pay-method{background:var(--bg3);border:2px solid var(--border);border-radius:12px;
+  padding:16px;text-align:center;cursor:pointer;transition:.15s;}
+.pay-method:hover,.pay-method.selected{border-color:var(--green);background:rgba(22,163,74,.05);}
+.pay-method-icon{font-size:28px;display:block;margin-bottom:6px;}
+.pay-method-name{font-size:12px;font-weight:700;}
+
+/* PRINT */
+.invoice-print{background:var(--bg3);border-radius:16px;padding:24px;font-size:13px;}
+.invoice-logo{display:flex;align-items:center;gap:10px;margin-bottom:16px;padding-bottom:16px;border-bottom:2px solid var(--border);}
+
+/* REVENUE CHART */
+.rev-chart{display:flex;align-items:flex-end;gap:8px;height:120px;}
+.rev-bar{flex:1;border-radius:6px 6px 0 0;transition:.3s;cursor:pointer;position:relative;}
+.rev-bar:hover{opacity:.8;}
+.rev-bar-label{position:absolute;bottom:-20px;left:50%;transform:translateX(-50%);
+  font-size:10px;color:var(--text3);white-space:nowrap;}
+.rev-bar-val{position:absolute;top:-20px;left:50%;transform:translateX(-50%);
+  font-size:10px;color:var(--text2);white-space:nowrap;font-weight:600;}
+
+/* NOTIFICATION ITEM */
+.notif-banner{background:linear-gradient(135deg,rgba(22,163,74,.05),rgba(22,163,74,.1));
+  border:1px solid rgba(22,163,74,.2);border-radius:12px;padding:14px 18px;
+  margin-bottom:10px;display:flex;gap:12px;align-items:flex-start;}
+.notif-icon{font-size:20px;flex-shrink:0;}
+
+/* FILTER ROW */
+.filter-row{display:flex;align-items:center;gap:10px;margin-bottom:18px;flex-wrap:wrap;}
+.search-bar{display:flex;align-items:center;gap:8px;background:var(--bg2);
+  border:1.5px solid var(--border);border-radius:10px;padding:0 14px;flex:1;max-width:350px;}
+.search-bar input{background:none;border:none;color:var(--text);font-family:var(--font);
+  font-size:13px;outline:none;padding:10px 0;flex:1;}
+
+/* SETTINGS */
+.setting-section{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:22px;margin-bottom:16px;box-shadow:var(--shadow);}
+.setting-section h3{font-size:14px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border);}
+.setting-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border);}
+.setting-row:last-child{border-bottom:none;}
+.setting-info{font-size:13px;font-weight:500;}
+.setting-desc{font-size:12px;color:var(--text2);margin-top:2px;}
+.toggle{width:44px;height:24px;background:var(--border);border-radius:20px;cursor:pointer;
+  position:relative;transition:.2s;flex-shrink:0;}
+.toggle.on{background:var(--green);}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;
+  background:#fff;top:3px;left:3px;transition:.2s;box-shadow:0 1px 3px rgba(0,0,0,.2);}
+.toggle.on::after{left:23px;}
+
+::-webkit-scrollbar{width:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-page">
+  <div class="login-wrap">
+    <div class="login-logo">
+      <span class="icon">⚽</span>
+      <h1>VinhUniFootBall</h1>
+      <p>Hệ thống quản lý cơ sở bóng đá – Powered by FootField</p>
+    </div>
+    <div class="login-card">
+      <h2>Đăng nhập hệ thống</h2>
+      <p class="sub">Tài khoản được cấp bởi FootField</p>
+      <div class="form-group">
+        <label>Tài khoản</label>
+        <input type="text" id="login-user" placeholder="Nhập tài khoản">
+      </div>
+      <div class="form-group">
+        <label>Mật khẩu</label>
+        <input type="password" id="login-pass" placeholder="Nhập mật khẩu">
+      </div>
+      <button class="btn-login" onclick="doLogin()">Đăng nhập →</button>
+      <p class="login-error" id="login-error">❌ Tài khoản hoặc mật khẩu không đúng</p>
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-row">
+        <div class="logo-icon-box">⚽</div>
+        <div>
+          <div class="logo-name" id="side-facility-name">VinhUniFootBall</div>
+          <div class="logo-sub">Quản lý cơ sở</div>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-tenant">
+      <div class="tenant-row">
+        <div class="tenant-ava">V</div>
+        <div>
+          <div class="tenant-nm">Nguyễn Văn Vinh</div>
+          <div class="tenant-pkg">📦 Gói Tiêu Chuẩn · FootField</div>
+        </div>
+      </div>
+    </div>
+    <div class="sidebar-nav">
+      <div class="nav-section">Tổng quan</div>
+      <div class="nav-item active" onclick="showPage('dashboard')"><span>📊</span> Dashboard</div>
+      <div class="nav-section">Quản lý sân</div>
+      <div class="nav-item" onclick="showPage('fields')"><span>⚽</span> Quản lý sân bóng</div>
+      <div class="nav-item" onclick="showPage('schedule')"><span>📅</span> Lịch đặt sân<span class="nav-badge" id="nb-pending">1</span></div>
+      <div class="nav-section">Khách hàng</div>
+      <div class="nav-item" onclick="showPage('customers')"><span>👥</span> Quản lý khách hàng</div>
+      <div class="nav-section" id="nav-finance-sec">Thu chi</div>
+      <div class="nav-item" onclick="showPage('finance')" id="nav-finance"><span>💰</span> Quản lý tài chính</div>
+      <div class="nav-section" id="nav-util-sec">Tiện ích</div>
+      <div class="nav-item" onclick="showPage('checkin')" id="nav-checkin"><span>📱</span> Check-in QR</div>
+      <div class="nav-item" onclick="showPage('payment')" id="nav-payment"><span>💳</span> Thu tiền</div>
+      <div class="nav-item" onclick="showPage('invoice')" id="nav-invoice"><span>🖨️</span> In hóa đơn</div>
+      <div class="nav-section">Hệ thống</div>
+      <div class="nav-item" onclick="showPage('notifications')"><span>🔔</span> Thông báo<span class="nav-badge" id="nb-notifs">0</span></div>
+      <div class="nav-item" onclick="showPage('support')"><span>🎫</span> Hỗ trợ & Báo lỗi</div>
+      <div class="nav-item" onclick="showPage('settings')"><span>⚙️</span> Cài đặt</div>
+      <div class="nav-item" onclick="showPage('staff')"><span>👔</span> Quản lý nhân viên</div>
+    </div>
+    <div class="sidebar-footer">
+      <button class="btn-logout" onclick="doLogout()">🚪 Đăng xuất</button>
+    </div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbar-title">Dashboard</div>
+      <div class="topbar-actions">
+        <button class="topbar-btn primary" onclick="showPage('schedule');openBookingModal()">+ Đặt sân mới</button>
+        <button class="topbar-btn" onclick="showPage('checkin')" id="top-btn-checkin">📱 QR Check-in</button>
+        <div style="font-size:12px;color:var(--text2);padding:8px 12px;background:var(--bg3);border-radius:8px;">📅 <span id="current-date"></span></div>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="page active" id="page-dashboard">
+        <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+          <div>
+            <h1>Dashboard 📊</h1>
+            <p>Tổng quan hoạt động kinh doanh của bạn</p>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-primary" onclick="copyStoreLink()">🔗 Copy link trang đặt sân</button>
+            <a class="btn btn-secondary" href="customer.html" target="_blank" id="storefront-preview-btn" style="text-decoration:none;">👁️ Xem trang đặt sân</a>
+          </div>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon-box green">⚽</div><div class="stat-label">Sân đang hoạt động</div><div class="stat-value green" id="d-fields">4</div><div class="stat-sub" id="d-fields-sub">1 sân đang bảo trì</div></div>
+          <div class="stat-card"><div class="stat-icon-box blue">📅</div><div class="stat-label">Đặt sân hôm nay</div><div class="stat-value blue" id="d-today">2</div><div class="stat-sub" id="d-today-sub">2 đã xác nhận</div></div>
+          <div class="stat-card"><div class="stat-icon-box yellow">💰</div><div class="stat-label">Doanh thu hôm nay</div><div class="stat-value yellow" id="d-rev">990K</div><div class="stat-sub" id="d-rev-sub">2 giao dịch thành công</div></div>
+          <div class="stat-card"><div class="stat-icon-box purple">👥</div><div class="stat-label">Tổng khách hàng</div><div class="stat-value" style="color:var(--purple)" id="d-cust">5</div><div class="stat-sub" id="d-cust-sub">2 khách VIP</div></div>
+        </div>
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-header"><div class="card-title">📈 Doanh thu 7 ngày gần nhất</div></div>
+            <div style="position:relative;padding-bottom:24px;">
+              <div class="rev-chart">
+                <div class="rev-bar" style="height:40%;background:linear-gradient(180deg,#16a34a,#15803d);"><div class="rev-bar-val">540K</div><div class="rev-bar-label">T2</div></div>
+                <div class="rev-bar" style="height:65%;background:linear-gradient(180deg,#16a34a,#15803d);"><div class="rev-bar-val">720K</div><div class="rev-bar-label">T3</div></div>
+                <div class="rev-bar" style="height:50%;background:linear-gradient(180deg,#16a34a,#15803d);"><div class="rev-bar-val">630K</div><div class="rev-bar-label">T4</div></div>
+                <div class="rev-bar" style="height:80%;background:linear-gradient(180deg,#16a34a,#15803d);"><div class="rev-bar-val">990K</div><div class="rev-bar-label">T5</div></div>
+                <div class="rev-bar" style="height:70%;background:linear-gradient(180deg,#16a34a,#15803d);"><div class="rev-bar-val">810K</div><div class="rev-bar-label">T6</div></div>
+                <div class="rev-bar" style="height:90%;background:linear-gradient(180deg,#f59e0b,#d97706);"><div class="rev-bar-val">1.17M</div><div class="rev-bar-label">T7</div></div>
+                <div class="rev-bar" style="height:60%;background:linear-gradient(180deg,#3b82f6,#2563eb);"><div class="rev-bar-val">990K</div><div class="rev-bar-label">CN</div></div>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">📋 Đặt sân hôm nay</div><div class="card-action" onclick="showPage('schedule')">Xem tất cả →</div></div>
+            <div id="today-bookings"></div>
+          </div>
+        </div>
+        <div class="grid-equal">
+          <div class="card">
+            <div class="card-header"><div class="card-title">⚽ Tình trạng sân</div><div class="card-action" onclick="showPage('fields')">Quản lý →</div></div>
+            <div id="dash-fields"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">⭐ Khách VIP</div><div class="card-action" onclick="showPage('customers')">Xem tất cả →</div></div>
+            <div id="dash-vips"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FIELDS -->
+      <div class="page" id="page-fields">
+        <div class="page-header">
+          <div class="ph-row">
+            <h1>Quản lý sân bóng ⚽</h1>
+            <div id="field-limit-info" style="font-size:12px;color:var(--text2);font-weight:600;background:var(--bg3);padding:4px 10px;border-radius:6px;border:1px solid var(--border);display:none;"></div>
+            <button class="btn btn-primary" id="btn-add-field" onclick="openFieldModal()">+ Thêm sân mới</button>
+          </div>
+          <p>Quản lý tất cả sân bóng tại cơ sở VinhUniFootBall</p>
+        </div>
+        <div class="field-grid" id="fields-grid"></div>
+      </div>
+
+      <!-- SCHEDULE -->
+      <div class="page" id="page-schedule">
+        <div class="page-header">
+          <div class="ph-row">
+            <h1>Lịch đặt sân 📅</h1>
+            <button class="btn btn-primary" onclick="openBookingModal()">+ Đặt sân mới</button>
+          </div>
+          <p>Quản lý toàn bộ lịch đặt sân của VinhUniFootBall</p>
+        </div>
+        <div class="filter-row">
+          <div class="search-bar"><span>🔍</span><input placeholder="Tìm tên/SĐT khách..." id="bk-search" oninput="renderSchedule()"></div>
+          <select class="btn btn-secondary" id="bk-field-filter" onchange="renderSchedule()">
+            <option value="">Tất cả sân</option>
+          </select>
+          <select class="btn btn-secondary" id="bk-status-filter" onchange="renderSchedule()">
+            <option value="">Tất cả trạng thái</option>
+            <option value="confirmed">Đã xác nhận</option>
+            <option value="pending">Chờ xác nhận</option>
+            <option value="completed">Hoàn thành</option>
+            <option value="cancelled">Đã hủy</option>
+          </select>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Mã đặt</th><th>Khách hàng</th><th>Sân</th><th>Ngày</th><th>Giờ</th><th>Số tiền</th><th>Thanh toán</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+              <tbody id="schedule-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CUSTOMERS -->
+      <div class="page" id="page-customers">
+        <div class="page-header">
+          <div class="ph-row">
+            <h1>Quản lý khách hàng 👥</h1>
+            <button class="btn btn-primary" onclick="openAddCustomerModal()">+ Thêm khách hàng</button>
+          </div>
+          <p>Danh sách và thống kê khách hàng</p>
+        </div>
+        <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
+          <div class="stat-card"><div class="stat-icon-box yellow">⭐</div><div class="stat-label">Khách VIP</div><div class="stat-value yellow" id="c-vip">2</div></div>
+          <div class="stat-card"><div class="stat-icon-box blue">👤</div><div class="stat-label">Khách thường xuyên</div><div class="stat-value blue" id="c-reg">2</div></div>
+          <div class="stat-card"><div class="stat-icon-box green">🌟</div><div class="stat-label">Khách mới</div><div class="stat-value green" id="c-new">1</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📋 Danh sách khách hàng</div>
+            <div class="filter-row" style="margin-bottom:0">
+              <div class="search-bar"><span>🔍</span><input placeholder="Tìm khách hàng..." id="cust-search" oninput="renderCustomers()"></div>
+              <select class="btn btn-secondary" id="cust-status-filter" onchange="renderCustomers()">
+                <option value="">Tất cả</option>
+                <option value="vip">VIP</option>
+                <option value="regular">Thường</option>
+                <option value="new">Mới</option>
+              </select>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Khách hàng</th><th>SĐT</th><th>Email</th><th>Lần chơi</th><th>Tổng chi</th><th>Lần cuối</th><th>Hạng</th><th>Thao tác</th></tr></thead>
+              <tbody id="customers-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- FINANCE -->
+      <div class="page" id="page-finance">
+        <div class="page-header">
+          <h1>Quản lý tài chính 💰</h1>
+          <p>Doanh thu, chi phí và báo cáo tài chính</p>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-icon-box green">💰</div><div class="stat-label">Doanh thu tháng 3</div><div class="stat-value green" id="total-revenue">1.99M</div><div class="stat-sub" id="growth-percentage">▲ +15% vs T2</div></div>
+          <div class="stat-card"><div class="stat-icon-box blue">✅</div><div class="stat-label">Đã thu</div><div class="stat-value blue" id="paid-count">1.55M</div><div class="stat-sub" id="paid-transactions">5 giao dịch</div></div>
+          <div class="stat-card"><div class="stat-icon-box yellow">⏳</div><div class="stat-label">Chưa thu</div><div class="stat-value yellow" id="unpaid-amount">360K</div><div class="stat-sub" id="unpaid-count">1 đặt chưa thanh toán</div></div>
+          <div class="stat-card"><div class="stat-icon-box purple">📊</div><div class="stat-label">Tỉ lệ lấp đầy</div><div class="stat-value purple" id="occupancy-rate" style="color:var(--purple)">73%</div><div class="stat-sub">Tốt hơn trung bình</div></div>
+        </div>
+        <div class="grid-equal">
+          <div class="card">
+            <div class="card-header"><div class="card-title">💳 Phân bổ phương thức TT</div></div>
+            <div id="payment-breakdown"></div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">⚽ Doanh thu theo sân</div></div>
+            <div id="field-revenue"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📋 Lịch sử giao dịch</div></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Mã GD</th><th>Khách hàng</th><th>Sân</th><th>Ngày</th><th>Số tiền</th><th>Phương thức</th><th>Trạng thái</th></tr></thead>
+              <tbody id="finance-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CHECKIN -->
+      <div class="page" id="page-checkin">
+        <div class="page-header">
+          <div>
+            <h1>Check-in Mã QR 🎫</h1>
+            <p>Quét mã hoặc nhập mã để xác nhận sử dụng sân</p>
+          </div>
+          <div style="text-align:right">
+            <div id="checkin-clock" style="font-size:24px;font-weight:800;font-family:var(--mono);color:var(--green)">00:00:00</div>
+            <div style="font-size:12px;color:var(--text2)">Giờ hệ thống (VN UTC+7)</div>
+          </div>
+        </div>
+        <div class="grid-equal">
+          <div class="card" style="text-align:center;">
+            <div class="card-header" style="justify-content:center;"><div class="card-title">📷 Quét mã QR</div></div>
+            <div style="background:var(--bg3);border-radius:16px;padding:40px;margin-bottom:16px;">
+              <div style="font-size:80px;margin-bottom:16px;">📷</div>
+              <div style="font-size:14px;color:var(--text2);margin-bottom:16px;">Camera đang chờ quét mã QR</div>
+              <div style="position:relative;width:180px;height:180px;margin:0 auto;">
+                <video id="qr-video" style="width:100%;height:100%;border-radius:12px;object-fit:cover;display:none;"></video>
+                <canvas id="qr-canvas" style="display:none;"></canvas>
+                <div id="qr-placeholder" style="background:#fff;border:3px dashed var(--border);border-radius:12px;width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:40px;position:absolute;top:0;left:0;">⬜</div>
+                <div id="qr-scanner" style="position:absolute;top:0;left:0;width:100%;height:100%;display:none;">
+                  <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:120px;height:120px;border:2px solid var(--green);border-radius:8px;">
+                    <div style="position:absolute;top:-2px;left:50%;transform:translateX(-50%);width:20px;height:4px;background:var(--green);"></div>
+                    <div style="position:absolute;bottom:-2px;left:50%;transform:translateX(-50%);width:20px;height:4px;background:var(--green);"></div>
+                    <div style="position:absolute;left:-2px;top:50%;transform:translateY(-50%);width:4px;height:20px;background:var(--green);"></div>
+                    <div style="position:absolute;right:-2px;top:50%;transform:translateY(-50%);width:4px;height:20px;background:var(--green);"></div>
+                  </div>
+                </div>
+              </div>
+              <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;">
+                <button id="start-camera" class="btn btn-primary btn-sm" onclick="startQRScanner()">📷 Bật Camera</button>
+                <button id="stop-camera" class="btn btn-secondary btn-sm" onclick="stopQRScanner()" style="display:none;">⏹️ Dừng Camera</button>
+              </div>
+            </div>
+            <div style="font-size:13px;color:var(--text2);margin-bottom:12px;">Hoặc nhập mã đặt sân thủ công</div>
+            <div style="display:flex;gap:8px;">
+              <input id="qr-input" placeholder="VD: QR-BK001" style="flex:1;padding:10px 14px;background:var(--bg3);border:1.5px solid var(--border);border-radius:8px;font-family:var(--mono);font-size:14px;outline:none;color:var(--text);">
+              <button class="btn btn-primary" onclick="doCheckin()">Xác nhận</button>
+            </div>
+          </div>
+          <div class="card" id="checkin-result">
+            <div class="card-header"><div class="card-title">✅ Kết quả Check-in</div></div>
+            <div style="text-align:center;padding:40px;color:var(--text3);">
+              <div style="font-size:48px;margin-bottom:12px;">🎫</div>
+              <div>Quét mã QR hoặc nhập mã đặt sân để xem thông tin</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📋 Lịch sử Check-in hôm nay</div></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Mã QR</th><th>Khách hàng</th><th>Sân</th><th>Giờ đặt</th><th>Giờ check-in</th><th>Trạng thái</th></tr></thead>
+              <tbody id="checkin-history"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- PAYMENT -->
+      <div class="page" id="page-payment">
+        <div class="page-header">
+          <h1>Thu tiền đa phương thức 💳</h1>
+          <p>Hỗ trợ tiền mặt, chuyển khoản và VNPay</p>
+        </div>
+        <div class="card" style="max-width:600px;margin:0 auto;">
+          <div class="card-header"><div class="card-title">💳 Tạo giao dịch thu tiền</div></div>
+          <div class="form-row">
+            <div class="input-group"><label>Đặt sân</label>
+              <select id="pay-booking">
+                <option value="">-- Chọn đặt sân --</option>
+              </select>
+            </div>
+            <div class="input-group"><label>Số tiền (₫)</label>
+              <input type="number" id="pay-amount" placeholder="0" oninput="updatePayAmount()">
+            </div>
+          </div>
+          <div class="input-group" style="margin-bottom:16px;"><label>Phương thức thanh toán</label></div>
+          <div class="pay-methods">
+            <div class="pay-method selected" onclick="selectPay(this,'cash')"><span class="pay-method-icon">💵</span><div class="pay-method-name">Tiền mặt</div></div>
+            <div class="pay-method" onclick="selectPay(this,'transfer')"><span class="pay-method-icon">🏦</span><div class="pay-method-name">Chuyển khoản</div></div>
+            <div class="pay-method" onclick="selectPay(this,'vnpay')"><span class="pay-method-icon">🔵</span><div class="pay-method-name">VNPay</div></div>
+          </div>
+          <div id="pay-qr-section" style="display:none;background:var(--bg3);border-radius:12px;padding:20px;text-align:center;margin:16px 0;">
+            <div id="pay-qr-img-container" style="margin-bottom:12px;">
+              <img id="pay-qr-image" src="" alt="VietQR" style="max-width:220px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);">
+            </div>
+            <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text2);margin-bottom:4px;" id="pay-qr-account">3036506868 - TRAN DUC LUONG</div>
+            <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--green);" id="pay-qr-display">••••••</div>
+          </div>
+          <div style="text-align:center;margin-top:20px;">
+            <div style="font-size:32px;font-weight:800;font-family:var(--mono);color:var(--green);margin-bottom:16px;" id="pay-total">0 ₫</div>
+            <button class="btn btn-primary" style="padding:14px 32px;font-size:15px;" onclick="confirmPayment()">✅ Xác nhận thanh toán</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVOICE -->
+      <div class="page" id="page-invoice">
+        <div class="page-header">
+          <h1>In hóa đơn 🖨️</h1>
+          <p>Tạo và in hóa đơn thanh toán cho khách hàng</p>
+        </div>
+        <div class="grid-equal">
+          <div>
+            <div class="card" style="margin-bottom:16px;">
+              <div class="card-header"><div class="card-title">🔍 Chọn đặt sân cần in</div></div>
+              <div class="input-group" style="margin-bottom:14px;"><label>Mã đặt sân / Khách hàng</label>
+                <select id="inv-booking" onchange="renderInvoicePreview()">
+                  <option value="">-- Chọn đặt sân --</option>
+                </select>
+              </div>
+              <button class="btn btn-primary" onclick="printInvoice()" style="width:100%;">🖨️ In hóa đơn</button>
+            </div>
+          </div>
+          <div class="card" id="invoice-preview">
+            <div style="text-align:center;padding:40px;color:var(--text3);">
+              <div style="font-size:48px;margin-bottom:12px;">🖨️</div>
+              <div>Chọn đặt sân để xem trước hóa đơn</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="page" id="page-notifications">
+        <div class="page-header">
+          <h1>Thông báo hệ thống 🔔</h1>
+          <p>Thông báo từ FootField và hệ thống</p>
+        </div>
+        <div id="notifs-container"></div>
+      </div>
+
+      <!-- SUPPORT -->
+      <div class="page" id="page-support">
+        <div class="page-header">
+          <div class="ph-row">
+            <h1>Hỗ trợ & Báo lỗi 🎫</h1>
+            <button class="btn btn-primary" onclick="openAddTicketModal()">+ Gửi yêu cầu mới</button>
+          </div>
+          <p>Gửi báo cáo lỗi hoặc đề xuất tính năng trực tiếp cho quản trị viên FootField</p>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📋 Lịch sử yêu cầu hỗ trợ</div></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Mã phiếu</th><th>Tiêu đề</th><th>Loại</th><th>Ưu tiên</th><th>Ngày gửi</th><th>Trạng thái</th></tr></thead>
+              <tbody id="tickets-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="page" id="page-settings">
+        <div class="page-header">
+          <h1>Cài đặt hệ thống ⚙️</h1>
+          <p>Tùy chỉnh cơ sở VinhUniFootBall</p>
+        </div>
+        <div class="setting-section">
+          <h3>🏢 Thông tin cơ sở</h3>
+          <div class="form-row"><div class="input-group"><label>Tên cơ sở</label><input id="set-name" value="" readonly style="background:var(--bg3);cursor:not-allowed"></div><div class="input-group"><label>Chủ sở hữu</label><input id="set-owner" value="" readonly style="background:var(--bg3);cursor:not-allowed"></div></div>
+          <div class="form-row"><div class="input-group"><label>Điện thoại</label><input id="set-phone" value="" readonly style="background:var(--bg3);cursor:not-allowed"></div><div class="input-group"><label>Email</label><input id="set-email" value="" readonly style="background:var(--bg3);cursor:not-allowed"></div></div>
+          <div class="input-group" style="margin-bottom:14px;"><label>Địa chỉ</label><input id="set-address" value="" readonly style="background:var(--bg3);cursor:not-allowed"></div>
+          <div class="alert alert-warning" style="font-size:12px;padding:12px;background:rgba(245,158,11,0.1);color:var(--yellow);border-radius:8px;border:1px solid rgba(245,158,11,0.2)">
+            ⚠️ <strong>Quy định bảo mật:</strong> Các thông tin định danh cơ sở này được quản lý tập trung bởi Provider. Vui lòng liên hệ <strong>provider-admin</strong> để yêu cầu thay đổi.
+          </div>
+        </div>
+        <div class="setting-section">
+          <h3>⏰ Giờ hoạt động</h3>
+          <div class="form-row">
+            <div class="input-group"><label>Giờ mở cửa</label><input id="set-open" type="time" value="05:30"></div>
+            <div class="input-group"><label>Giờ đóng cửa</label><input id="set-close" type="time" value="22:30"></div>
+          </div>
+          <button class="btn btn-primary" onclick="saveSettings('hours')">💾 Lưu giờ hoạt động</button>
+        </div>
+        <div class="setting-section">
+          <h3>🖼️ Hình ảnh thương hiệu</h3>
+          <div class="input-group" style="margin-bottom:14px;">
+            <label>Banner chính (Hero Banner)</label>
+            <div style="display:flex; gap:10px;">
+              <input id="set-hero-banner" placeholder="URL hình ảnh banner..." style="flex:1;">
+              <button class="btn btn-secondary" onclick="document.getElementById('file-hero').click()">📂 Tải ảnh</button>
+              <input type="file" id="file-hero" style="display:none" accept="image/*" onchange="handleFileUpload('file-hero', 'set-hero-banner')">
+            </div>
+          </div>
+          <button class="btn btn-primary" onclick="saveSettings('appearance')">💾 Lưu hình ảnh</button>
+        </div>
+        <div class="setting-section">
+          <h3>💳 Thông tin thanh toán</h3>
+          <div class="form-row">
+            <div class="input-group"><label>Tên ngân hàng</label><input id="set-bank-name" value="Techcombank"></div>
+            <div class="input-group"><label>Số tài khoản</label><input id="set-bank-acc" value="3036506868"></div>
+          </div>
+          <div class="input-group" style="margin-bottom:14px;"><label>Tên chủ tài khoản</label><input id="set-bank-holder" value="TRAN DUC LUONG"></div>
+          <button class="btn btn-primary" onclick="saveSettings('bank')">💾 Lưu thông tin thanh toán</button>
+        </div>
+      </div>
+
+      <!-- STAFF -->
+      <div class="page" id="page-staff">
+        <div class="page-header">
+          <div class="ph-row">
+            <h1>Quản lý nhân viên 👔</h1>
+            <button class="btn btn-primary" onclick="openStaffModal()">+ Thêm nhân viên</button>
+          </div>
+          <p>Danh sách nhân viên hỗ trợ tại cơ sở</p>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>ID</th><th>Họ và tên</th><th>Số điện thoại</th><th>Trạng thái</th><th>Thao tác</th></tr></thead>
+              <tbody id="staff-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modal-booking">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">📅 Đặt sân mới</div>
+      <button class="modal-close" onclick="closeModal('modal-booking')">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="input-group"><label>Khách hàng</label><input id="bk-cust" placeholder="Tên khách hàng"></div>
+      <div class="input-group"><label>Số điện thoại</label><input id="bk-phone" placeholder="0912345678"></div>
+    </div>
+    <div class="form-row">
+      <div class="input-group"><label>Sân</label>
+        <select id="bk-field"></select>
+      </div>
+      <div class="input-group"><label>Ngày</label><input type="date" id="bk-date"></div>
+    </div>
+    <div class="form-row">
+      <div class="input-group"><label>Giờ bắt đầu</label><input type="time" id="bk-start" value="08:00" onchange="calcBkPrice()"></div>
+      <div class="input-group"><label>Giờ kết thúc</label><input type="time" id="bk-end" value="10:00" onchange="calcBkPrice()"></div>
+    </div>
+    <div class="input-group" style="margin-bottom:14px;"><label>Ghi chú</label><input id="bk-note" placeholder="Thông tin thêm..."></div>
+    <div style="background:rgba(22,163,74,.05);border:1px solid rgba(22,163,74,.2);border-radius:10px;padding:14px;text-align:center;">
+      <div style="font-size:12px;color:var(--text2)">Tổng tiền dự tính</div>
+      <div style="font-size:28px;font-weight:800;font-family:var(--mono);color:var(--green);" id="bk-price-display">0 ₫</div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-booking')">Hủy</button>
+      <button class="btn btn-primary" onclick="addBooking()">✅ Xác nhận đặt sân</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-field">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="field-modal-title">Thêm sân mới</div>
+      <button class="modal-close" onclick="closeModal('modal-field')">✕</button>
+    </div>
+    <input type="hidden" id="field-id">
+    <div class="form-row">
+      <div class="input-group"><label>Tên sân</label><input id="field-name" placeholder="VD: Sân E - Mini 5"></div>
+      <div class="input-group"><label>Loại sân</label>
+        <select id="field-type"><option value="5v5">5 vs 5</option><option value="7v7">7 vs 7</option><option value="11v11">11 vs 11</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="input-group"><label>Kích thước</label><input id="field-size" placeholder="VD: Mini (20x40m)"></div>
+      <div class="input-group"><label>Loại cỏ</label><input id="field-grass" placeholder="Cỏ nhân tạo thế hệ 4"></div>
+    </div>
+    <div class="input-group" style="margin-bottom:14px;"><label>Giá thuê (₫/giờ)</label><input type="number" id="field-price" placeholder="180000"></div>
+    <div class="input-group" style="margin-bottom:14px;">
+      <label>Hình ảnh sân bóng</label>
+      <div style="display:flex; gap:10px;">
+        <input id="field-image" placeholder="URL hình ảnh sân bóng..." style="flex:1;">
+        <button class="btn btn-secondary" onclick="document.getElementById('file-field').click()">📂 Tải ảnh</button>
+        <input type="file" id="file-field" style="display:none" accept="image/*" onchange="handleFileUpload('file-field', 'field-image')">
+      </div>
+    </div>
+    <div class="input-group" style="margin-bottom:14px;"><label>Tiện ích (phân cách bằng dấu phẩy)</label><input id="field-amenities" placeholder="Đèn chiếu sáng, Nước uống, ..."></div>
+    <div class="input-group" style="margin-bottom:14px;"><label>Mô tả sân</label><textarea id="field-desc" rows="3" placeholder="Mô tả chi tiết về sân bóng..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-field')">Hủy</button>
+      <button id="field-save-btn" class="btn btn-primary" onclick="saveField()">✅ Thêm sân</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-add-customer">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">👤 Thêm khách hàng</div>
+      <button class="modal-close" onclick="closeModal('modal-add-customer')">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="input-group"><label>Họ và tên</label><input id="nc-name" placeholder="Họ và tên"></div>
+      <div class="input-group"><label>Số điện thoại</label><input id="nc-phone" placeholder="0912345678"></div>
+    </div>
+    <div class="input-group" style="margin-bottom:14px;"><label>Email</label><input id="nc-email" type="email" placeholder="email@gmail.com"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-customer')">Hủy</button>
+      <button class="btn btn-primary" onclick="addCustomer()">✅ Thêm khách hàng</button>
+    </div>
+  </div>
+</div>
+
+
+
+<!-- MODAL THÊM PHIẾU HỖ TRỢ -->
+<div class="modal-overlay" id="modal-add-ticket">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🎫 Gửi yêu cầu hỗ trợ mới</div>
+      <button class="modal-close" onclick="closeModal('modal-add-ticket')">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="input-group"><label>Loại yêu cầu</label>
+        <select id="tk-type">
+          <option value="bug">🐛 Báo lỗi hệ thống</option>
+          <option value="feature">💡 Đề xuất tính năng</option>
+          <option value="other">❓ Hỗ trợ khác</option>
+        </select>
+      </div>
+      <div class="input-group"><label>Mức độ ưu tiên</label>
+        <select id="tk-prio">
+          <option value="low">Thấp</option>
+          <option value="medium" selected>Trung bình</option>
+          <option value="high">Cao (Cần gấp)</option>
+        </select>
+      </div>
+    </div>
+    <div class="input-group" style="margin-bottom:16px;"><label>Tiêu đề ngắn gọn</label><input id="tk-subject" placeholder="VD: Không in được hóa đơn"></div>
+    <div class="input-group" style="margin-bottom:16px;"><label>Nội dung chi tiết</label><textarea id="tk-message" rows="5" placeholder="Mô tả chi tiết vấn đề bạn đang gặp phải..."></textarea></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-add-ticket')">Hủy</button>
+      <button class="btn btn-primary" onclick="submitTicket()">🚀 Gửi yêu cầu</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL THÊM NHÂN VIÊN -->
+<div class="modal-overlay" id="modal-staff">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="staff-modal-title">Thêm nhân viên mới</div>
+      <button class="modal-close" onclick="closeModal('modal-staff')">✕</button>
+    </div>
+    <input type="hidden" id="staff-id">
+    <div class="form-row">
+      <div class="input-group"><label>Họ và tên</label><input id="staff-name" placeholder="VD: Nguyễn Văn A"></div>
+      <div class="input-group"><label>Số điện thoại</label><input id="staff-phone" placeholder="0912345678"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-staff')">Hủy</button>
+      <button id="staff-save-btn" class="btn btn-primary" onclick="saveStaff()">✅ Xác nhận</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script>
+// ===== APP LOGIC =====
+const API_BASE_URL = 'http://localhost:5000';
+let TENANT_ID = '';
+let db = {};
+const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 phút
+
+const PKG_FEATURES = {
+  'pkg1': { name: 'Cơ Bản', max_fields: 3, extras: [] },
+  'pkg2': { name: 'Tiêu Chuẩn', max_fields: 8, extras: ['checkin', 'payment', 'invoice'] },
+  'pkg3': { name: 'Cao Cấp', max_fields: 999, extras: ['checkin', 'payment', 'invoice', 'advanced_finance'] }
+};
+
+function applyPackageRestrictions(tenant) {
+  if (!tenant || !tenant.package_id) return;
+  const pkg = PKG_FEATURES[tenant.package_id] || PKG_FEATURES['pkg1'];
+  
+  // Update package label in sidebar
+  document.querySelectorAll('.tenant-pkg').forEach(el => el.textContent = `📦 Gói ${pkg.name} · FootField`);
+
+  // Hide/Show Extra features
+  const allExtras = ['checkin', 'payment', 'invoice'];
+  allExtras.forEach(feat => {
+    const navItem = document.getElementById(`nav-${feat}`);
+    const topBtn = document.getElementById(`top-btn-${feat}`); // Try to find topbar buttons too
+    const isVisible = pkg.extras.includes(feat);
+    
+    if (navItem) navItem.style.display = isVisible ? 'flex' : 'none';
+    if (topBtn) topBtn.style.display = isVisible ? 'inline-flex' : 'none';
+  });
+
+  // Hide utility section if no extras are visible
+  const hasAnyExtra = allExtras.some(f => pkg.extras.includes(f));
+  const utilSec = document.getElementById('nav-util-sec');
+  if (utilSec) utilSec.style.display = hasAnyExtra ? 'block' : 'none';
+
+  // Field Limit Check for UI
+  const currentCount = (db.fields || []).length;
+  const btnAdd = document.getElementById('btn-add-field');
+  const limitInfo = document.getElementById('field-limit-info');
+  
+  if (limitInfo) {
+    limitInfo.textContent = `Hạn mức: ${currentCount}/${pkg.max_fields === 999 ? '∞' : pkg.max_fields} sân`;
+    limitInfo.style.display = 'block';
+  }
+
+  if (btnAdd) {
+    if (currentCount >= pkg.max_fields) {
+      btnAdd.disabled = true;
+      btnAdd.style.opacity = '0.5';
+      btnAdd.style.cursor = 'not-allowed';
+      btnAdd.title = 'Đã đạt giới hạn số lượng sân của gói dịch vụ';
+    } else {
+      btnAdd.disabled = false;
+      btnAdd.style.opacity = '1';
+      btnAdd.style.cursor = 'pointer';
+      btnAdd.title = '';
+    }
+  }
+}
+
+function updateLastActive() {
+  localStorage.setItem('ff_tenant_last_active', Date.now().toString());
+}
+
+// Lắng nghe các sự kiện để cập nhật thời gian hoạt động cuối cùng
+['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart'].forEach(name => {
+  document.addEventListener(name, updateLastActive, true);
+});
+
+// HELPERS
+const fmt=n=>n.toLocaleString('vi-VN')+' ₫';
+const fmtDate=s=>s?new Date(s).toLocaleDateString('vi-VN'):'';// ... }}
+function myBookings(){return(db.bookings||[]).filter(b=>b.tenant_id===TENANT_ID);}
+function myCustomers(){return(db.customers||[]).filter(c=>c.tenant_id===TENANT_ID);}
+function myFields(){return(db.fields||[]).filter(f=>f.tenant_id===TENANT_ID);}
+function getField(id){return myFields().find(f=>f.id===id)||{};}
+function fieldStatusBadge(s){const m={available:'<span class="badge badge-green">✅ Sẵn sàng</span>',maintenance:'<span class="badge badge-yellow">🔧 Bảo trì</span>',occupied:'<span class="badge badge-red">🔴 Đang dùng</span>'};return m[s]||s;}
+function bkStatusBadge(s){const m={confirmed:'<span class="badge badge-blue">✓ Xác nhận</span>',pending:'<span class="badge badge-yellow">⏳ Chờ xác nhận</span>',completed:'<span class="badge badge-green">✅ Hoàn thành</span>',cancelled:'<span class="badge badge-red">✗ Đã hủy</span>'};return m[s]||s;}
+function custBadge(s){const m={vip:'<span class="badge badge-yellow">⭐ VIP</span>',regular:'<span class="badge badge-blue">👤 Thường</span>',new:'<span class="badge badge-green">🌟 Mới</span>'};return m[s]||s;}
+function pmBadge(s){const m={cash:'💵 Tiền mặt',transfer:'🏦 Chuyển khoản',vnpay:'🔵 VNPay'};return m[s]||s;}
+function tkStatusBadge(s){const m={open:'<span class="badge badge-yellow">⏳ Đang chờ</span>',processing:'<span class="badge badge-blue">⚙️ Đang xử lý</span>',resolved:'<span class="badge badge-green">✅ Đã xong</span>'};return m[s]||s;}
+function tkPrioBadge(s){const m={high:'<span class="badge badge-red">🔴 Cao</span>',medium:'<span class="badge badge-yellow">🟡 Trung bình</span>',low:'<span class="badge badge-gray">⚪ Thấp</span>'};return m[s]||s;}
+
+// AUTH
+async function doLogin(){
+  const u=document.getElementById('login-user').value;
+  const p=document.getElementById('login-pass').value;
+  const errorEl = document.getElementById('login-error');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username: u, password: p, type: 'tenant' })
+    });
+
+    const data = await response.json();
+
+    if (data.success) {
+      TENANT_ID = data.user.id || data.user.tenant_id;
+      document.getElementById('login-page').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      localStorage.setItem('ff_tenant_user', JSON.stringify(data.user));
+      updateLastActive(); // Khởi tạo thời gian hoạt động
+      initApp();
+    } else {
+      errorEl.style.display = 'block';
+      errorEl.textContent = '❌ ' + (data.message || 'Tài khoản hoặc mật khẩu không đúng');
+    }
+  } catch (error) {
+    console.error('Login error:', error);
+    errorEl.style.display = 'block';
+    errorEl.textContent = '❌ Lỗi kết nối đến server';
+  }
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+function doLogout(){
+  localStorage.removeItem('ff_tenant_user');
+  localStorage.removeItem('ff_tenant_last_active');
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-page').style.display='flex';
+}
+
+// NAV
+const pageTitles={dashboard:'Dashboard',fields:'Quản lý sân bóng',schedule:'Lịch đặt sân',customers:'Quản lý khách hàng',finance:'Quản lý tài chính',checkin:'Check-in QR',payment:'Thu tiền',invoice:'In hóa đơn',notifications:'Thông báo hệ thống',settings:'Cài đặt hệ thống'};
+function showPage(name){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>{if(n.textContent.includes(pageTitles[name]))n.classList.add('active');});
+  document.getElementById('topbar-title').textContent=pageTitles[name];
+  
+  if(name === 'dashboard') loadDashboardData();
+  
+  const renders={fields:renderFields,schedule:renderSchedule,customers:renderCustomers,finance:renderFinance,checkin:renderCheckin,payment:renderPayment,invoice:renderInvoicePage,notifications:renderNotifications,settings:renderSettings,staff:renderStaff};
+  if(renders[name])renders[name]();
+  
+  // Custom logic for marking notifications as read
+  if(name === 'notifications') markAllNotifsRead();
+}
+
+// INIT
+async function initApp(){
+  const now=new Date();
+  document.getElementById('current-date').textContent=now.toLocaleDateString('vi-VN',{weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});
+  
+  // initDB();
+  populateFieldFilters();
+
+  // Load dashboard data from API
+  const dashData = await loadDashboardData();
+  if(db.tenant) syncGlobalUI(db.tenant);
+  
+  // Update storefront link dynamically
+  const previewBtn = document.getElementById('storefront-preview-btn');
+  const linkObj = new URL('customer.html', window.location.href);
+  linkObj.searchParams.set('tenant', TENANT_ID);
+  if(previewBtn) previewBtn.href = linkObj.href;
+}
+
+function copyStoreLink() {
+  const linkObj = new URL('customer.html', window.location.href);
+  linkObj.searchParams.set('tenant', TENANT_ID);
+  const link = linkObj.href;
+  
+  navigator.clipboard.writeText(link).then(() => {
+    alert('✅ Đã sao chép link gian hàng của bạn:\n' + link);
+  }).catch(err => {
+    prompt('Link gian hàng của bạn (Hãy bôi đen và copy):', link);
+  });
+}
+
+async function loadDashboardData() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/tenants/${TENANT_ID}/dashboard`);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    
+    // Fetch customers
+    const custRes = await fetch(`${API_BASE_URL}/api/customers/tenant/${TENANT_ID}`);
+    db.customers = await custRes.json();
+    
+    // Fetch tickets
+    const tkRes = await fetch(`${API_BASE_URL}/api/tickets/tenant/${TENANT_ID}`);
+    db.tickets = await tkRes.json();
+    
+    renderDashboard(data);
+    if (db.tenant) applyPackageRestrictions(db.tenant);
+    if(document.getElementById('page-support').classList.contains('active')) renderSupport();
+  } catch (error) {
+    console.error('Error loading dashboard data:', error);
+    document.getElementById('page-dashboard').innerHTML = `<div style="text-align:center;padding:40px;color:var(--red)">Lỗi tải dữ liệu Dashboard. Vui lòng kiểm tra lại kết nối và API.</div>`;
+  }
+}
+
+// DASHBOARD
+function renderDashboard(data){
+  if (!data) return;
+
+  const { stats, revenue7Days, todayBookingsList, fieldsStatus, vipCustomers } = data;
+
+  // 1. Update stat cards
+  document.getElementById('d-fields').textContent = stats.activeFields;
+  document.getElementById('d-today').textContent = stats.todayBookings;
+  document.getElementById('d-rev').textContent = (stats.todayRevenue / 1000).toFixed(0) + 'K';
+  document.getElementById('d-cust').textContent = stats.totalCustomers;
+  document.getElementById('d-cust-sub').textContent = `${stats.vipCustomers} khách VIP`;
+  
+  // Update sub-texts
+  document.getElementById('d-fields-sub').textContent = `${stats.maintenanceFields} sân đang bảo trì`;
+  document.getElementById('d-today-sub').textContent = `${stats.confirmedToday} đã xác nhận`;
+  document.getElementById('d-rev-sub').textContent = `${stats.paidTransactionsToday} giao dịch thành công`;
+  
+  updateSidebarBadges(stats);
+
+  // 2. Update revenue chart
+  const revChart = document.querySelector('.rev-chart');
+  if (revChart) {
+    const maxRev = Math.max(...revenue7Days.map(d => d.revenue), 1);
+    const days = ['CN', 'T2', 'T3', 'T4', 'T5', 'T6', 'T7'];
+    revChart.innerHTML = revenue7Days.map(d => {
+      const day = new Date(d.day);
+      const height = (d.revenue / maxRev * 100).toFixed(0);
+      return `<div class="rev-bar" style="height:${height}%;background:linear-gradient(180deg,#16a34a,#15803d);">
+        <div class="rev-bar-val">${(d.revenue / 1000).toFixed(0)}K</div>
+        <div class="rev-bar-label">${days[day.getDay()]}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // 3. Update today's bookings
+  document.getElementById('today-bookings').innerHTML = todayBookingsList.length ? todayBookingsList.map(b => {
+    return`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div style="font-size:24px">⚽</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:600">${b.customer_name}</div><div style="font-size:11px;color:var(--text2)">${b.field_name} · ${b.start_time}-${b.end_time}</div></div>
+      ${bkStatusBadge(b.status)}
+    </div>`}).join('') : '<div style="text-align:center;padding:20px;color:var(--text3)">Không có đặt sân hôm nay</div>';
+
+  // 4. Update fields status
+  document.getElementById('dash-fields').innerHTML = fieldsStatus.map(f => `
+    <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border);">
+      <div style="font-size:20px">⚽</div>
+      <div style="flex:1"><div style="font-size:13px;font-weight:600">${f.name}</div><div style="font-size:11px;color:var(--text2)">${fmt(f.price_per_hour)}/giờ</div></div>
+      ${fieldStatusBadge(f.status)}
+    </div>`).join('');
+
+  // 5. Update VIP customers
+  document.getElementById('dash-vips').innerHTML = vipCustomers.map(c => `
+    <div class="customer-row">
+      <div class="cust-ava">${c.name[0]}</div>
+      <div><div class="cust-name">${c.name}</div><div class="cust-info">${c.total_bookings} lần đặt sân</div></div>
+      <div class="cust-stat">${fmt(c.total_spent)}<div class="cust-stat-sub">Tổng chi</div></div>
+    </div>`).join('');
+}
+
+// FIELDS
+async function renderFields(){
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/fields/${TENANT_ID}`);
+    const fields = await response.json();
+    db.fields = fields;
+
+    // Fetch today's bookings to check "Occupied" status
+    const bkRes = await fetch(`${API_BASE_URL}/api/bookings/tenant/${TENANT_ID}`);
+    const bookings = await bkRes.json();
+    const now = new Date();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
+    const todayStr = new Date(now.getTime() + (7*60*60*1000)).toISOString().slice(0, 10);
+
+    document.getElementById('fields-grid').innerHTML = fields.map(f => {
+      // Check if occupied right now
+      let status = f.status || 'available';
+      if (status === 'available') {
+        const activeBk = (db.bookings || []).find(b => {
+          if (b.field_id !== f.id || b.date !== todayStr || b.status === 'cancelled') return false;
+          const [sh, sm] = b.start_time.split(':').map(Number);
+          const [eh, em] = b.end_time.split(':').map(Number);
+          const start = sh * 60 + sm;
+          const end = eh * 60 + em;
+          return currentTime >= start && currentTime <= end;
+        });
+        if (activeBk) status = 'occupied';
+      }
+
+      return `<div class="field-card">
+        <div class="field-top">
+          <div class="field-icon">
+            ${f.image && (f.image.startsWith('http') || f.image.startsWith('/')) 
+              ? `<img src="${f.image}" onerror="this.src='https://placehold.co/40x40?text=⚽'">` 
+              : (f.image || '⚽')}
+          </div>
+          <div><div class="field-name">${f.name}</div><div class="field-type">${f.type}</div></div>
+        </div>
+        <div class="field-body">
+          <div class="field-stat-row">
+            ${fieldStatusBadge(status)}
+            <span class="badge badge-gray">${f.size}</span>
+            <span class="badge badge-gray">🌿 ${f.grass}</span>
+          </div>
+          <div style="font-size:20px;font-weight:800;font-family:var(--mono);color:var(--green);margin-bottom:12px">${fmt(f.price_per_hour)}<span style="font-size:12px;font-weight:400;color:var(--text2)">/giờ</span></div>
+          <div class="field-actions">
+            <button class="btn btn-sm btn-secondary" onclick="openFieldModal('${f.id}')">✏️ Sửa</button>
+            <button class="btn btn-sm btn-warning" onclick="toggleFieldStatus('${f.id}', '${f.status}')">
+              ${f.status === 'maintenance' ? '✅ Sẵn sàng' : '🔧 Bảo trì'}
+            </button>
+            <button class="btn btn-sm btn-danger" onclick="deleteField('${f.id}')">🗑️ Xóa</button>
+            <button class="btn btn-sm btn-primary" onclick="document.getElementById('bk-field').value='${f.id}';openBookingModal()">+ Đặt</button>
+          </div>
+        </div>
+      </div>`}).join('');
+
+    // Re-apply restrictions to update "Add Field" button status
+    if (db.tenant) applyPackageRestrictions(db.tenant);
+  } catch (error) {
+    console.error('Error rendering fields:', error);
+    document.getElementById('fields-grid').innerHTML = '<p style="color:red">Lỗi tải danh sách sân bóng.</p>';
+  }
+}
+
+function openFieldModal(id) {
+  const modal = document.getElementById('modal-field');
+  const title = document.getElementById('field-modal-title');
+  const saveBtn = document.getElementById('field-save-btn');
+  
+  document.getElementById('field-id').value = '';
+  document.getElementById('field-name').value = '';
+  document.getElementById('field-type').value = '5v5';
+  document.getElementById('field-size').value = '';
+  document.getElementById('field-grass').value = '';
+  document.getElementById('field-price').value = '';
+  document.getElementById('field-image').value = '';
+  document.getElementById('field-amenities').value = '';
+  document.getElementById('field-desc').value = '';
+
+  if (id) {
+    const field = db.fields.find(f => f.id === id);
+    if (field) {
+      title.textContent = '✏️ Chỉnh sửa sân';
+      saveBtn.textContent = '💾 Lưu thay đổi';
+      document.getElementById('field-id').value = field.id;
+      document.getElementById('field-name').value = field.name;
+      document.getElementById('field-type').value = field.type;
+      document.getElementById('field-size').value = field.size;
+      document.getElementById('field-grass').value = field.grass;
+      document.getElementById('field-price').value = field.price_per_hour;
+      document.getElementById('field-image').value = field.image || '';
+      document.getElementById('field-amenities').value = field.amenities || '';
+      document.getElementById('field-desc').value = field.description || '';
+    }
+  } else {
+    title.textContent = '⚽ Thêm sân mới';
+    saveBtn.textContent = '✅ Thêm sân';
+  }
+  modal.classList.add('show');
+}
+
+async function saveField() {
+  const fieldId = document.getElementById('field-id').value;
+  const isUpdating = !!fieldId;
+  const fieldData = {
+    tenant_id: TENANT_ID,
+    name: document.getElementById('field-name').value,
+    type: document.getElementById('field-type').value,
+    size: document.getElementById('field-size').value,
+    grass: document.getElementById('field-grass').value,
+    price_per_hour: parseInt(document.getElementById('field-price').value, 10),
+    image: document.getElementById('field-image').value,
+    amenities: document.getElementById('field-amenities').value,
+    description: document.getElementById('field-desc').value,
+    status: isUpdating ? (db.fields.find(f=>f.id===fieldId)||{}).status : 'available'
+  };
+
+  const url = isUpdating ? `${API_BASE_URL}/api/fields/${fieldId}` : `${API_BASE_URL}/api/fields`;
+  const method = isUpdating ? 'PUT' : 'POST';
+
+  try {
+    const response = await fetch(url, {
+      method: method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(fieldData)
+    });
+
+    if (response.ok) {
+      closeModal('modal-field');
+      await renderFields(); // Refresh the list
+      await loadDashboardData(); // Refresh dashboard stats
+    } else {
+      const error = await response.json();
+      alert(`Lỗi lưu sân: ${error.message}`);
+    }
+  } catch (error) {
+    console.error('Error saving field:', error);
+    alert('Lỗi kết nối khi lưu sân.');
+  }
+}
+
+async function deleteField(id) {
+  if (!confirm('Bạn có chắc chắn muốn xóa sân này không? Hành động này không thể hoàn tác.')) {
+    return;
+  }
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/fields/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (response.ok) {
+      await renderFields(); // Refresh the list
+      await loadDashboardData(); // Refresh dashboard
+    } else {
+      const error = await response.json();
+      alert(`Lỗi xóa sân: ${error.message}`);
+    }
+  } catch (error) {
+    console.error('Error deleting field:', error);
+    alert('Lỗi kết nối khi xóa sân.');
+  }
+}
+
+async function toggleFieldStatus(id, currentStatus){
+  const newStatus = currentStatus === 'available' ? 'maintenance' : 'available';
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/fields/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus })
+    });
+    if (response.ok) {
+      renderFields(); // Re-render to show the change
+      await loadDashboardData(); // Refresh dashboard
+    } else {
+      alert('Lỗi cập nhật trạng thái sân.');
+    }
+  } catch (error) {
+    console.error('Error toggling field status:', error);
+    alert('Lỗi kết nối khi cập nhật trạng thái sân.');
+  }
+}
+
+// SCHEDULE
+async function populateFieldFilters(){
+  const opts = myFields().map(f=>`<option value="${f.id}">${f.name}</option>`).join('');
+  ['bk-field-filter','bk-field'].forEach(id=>{const el=document.getElementById(id);if(el&&el.tagName==='SELECT')el.innerHTML=(id==='bk-field-filter'?'<option value="">Tất cả sân</option>':'')+opts;});
+  
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/bookings/tenant/${TENANT_ID}`);
+    const bks = await res.json();
+    db.bookings = bks; 
+
+    // Cập nhật thông tin tenant vào bộ nhớ đệm
+    const tenantRes = await fetch(`${API_BASE_URL}/api/tenants/${TENANT_ID}/settings`);
+    const t = await tenantRes.json();
+    db.tenant = t; 
+    syncGlobalUI(t); // Đồng bộ UI ngay khi có dữ liệu mới
+    
+    const payBk = document.getElementById('pay-booking');
+    if(payBk) {
+      payBk.innerHTML = '<option value="">-- Chọn đặt sân --</option>' + 
+        bks.filter(b => !b.paid && b.status !== 'cancelled')
+           .map(b => `<option value="${b.id}" data-price="${b.total_price}">${b.id} - ${b.customer_name} (${fmt(b.total_price)})</option>`).join('');
+      
+      payBk.onchange = () => {
+        const opt = payBk.options[payBk.selectedIndex];
+        const price = opt.getAttribute('data-price') || 0;
+        document.getElementById('pay-amount').value = price;
+        updatePayAmount();
+      };
+    }
+
+    const invBk = document.getElementById('inv-booking');
+    if(invBk) {
+      invBk.innerHTML = '<option value="">-- Chọn đặt sân --</option>' + 
+        bks.map(b => `<option value="${b.id}">${b.id} - ${b.customer_name} - ${fmtDate(b.date)}</option>`).join('');
+    }
+  } catch (error) {
+    console.error('Error populating filters:', error);
+  }
+  
+  const todayVn = new Date(new Date().getTime() + (7*60*60*1000)).toISOString().slice(0, 10);
+  const bkDate=document.getElementById('bk-date'); if(bkDate) bkDate.value = todayVn;
+}
+async function renderSchedule(){
+  const q = document.getElementById('bk-search')?.value || '';
+  const field = document.getElementById('bk-field-filter')?.value || '';
+  const status = document.getElementById('bk-status-filter')?.value || '';
+
+  try {
+    const url = new URL(`${API_BASE_URL}/api/bookings/tenant/${TENANT_ID}`);
+    if (q) url.searchParams.append('q', q);
+    if (field) url.searchParams.append('field', field);
+    if (status) url.searchParams.append('status', status);
+
+    const response = await fetch(url);
+    const bookings = await response.json();
+
+    document.getElementById('schedule-table').innerHTML = bookings.map(b => `
+      <tr>
+        <td><span style="font-family:var(--mono);font-size:12px;color:var(--green)">${b.id}</span></td>
+        <td><strong>${b.customer_name}</strong><br><small style="color:var(--text2)">${b.customer_phone}</small></td>
+        <td>${b.field_name || 'N/A'}</td>
+        <td>${fmtDate(b.date)}</td>
+        <td>${b.start_time}–${b.end_time}</td>
+        <td><strong style="font-family:var(--mono)">${fmt(b.total_price)}</strong></td>
+        <td>${b.paid ? '<span class="badge badge-green">✅ Đã thu</span>' : '<span class="badge badge-red">⏳ Chưa thu</span>'}</td>
+        <td>${bkStatusBadge(b.status)}</td>
+        <td style="display:flex;gap:4px;flex-wrap:wrap">
+          ${b.status === 'pending' ? `<button class="btn btn-sm btn-primary" onclick="updateBookingStatus('${b.id}', 'confirmed')">✓ Xác nhận</button>` : ''}
+          ${!b.paid ? `<button class="btn btn-sm btn-warning" onclick="markBookingPaid('${b.id}')">💳 Thu tiền</button>` : ''}
+          ${b.status !== 'cancelled' ? `<button class="btn btn-sm btn-danger" onclick="updateBookingStatus('${b.id}', 'cancelled')">✗ Hủy</button>` : ''}
+        </td>
+      </tr>`).join('') || '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--text2)">Không có đặt sân nào</td></tr>';
+  } catch (error) {
+    console.error('Error rendering schedule:', error);
+    document.getElementById('schedule-table').innerHTML = '<tr><td colspan="9" style="text-align:center;padding:30px;color:var(--red)">Lỗi tải lịch đặt sân.</td></tr>';
+  }
+}
+async function updateBookingStatus(id, status) {
+  if (status === 'cancelled' && !confirm('Bạn có chắc muốn hủy đặt sân này?')) return;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/bookings/${id}/status`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status })
+    });
+    if (response.ok) {
+      // ✅ Invalidate customer cache để đồng bộ dữ liệu real-time
+      try {
+        await fetch(`${API_BASE_URL}/api/cache/invalidate`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ tenant_id: TENANT_ID, action: 'booking_status_update' })
+        });
+      } catch (cacheError) {
+        console.log('Cache invalidation failed:', cacheError);
+        // Vẫn tiếp tục nếu cache invalidation thất bại
+      }
+      
+      // ✅ LocalStorage signaling cho real-time sync
+      try {
+        const cacheKey = `vinhunifootball_cache_invalidate_${TENANT_ID}`;
+        localStorage.setItem(cacheKey, JSON.stringify({
+          timestamp: Date.now(),
+          action: 'booking_status_update',
+          booking_id: id,
+          status: status
+        }));
+        
+        // Xóa ngay sau khi set để trigger storage event
+        localStorage.removeItem(cacheKey);
+      } catch (storageError) {
+        console.log('LocalStorage signaling failed:', storageError);
+      }
+      
+      renderSchedule();
+      await loadDashboardData(); // Refresh dashboard statistics real-time
+    } else {
+      alert('Lỗi cập nhật trạng thái đặt sân.');
+    }
+  } catch (error) {
+    console.error('Error updating booking status:', error);
+    alert('Lỗi kết nối khi cập nhật trạng thái.');
+  }
+}
+
+async function markBookingPaid(id) {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/bookings/${id}/payment`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paid: true, payment_method: 'cash' }) // Default to cash for now
+    });
+    if (response.ok) {
+      // Update customer total_spent when payment is made
+      const booking = myBookings().find(b => b.id === id);
+      if (booking) {
+        const customer = myCustomers().find(c => c.phone === booking.customer_phone);
+        if (customer) {
+          customer.total_spent += booking.total_price;
+          updateCustomerStatus(customer);
+          saveDB();
+        }
+      }
+      
+      renderSchedule();
+      // Potentially re-render finance page if it's visible
+      if (document.getElementById('page-finance').classList.contains('active')) {
+        renderFinance();
+      }
+      // Re-render customers to update stats
+      if (document.getElementById('page-customers').classList.contains('active')) {
+        renderCustomers();
+      }
+      await loadDashboardData(); // Sync dashboard after payment
+    } else {
+      alert('Lỗi cập nhật thanh toán.');
+    }
+  } catch (error) {
+    console.error('Error updating payment status:', error);
+    alert('Lỗi kết nối khi cập nhật thanh toán.');
+  }
+}
+function openBookingModal(){
+  populateFieldFilters();
+  document.getElementById('modal-booking').classList.add('show');
+}
+function calcBkPrice(){
+  const fieldSelect = document.getElementById('bk-field');
+  const fieldId = fieldSelect.value;
+  const field = db.fields.find(f => f.id === fieldId);
+  const pricePerHour = field ? field.price_per_hour : 0;
+
+  const s = document.getElementById('bk-start').value || '';
+  const e = document.getElementById('bk-end').value || '';
+
+  if(s && e && pricePerHour){
+    const [sh, sm] = s.split(':').map(Number);
+    const [eh, em] = e.split(':').map(Number);
+    const duration = ((eh * 60 + em) - (sh * 60 + sm)) / 60;
+    const price = duration > 0 ? Math.round(duration * pricePerHour) : 0;
+    document.getElementById('bk-price-display').textContent = fmt(price);
+  }
+}
+
+async function addBooking(){
+  const name = document.getElementById('bk-cust').value.trim();
+  const phone = document.getElementById('bk-phone').value.trim();
+  const fieldId = document.getElementById('bk-field').value;
+  const date = document.getElementById('bk-date').value;
+  const startTime = document.getElementById('bk-start').value;
+  const endTime = document.getElementById('bk-end').value;
+  const note = document.getElementById('bk-note').value;
+
+  if(!name) return alert('Vui lòng nhập tên khách hàng');
+  if(!phone) return alert('Vui lòng nhập số điện thoại');
+  if(!fieldId) return alert('Vui lòng chọn sân');
+  if(!date) return alert('Vui lòng chọn ngày');
+
+  // ✅ Validation: Không cho phép đặt trong quá khứ
+  const now = new Date();
+  const vnNow = new Date(now.getTime() + (7 * 60 * 60 * 1000));
+  const todayStr = vnNow.toISOString().slice(0, 10);
+  const currentTime = vnNow.getHours() * 60 + vnNow.getMinutes();
+  const [sh, sm] = startTime.split(':').map(Number);
+  const startTimeNum = sh * 60 + sm;
+
+  if (date < todayStr) return alert('❌ Không thể đặt sân cho ngày trong quá khứ.');
+  if (date === todayStr && startTimeNum < currentTime - 5) { // Cho phép trễ 5p
+    return alert('❌ Không thể đặt sân cho khung giờ đã qua.');
+  }
+
+  const field = db.fields.find(f => f.id === fieldId) || {};
+  const [eh, em] = endTime.split(':').map(Number);
+  const endTimeNum = eh * 60 + em;
+  const duration = (endTimeNum - startTimeNum) / 60;
+  
+  if (duration <= 0) return alert('❌ Giờ kết thúc phải sau giờ bắt đầu');
+
+  // ✅ Client-side Conflict Check
+  try {
+    const bkRes = await fetch(`${API_BASE_URL}/api/bookings/tenant/${TENANT_ID}`);
+    const existingBookings = await bkRes.json();
+    const hasConflict = existingBookings.some(b => {
+      if (b.field_id !== fieldId || b.date !== date || !['confirmed', 'pending'].includes(b.status)) return false;
+      const [bsh, bsm] = b.start_time.split(':').map(Number);
+      const [beh, bem] = b.end_time.split(':').map(Number);
+      const bStart = bsh * 60 + bsm;
+      const bEnd = beh * 60 + bem;
+      // Overlap detection
+      return (startTimeNum >= bStart && startTimeNum < bEnd) || 
+             (endTimeNum > bStart && endTimeNum <= bEnd) ||
+             (startTimeNum <= bStart && endTimeNum >= bEnd);
+    });
+
+    if (hasConflict) {
+      return alert('❌ Khung giờ này đã có người đặt. Vui lòng chọn giờ khác.');
+    }
+  } catch (err) { console.log('Conflict check skipped:', err); }
+
+  const totalPrice = Math.round(duration * field.price_per_hour) || 0;
+
+  const bookingData = {
+    tenant_id: TENANT_ID,
+    field_id: fieldId,
+    customer_name: name,
+    customer_phone: phone,
+    customer_email: '',
+    date: date,
+    start_time: startTime,
+    end_time: endTime,
+    duration: duration,
+    total_price: totalPrice,
+    status: 'confirmed',
+    payment_method: 'cash',
+    paid: false,
+    note: note,
+    qr_code: `QR-${Date.now()}`
+  };
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/bookings`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(bookingData)
+    });
+
+    if (response.ok) {
+      closeModal('modal-booking');
+      // Reset form
+      document.getElementById('bk-cust').value = '';
+      document.getElementById('bk-phone').value = '';
+      document.getElementById('bk-note').value = '';
+      
+      // Sync customer data
+      syncCustomerFromBooking(bookingData);
+      
+      await renderSchedule();
+      await renderCustomers(); // Refresh customer list
+      await loadDashboardData(); // Refresh dashboard stats
+      alert('✅ Đặt sân thành công!');
+    } else {
+      const error = await response.json();
+      alert(`Lỗi đặt sân: ${error.message}`);
+    }
+  } catch (error) {
+    console.error('Error adding booking:', error);
+    alert('Lỗi kết nối khi đặt sân.');
+  }
+}
+
+// CUSTOMERS
+function syncCustomerFromBooking(booking) {
+  let customer = myCustomers().find(c => c.phone === booking.customer_phone);
+  
+  if (!customer) {
+    // Tạo customer mới
+    customer = {
+      id: 'c' + Date.now(),
+      tenant_id: TENANT_ID,
+      name: booking.customer_name,
+      phone: booking.customer_phone,
+      email: booking.customer_email || '',
+      total_bookings: 1,
+      total_spent: booking.total_price,
+      last_visit: booking.date,
+      status: 'new',
+      joined: new Date().toISOString().split('T')[0]
+    };
+    db.customers.push(customer);
+  } else {
+    // Cập nhật customer có sẵn
+    customer.total_bookings += 1;
+    customer.total_spent += booking.total_price;
+    customer.last_visit = booking.date;
+    
+    // Auto upgrade status
+    updateCustomerStatus(customer);
+  }
+  
+  saveDB();
+  return customer;
+}
+
+function updateCustomerStatus(customer) {
+  // Not used on frontend anymore as backend handles this, but kept for reference
+}
+
+async function renderCustomers(){
+  const q=(document.getElementById('cust-search')||{}).value?.toLowerCase()||'';
+  const sf=(document.getElementById('cust-status-filter')||{}).value||'';
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/customers/tenant/${TENANT_ID}`);
+    const customers = await response.json();
+    db.customers = customers;
+    
+    const list = customers.filter(c=>(!q||c.name.toLowerCase().includes(q)||c.phone.includes(q))&&(!sf||c.status===sf));
+    
+    document.getElementById('c-vip').textContent=customers.filter(c=>c.status==='vip').length;
+    document.getElementById('c-reg').textContent=customers.filter(c=>c.status==='regular').length;
+    document.getElementById('c-new').textContent=customers.filter(c=>c.status==='new').length;
+    
+    document.getElementById('customers-table').innerHTML=list.map(c=>`<tr>
+      <td><div style="display:flex;align-items:center;gap:10px"><div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#16a34a,#0891b2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:12px">${c.name[0]}</div><strong>${c.name}</strong></div></td>
+      <td>${c.phone}</td>
+      <td>${c.email || ''}</td>
+      <td style="font-family:var(--mono)">${c.total_bookings}</td>
+      <td style="font-family:var(--mono);color:var(--green);font-weight:700">${fmt(c.total_spent)}</td>
+      <td>${fmtDate(c.last_visit)}</td>
+      <td>${custBadge(c.status)}</td>
+      <td>
+        <button class="btn btn-sm btn-secondary" onclick="viewCustomerHistory('${c.id}')">📋 Lịch sử</button>
+        <button class="btn btn-sm btn-warning" onclick="editCustomer('${c.id}')">✏️ Sửa</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteCustomer('${c.id}')">🗑️ Xóa</button>
+      </td>
+    </tr>`).join('')||'<tr><td colspan="8" style="text-align:center;padding:30px;color:var(--text2)">Không có khách hàng</td></tr>';
+  } catch (error) {
+    console.error('Error rendering customers:', error);
+  }
+}
+function openAddCustomerModal(){
+  // Reset form
+  document.getElementById('nc-name').value = '';
+  document.getElementById('nc-phone').value = '';
+  document.getElementById('nc-email').value = '';
+  document.getElementById('modal-add-customer').classList.add('show');
+}
+async function addCustomer(){
+  const name = document.getElementById('nc-name').value.trim();
+  const phone = document.getElementById('nc-phone').value.trim();
+  const email = document.getElementById('nc-email').value.trim();
+  
+  // Validation
+  if(!name) return alert('❌ Vui lòng nhập tên khách hàng');
+  if(!phone) return alert('❌ Vui lòng nhập số điện thoại');
+  if(!/^[0-9]{10}$/.test(phone)) return alert('❌ Số điện thoại không hợp lệ (phải có 10 số)');
+  if(email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return alert('❌ Email không hợp lệ');
+  
+  const customerData = {
+    tenant_id: TENANT_ID,
+    name: name,
+    phone: phone,
+    email: email
+  };
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/customers`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(customerData)
+    });
+
+    if (response.ok) {
+      closeModal('modal-add-customer');
+      await renderCustomers();
+      await loadDashboardData();
+      alert(`✅ Thêm khách hàng ${name} thành công!`);
+    } else {
+      const error = await response.json();
+      alert(`❌ Lỗi: ${error.message}`);
+    }
+  } catch (error) {
+    console.error('Error adding customer:', error);
+    alert('❌ Lỗi kết nối khi thêm khách hàng.');
+  }
+}
+
+function viewCustomerHistory(customerId) {
+  const customer = myCustomers().find(c => c.id === customerId);
+  if (!customer) return;
+  
+  const customerBookings = myBookings().filter(b => b.customer_phone === customer.phone);
+  alert(`Lịch sử đặt sân của ${customer.name}:\n\nTổng số lần: ${customerBookings.length}\nTổng chi tiêu: ${fmt(customer.total_spent)}`);
+}
+
+function editCustomer(customerId) {
+  const customer = myCustomers().find(c => c.id === customerId);
+  if (!customer) return;
+  
+  document.getElementById('nc-name').value = customer.name;
+  document.getElementById('nc-phone').value = customer.phone;
+  document.getElementById('nc-email').value = customer.email || '';
+  
+  document.querySelector('#modal-add-customer .modal-title').textContent = '✏️ Chỉnh sửa khách hàng';
+  document.querySelector('#modal-add-customer .modal-footer .btn-primary').textContent = '💾 Lưu thay đổi';
+  document.querySelector('#modal-add-customer .modal-footer .btn-primary').onclick = () => updateCustomer(customerId);
+  
+  document.getElementById('modal-add-customer').classList.add('show');
+}
+
+async function updateCustomer(customerId) {
+  const name = document.getElementById('nc-name').value.trim();
+  const phone = document.getElementById('nc-phone').value.trim();
+  const email = document.getElementById('nc-email').value.trim();
+  
+  if(!name || !phone) return alert('❌ Vui lòng nhập tên và số điện thoại');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/customers/${customerId}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, email })
+    });
+
+    if (response.ok) {
+      closeModal('modal-add-customer');
+      await renderCustomers();
+      alert(`✅ Cập nhật khách hàng thành công!`);
+    } else {
+      const error = await response.json();
+      alert(`❌ Lỗi: ${error.message}`);
+    }
+  } catch (error) {
+    console.error('Error updating customer:', error);
+    alert('❌ Lỗi kết nối khi cập nhật khách hàng.');
+  }
+}
+
+async function deleteCustomer(customerId) {
+  if (!confirm('Bạn có chắc chắn muốn xóa khách hàng này không?')) return;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/customers/${customerId}`, {
+      method: 'DELETE'
+    });
+
+    if (response.ok) {
+      await renderCustomers();
+      await loadDashboardData();
+      alert('✅ Đã xóa khách hàng thành công!');
+    } else {
+      const error = await response.json();
+      alert(`❌ Lỗi xóa khách hàng: ${error.message}`);
+    }
+  } catch (error) {
+    console.error('Error deleting customer:', error);
+    alert('❌ Lỗi kết nối khi xóa khách hàng.');
+  }
+}
+
+function syncCustomerFinancials() {
+  const customers = myCustomers();
+  customers.forEach(customer => {
+    const customerBookings = myBookings().filter(b => 
+      b.customer_phone === customer.phone && b.paid
+    );
+    
+    customer.total_bookings = customerBookings.length;
+    customer.total_spent = customerBookings.reduce((sum, b) => sum + b.total_price, 0);
+    customer.last_visit = customerBookings.length > 0 ? 
+      customerBookings.sort((a,b) => b.date.localeCompare(a.date))[0].date : 
+      customer.last_visit;
+  });
+  saveDB();
+}
+
+// FINANCE
+// Finance data is now fetched from the backend API
+
+async function renderFinance(){
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/finance/tenant/${TENANT_ID}/report`);
+    const data = await response.json();
+    const { stats, paymentBreakdown, fieldRevenue, recentTransactions } = data;
+    
+    // Update stat cards
+    document.getElementById('total-revenue').textContent = fmt(stats.totalRevenue);
+    document.getElementById('paid-count').textContent = stats.paidCount; // Fixed: was showing revenue
+    document.getElementById('unpaid-amount').textContent = fmt(stats.unpaidAmount);
+    document.getElementById('unpaid-count').textContent = `${stats.unpaidCount} đặt chưa thanh toán`;
+    document.getElementById('growth-percentage').textContent = stats.growthPercentage >= 0 ? 
+      `▲ +${stats.growthPercentage.toFixed(1)}% vs ${stats.prevMonthName}` : 
+      `▼ ${Math.abs(stats.growthPercentage).toFixed(1)}% vs ${stats.prevMonthName}`;
+    document.getElementById('occupancy-rate').textContent = `${stats.occupancyRate.toFixed(0)}%`;
+    document.getElementById('paid-transactions').textContent = `Số giao dịch thành công`;
+    
+    // Payment breakdown
+    const pmNames={cash:'Tiền mặt',transfer:'Chuyển khoản',vnpay:'VNPay'};
+    const maxPm = Math.max(...paymentBreakdown.map(v => v.value), 1);
+    document.getElementById('payment-breakdown').innerHTML = paymentBreakdown.map(v => `
+      <div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>${pmNames[v.id]||v.id}</span><span style="font-family:var(--mono);font-weight:700">${fmt(v.value)}</span></div>
+        <div style="background:var(--bg3);border-radius:4px;height:8px"><div style="width:${(v.value/maxPm*100).toFixed(0)}%;height:100%;background:var(--green);border-radius:4px"></div></div>
+      </div>`).join('') || '<div style="color:var(--text2);text-align:center;padding:20px">Chưa có giao dịch</div>';
+
+    // Field revenue
+    const maxFr = Math.max(...fieldRevenue.map(v => v.value), 1);
+    document.getElementById('field-revenue').innerHTML = fieldRevenue.map(v => `
+      <div style="margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>⚽ ${v.name}</span><span style="font-family:var(--mono);font-weight:700">${fmt(v.value)}</span></div>
+        <div style="background:var(--bg3);border-radius:4px;height:8px"><div style="width:${(v.value/maxFr*100).toFixed(0)}%;height:100%;background:var(--accent3);border-radius:4px"></div></div>
+      </div>`).join('') || '<div style="color:var(--text2);text-align:center;padding:20px">Chưa có dữ liệu tháng này</div>';
+
+    // Transaction table
+    document.getElementById('finance-table').innerHTML = recentTransactions.map(b => `<tr>
+        <td><span style="font-family:var(--mono);font-size:12px;color:var(--green)">${b.id}</span></td>
+        <td><strong>${b.customer_name}</strong></td>
+        <td>${b.field_name}</td>
+        <td>${fmtDate(b.date)}</td>
+        <td style="font-family:var(--mono);font-weight:700">${fmt(b.total_price)}</td>
+        <td>${pmBadge(b.payment_method)}</td>
+        <td>${b.paid?'<span class="badge badge-green">✅ Đã thu</span>':'<span class="badge badge-red">⏳ Chưa thu</span>'}</td>
+      </tr>`).join('');
+  } catch (error) {
+    console.error('Error rendering finance:', error);
+  }
+}
+
+// PAYMENT
+let selectedPayMethod='cash';
+async function renderPayment(){ await populateFieldFilters(); }
+function selectPay(el,method){
+  document.querySelectorAll('.pay-method').forEach(m=>m.classList.remove('selected'));
+  el.classList.add('selected');selectedPayMethod=method;
+  const qrMethods=['transfer','vnpay'];
+  document.getElementById('pay-qr-section').style.display=qrMethods.includes(method)?'block':'none';
+  if(qrMethods.includes(method)){
+    updateQRImage();
+  }
+}
+function updateQRImage() {
+  const method = selectedPayMethod;
+  const bkId = document.getElementById('pay-booking').value || 'OD';
+  const amt = document.getElementById('pay-amount').value || '0';
+  const qrDisplay = document.getElementById('pay-qr-display');
+  const qrImg = document.getElementById('pay-qr-image');
+  
+  if (method === 'transfer' || method === 'vnpay') {
+    const t = db.tenant || {};
+    const bankId = (t.bank_name || 'tcb').toLowerCase();
+    const accNum = t.bank_account || '3036506868';
+    const accName = encodeURIComponent(t.bank_holder || 'TRAN DUC LUONG');
+    const memo = encodeURIComponent(`Thanh toan FF ${bkId}`);
+    
+    qrImg.src = `https://img.vietqr.io/image/${bankId}-${accNum}-compact2.png?amount=${amt}&addInfo=${memo}&accountName=${accName}`;
+    qrDisplay.textContent = parseInt(amt).toLocaleString('vi-VN') + ' ₫';
+    
+    const accLabel = document.getElementById('pay-qr-account');
+    if(accLabel) accLabel.textContent = `${accNum} - ${t.bank_holder || 'TRAN DUC LUONG'}`;
+  }
+}
+function updatePayAmount(){
+  const v=+document.getElementById('pay-amount').value||0;
+  document.getElementById('pay-total').textContent=fmt(v);
+  if (selectedPayMethod === 'transfer' || selectedPayMethod === 'vnpay') {
+    updateQRImage();
+  }
+}
+async function confirmPayment(){
+  const bkId = document.getElementById('pay-booking').value;
+  const amt = +document.getElementById('pay-amount').value;
+  const method = selectedPayMethod;
+  if(!amt || !bkId) return alert('❌ Chọn lượt đặt sân và nhập số tiền');
+  
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/bookings/${bkId}/payment`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paid: true, payment_method: method })
+    });
+
+    if (response.ok) {
+      alert(`✅ Thanh toán ${fmt(amt)} thành công!\nPhương thức: ${pmBadge(method)}`);
+      await renderFinance();
+      await renderSchedule();
+      await renderPayment(); // Làm mới dropdown sau khi thanh toán
+      document.getElementById('pay-amount').value = '0';
+      updatePayAmount();
+    } else {
+      const error = await response.json();
+      alert(`❌ Lỗi thanh toán: ${error.message}`);
+    }
+  } catch (error) {
+    console.error('Payment error:', error);
+    alert('❌ Lỗi kết nối khi thanh toán.');
+  }
+}
+
+async function renderCheckin(){
+  const today = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString().slice(0, 10);
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/bookings/tenant/${TENANT_ID}?date=${today}`);
+    const bks = await res.json();
+    document.getElementById('checkin-history').innerHTML = bks.map(b => `<tr>
+        <td><span style="font-family:var(--mono);color:var(--green)">${b.qr_code}</span></td>
+        <td><strong>${b.customer_name}</strong></td>
+        <td>${b.field_name}</td>
+        <td>${b.start_time.substring(0,5)}–${b.end_time.substring(0,5)}</td>
+        <td>${b.status==='completed'?'✅':'—'}</td>
+        <td>${b.status==='completed'?'<span class="badge badge-green">✅ Đã check-in</span>':'<span class="badge badge-yellow">⏳ Chờ sân</span>'}</td>
+      </tr>`).join('') || '<tr><td colspan="6" style="text-align:center;padding:20px;color:var(--text3)">Không có lịch hôm nay</td></tr>';
+  } catch (error) { console.error('Error rendering checkin:', error); }
+}
+
+async function doCheckin(){
+  const code = (document.getElementById('qr-input').value || '').trim().toUpperCase();
+  const resBox = document.getElementById('checkin-result');
+  if(!code) return alert('Nhập mã QR');
+
+  try {
+    // 1. Tra cứu mã QR trên toàn bộ hệ thống (Toàn bộ MySQL)
+    const searchRes = await fetch(`${API_BASE_URL}/api/bookings/qr/${code}`);
+    if (!searchRes.ok) {
+      if (searchRes.status === 404) return alert('❌ Không tìm thấy mã đặt sân này trong hệ thống!');
+      else return alert('❌ Lỗi kết nối máy chủ!');
+    }
+    const bk = await searchRes.json();
+    
+    // 2. Kiểm tra logic ngày tháng và trạng thái (Chuẩn hóa múi giờ Việt Nam UTC+7)
+    const vnNow = new Date(new Date().getTime() + (7 * 60 * 60 * 1000));
+    const todayStr = vnNow.toISOString().slice(0, 10);
+    
+    // Giải quyết vấn đề lệch múi giờ khi nhận date từ MySQL (thường ở dạng UTC)
+    const bookingDateRaw = new Date(bk.date);
+    const vnBookingDate = new Date(bookingDateRaw.getTime() + (7 * 60 * 60 * 1000));
+    const bkDateStr = vnBookingDate.toISOString().slice(0, 10);
+    
+    // Nếu mã của ngày trong quá khứ
+    if (bkDateStr < todayStr) {
+      return alert(`❌ Lượt đặt sân này đã hết hạn từ ngày ${fmtDate(bk.date)}!`);
+    }
+
+    // Nếu mã của ngày trong tương lai (Đã có logic cảnh báo ở bước trước, nhưng có thể cho phép check-in sớm tùy chính sách)
+    // Ở đây ta giữ nguyên logic cũ là báo mã dành cho ngày khác nếu không phải hôm nay
+    if (bkDateStr > todayStr) {
+      return alert(`⚠️ Mã này dành cho ngày ${fmtDate(bk.date)}. Hiện tại chưa đến ngày sử dụng!`);
+    }
+
+    // Nếu là ngày hôm nay, kiểm tra giờ kết thúc
+    if (bkDateStr === todayStr) {
+      const currentTimeStr = vnNow.toISOString().slice(11, 19); // HH:mm:ss
+      if (bk.end_time < currentTimeStr) {
+        return alert(`❌ Lượt đặt sân này đã hết hạn (Đã kết thúc lúc ${bk.end_time.substring(0,5)} hôm nay)!`);
+      }
+    }
+
+    // Nếu mã đã check-in rồi
+    if (bk.status === 'completed') {
+      resBox.innerHTML=`<div class="card-header"><div class="card-title" style="color:var(--green)">✅ Thông tin Check-in</div></div>
+        <div style="text-align:center;padding:20px;">
+          <div style="font-size:60px;margin-bottom:10px;">✅</div>
+          <div style="font-size:18px;font-weight:800;margin-bottom:5px;">${bk.customer_name}</div>
+          <div class="badge badge-green">Mã này ĐÃ CHECK-IN</div>
+        </div>
+        <div style="padding:15px;background:var(--bg3);border-radius:12px;display:grid;grid-template-columns:1fr 1fr;gap:15px;font-size:13px;">
+          <div><div style="color:var(--text2)">Sân</div><strong>${bk.field_name}</strong></div>
+          <div><div style="color:var(--text2)">Giờ đặt</div><strong>${bk.start_time.substring(0,5)} – ${bk.end_time.substring(0,5)}</strong></div>
+          <div><div style="color:var(--text2)">Thanh toán</div><strong style="color:var(--green)">Đã thu: ${fmt(bk.total_price)}</strong></div>
+          <div><div style="color:var(--text2)">Trạng thái</div><strong style="color:var(--green)">ĐÃ HOÀN TẤT</strong></div>
+        </div>`;
+      document.getElementById('qr-input').value = '';
+      document.getElementById('qr-input').focus();
+      return;
+    }
+
+    // Nếu mã bị hủy
+    if (bk.status === 'cancelled') {
+        return alert('❌ Đơn đặt sân này đã bị hủy trên hệ thống!');
+    }
+
+    // 💡 Cảnh báo nếu chưa thanh toán nhưng vẫn cho check-in (tùy chính sách)
+    if (!bk.paid) {
+        if (!confirm(`⚠️ Khách hàng ${bk.customer_name} CHƯA THANH TOÁN (${fmt(bk.total_price)}). Bạn vẫn muốn cho Check-in chứ?`)) {
+            return;
+        }
+    }
+
+    // 3. Thực hiện check-in (Cập nhật 'completed')
+    const updateRes = await fetch(`${API_BASE_URL}/api/bookings/${bk.id}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'completed' })
+    });
+
+    if (updateRes.ok) {
+      resBox.innerHTML=`<div class="card-header"><div class="card-title" style="color:var(--green)">✨ Check-in THÀNH CÔNG!</div></div>
+        <div class="qr-box" style="padding:30px;background:linear-gradient(135deg,rgba(22,163,74,0.1),transparent)">
+          <span class="qr-code" style="font-size:80px;animation:bounceIn 0.5s ease;">🎉</span>
+          <div class="qr-info" style="font-size:24px;font-weight:800;margin:15px 0;">${bk.customer_name}</div>
+          <div style="font-size:16px;color:var(--green);font-weight:600;">⚽ ${bk.field_name}</div>
+          <div style="font-size:20px;font-weight:700;margin-top:10px;font-family:var(--mono)">${bk.start_time.substring(0,5)} – ${bk.end_time.substring(0,5)}</div>
+        </div>
+        <div style="padding:15px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px">
+          <div><div style="color:var(--text2);margin-bottom:4px">Mã tra cứu</div><strong style="font-family:var(--mono)">${bk.qr_code}</strong></div>
+          <div><div style="color:var(--text2);margin-bottom:4px">Thanh toán</div><strong style="color:${bk.paid?'var(--green)':'var(--red)'}">${bk.paid?'✅ Đã thu đủ':'⏳ Chờ thu tiền'}</strong></div>
+        </div>`;
+      
+      await renderCheckin();
+      await renderSchedule(); // Đồng bộ bảng lịch sân
+      document.getElementById('qr-input').value = '';
+      document.getElementById('qr-input').focus(); // Sẵn sàng quét mã tiếp theo
+      
+      // Hiệu ứng thành công âm thanh (tùy chọn)
+      console.log('Check-in success for:', bk.qr_code);
+    } else {
+      alert('❌ Lỗi xử lý check-in trên máy chủ.');
+    }
+  } catch (error) {
+    console.error('Check-in error:', error);
+    alert('❌ Lỗi kết nối khi quét mã QR.');
+  }
+}
+async function startClock() {
+  setInterval(() => {
+    const el = document.getElementById('checkin-clock');
+    if (el) {
+      const vnTime = new Date(new Date().getTime() + (7 * 60 * 60 * 1000));
+      el.textContent = vnTime.toISOString().slice(11, 19);
+    }
+  }, 1000);
+}
+
+// INVOICE
+async function renderInvoicePage(){ await populateFieldFilters(); }
+function renderInvoicePreview(){
+  const id=document.getElementById('inv-booking').value;
+  if(!id)return;
+  const bks = db.bookings || [];
+  const bk=bks.find(b=>b.id===id);
+  if(!bk) return document.getElementById('invoice-preview').innerHTML = '<div style="text-align:center;padding:40px;color:var(--red)">Không tìm thấy dữ liệu hóa đơn.</div>';
+
+  document.getElementById('invoice-preview').innerHTML=`
+    <div class="invoice-print" style="padding:40px; background:#fff; color:#000; border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,0.05);">
+      <div style="display:flex; justify-content:space-between; align-items:start; border-bottom:2px solid #eee; padding-bottom:20px; margin-bottom:20px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <div style="font-size:40px;">⚽</div>
+          <div>
+            <div style="font-size:22px; font-weight:800; color:#16a34a; letter-spacing:-0.5px;">${db.tenant?.name || 'VinhUniFootBall'}</div>
+            <div style="font-size:12px; color:#666;">${db.tenant?.address || 'Số 15, Đường Trần Phú, TP. Vinh, Nghệ An'}</div>
+            <div style="font-size:12px; color:#666;">Hotline: ${db.tenant?.phone || '0912.345.678'}</div>
+          </div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:14px; font-weight:700; color:#999; margin-bottom:4px;">PHIẾU THANH TOÁN</div>
+          <div style="font-size:18px; font-weight:800; font-family:var(--mono); color:#16a34a;">${bk.id}</div>
+          <div style="font-size:11px; color:#666; margin-top:4px;">Ngày lập: ${new Date().toLocaleDateString('vi-VN')}</div>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-bottom:30px;">
+        <div>
+          <div style="font-size:11px; font-weight:700; color:#999; text-transform:uppercase; margin-bottom:8px;">Khách hàng</div>
+          <div style="font-size:15px; font-weight:700;">${bk.customer_name}</div>
+          <div style="font-size:13px; color:#444;">SĐT: ${bk.customer_phone}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:11px; font-weight:700; color:#999; text-transform:uppercase; margin-bottom:8px;">Chi tiết thuê sân</div>
+          <div style="font-size:14px; font-weight:700;">${bk.field_name}</div>
+          <div style="font-size:13px; color:#444;">Ngày đá: ${fmtDate(bk.date)}</div>
+          <div style="font-size:13px; color:#444;">Giờ: ${bk.start_time.substring(0,5)} – ${bk.end_time.substring(0,5)} (${bk.duration}h)</div>
+        </div>
+      </div>
+
+      <table style="width:100%; border-collapse:collapse; margin-bottom:30px;">
+        <thead>
+          <tr style="background:#f8fdf9; border-bottom:2px solid #16a34a;">
+            <th style="padding:12px 8px; text-align:left; font-size:12px; color:#16a34a;">Dịch vụ</th>
+            <th style="padding:12px 8px; text-align:right; font-size:12px; color:#16a34a;">Đơn giá</th>
+            <th style="padding:12px 8px; text-align:right; font-size:12px; color:#16a34a;">Thời lượng</th>
+            <th style="padding:12px 8px; text-align:right; font-size:12px; color:#16a34a;">Thành tiền</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr style="border-bottom:1px solid #eee;">
+            <td style="padding:15px 8px; font-size:14px; font-weight:600;">Thuê sân bóng ${bk.field_name}</td>
+            <td style="padding:15px 8px; text-align:right; font-family:var(--mono); font-size:14px;">${fmt(bk.total_price/bk.duration)}</td>
+            <td style="padding:15px 8px; text-align:right; font-size:14px;">${bk.duration} h</td>
+            <td style="padding:15px 8px; text-align:right; font-family:var(--mono); font-size:15px; font-weight:700;">${fmt(bk.total_price)}</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div style="display:flex; justify-content:space-between; align-items:end;">
+        <div>
+          <div style="font-size:12px; color:#666; margin-bottom:4px;">Phương thức thanh toán:</div>
+          <div style="font-size:14px; font-weight:700; color:#444;">${pmBadge(bk.payment_method)}</div>
+          <div style="margin-top:6px;">${bk.paid?'<span style="color:#16a34a; font-weight:700; font-size:12px; padding:4px 8px; background:#e8f5e9; border-radius:4px;">✅ ĐÃ THANH TOÁN</span>':'<span style="color:#dc2626; font-weight:700; font-size:12px; padding:4px 8px; background:#fef2f2; border-radius:4px;">⏳ CHƯA THU TIỀN</span>'}</div>
+        </div>
+        <div style="text-align:right;">
+          <div style="font-size:13px; color:#666; margin-bottom:5px;">TỔNG CỘNG</div>
+          <div style="font-size:32px; font-weight:900; color:#16a34a; font-family:var(--mono);">${fmt(bk.total_price)}</div>
+        </div>
+      </div>
+
+      <div style="margin-top:50px; text-align:center; border-top:1px dashed #ddd; padding-top:20px;">
+        <div style="font-size:14px; font-weight:700; color:#444; margin-bottom:5px;">Cảm ơn quý khách đã tin chọn VinhUniFootBall! ⚽</div>
+        <div style="font-size:11px; color:#999;">Mọi thắc mắc vui lòng liên hệ Ban quản lý sân để được hỗ trợ.</div>
+      </div>
+    </div>`;
+}
+function printInvoice(){
+  const id=document.getElementById('inv-booking').value;
+  if(!id){alert('Chọn đặt sân cần in');return;}
+  window.print();
+}
+
+// NOTIFICATIONS
+async function renderNotifications(){
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/notifications/tenant/${TENANT_ID}`);
+    const data = await response.json();
+    
+    const icons={system:'🔧',promo:'🎁',feature:'✨'};
+    document.getElementById('notifs-container').innerHTML = data.map(n => `
+    <div class="notif-banner ${n.is_read ? '' : 'unread'}">
+      <div class="notif-icon">${icons[n.type]||'📢'}</div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:14px;font-weight:700">${n.title}</div>
+          ${!n.is_read ? '<span class="badge badge-red" style="font-size:9px;padding:2px 6px;">MỚI</span>' : ''}
+        </div>
+        <div style="font-size:13px;color:var(--text2);margin-top:4px">${n.message}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:6px">📅 ${fmtDate(n.created_at)}</div>
+      </div>
+    </div>`).join('')||'<div style="text-align:center;padding:40px;color:var(--text2)">Chưa có thông báo</div>';
+  } catch (error) {
+    console.error('Error rendering notifications:', error);
+  }
+}
+
+async function renderSettings(){
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/tenants/${TENANT_ID}/settings`);
+    const t = await res.json();
+    db.tenant = t; 
+
+    document.getElementById('set-name').value = t.name || '';
+    document.getElementById('set-owner').value = t.owner || '';
+    document.getElementById('set-phone').value = t.phone || '';
+    document.getElementById('set-email').value = t.email || '';
+    document.getElementById('set-address').value = t.address || '';
+    
+    document.getElementById('set-open').value = (t.open_time || '06:00:00').substring(0,5);
+    document.getElementById('set-close').value = (t.close_time || '22:00:00').substring(0,5);
+    
+    document.getElementById('set-bank-name').value = t.bank_name || '';
+    document.getElementById('set-bank-acc').value = t.bank_account || '';
+    document.getElementById('set-bank-holder').value = t.bank_holder || '';
+    
+    // Appearance
+    const bannerInput = document.getElementById('set-hero-banner');
+    if (bannerInput) bannerInput.value = t.hero_banner || '';
+    
+  } catch (error) {
+    console.error('Error rendering settings:', error);
+  }
+}
+
+async function saveSettings(section){
+  if(section==='info') return; 
+  let data = {};
+  if(section==='hours'){
+    data = {
+      open_time: document.getElementById('set-open').value,
+      close_time: document.getElementById('set-close').value
+    };
+  } else if(section==='bank'){
+    data = {
+      bank_name: document.getElementById('set-bank-name').value,
+      bank_account: document.getElementById('set-bank-acc').value,
+      bank_holder: document.getElementById('set-bank-holder').value
+    };
+  } else if(section==='appearance'){
+    data = {
+      hero_banner: document.getElementById('set-hero-banner').value
+    };
+  }
+
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/tenants/${TENANT_ID}/settings`, {
+      method: 'PATCH',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    });
+    if (res.ok) {
+      alert(`✅ Đã cập nhật cài đặt thành công!`);
+      await renderSettings();
+      await loadDashboardData(); // Cập nhật lại số liệu thống kê & Badges ở Sidebar
+    } else {
+      alert('❌ Lỗi khi cập nhật cài đặt.');
+    }
+  } catch (error) {
+    console.error('Save settings error:', error);
+    alert('❌ Lỗi kết nối máy chủ.');
+  }
+}
+
+function syncGlobalUI(t){
+  if(!t)return;
+  document.querySelectorAll('#side-facility-name').forEach(el=>el.textContent=t.name||'VinhUniFootBall');
+  document.querySelectorAll('.tenant-nm').forEach(el=>el.textContent=t.owner||'Chủ cơ sở');
+  document.querySelectorAll('.tenant-ava').forEach(el=>el.textContent=(t.name||'V').substring(0,1).toUpperCase());
+}
+
+function updateSidebarBadges(stats) {
+  if (!stats) return;
+  
+  const pendingEl = document.getElementById('nb-pending');
+  if (pendingEl) {
+    pendingEl.textContent = stats.pendingBookings;
+    pendingEl.style.display = stats.pendingBookings > 0 ? 'inline-block' : 'none';
+  }
+  
+  const notifsEl = document.getElementById('nb-notifs');
+  if (notifsEl) {
+    notifsEl.textContent = stats.unreadNotifications;
+    notifsEl.style.display = stats.unreadNotifications > 0 ? 'inline-block' : 'none';
+  }
+}
+
+async function markAllNotifsRead() {
+  try {
+    await fetch(`${API_BASE_URL}/api/notifications/tenant/${TENANT_ID}/read-all`, {
+      method: 'POST'
+    });
+    // Update local badge immediately
+    const notifsEl = document.getElementById('nb-notifs');
+    if (notifsEl) notifsEl.style.display = 'none';
+  } catch (err) {
+    console.error('Error marking notifications as read:', err);
+  }
+}
+
+// MODAL
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+document.querySelectorAll('.modal-overlay').forEach(m=>{m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show');});});
+
+// QR SCANNER
+let stream = null;
+let scanInterval = null;
+
+async function startQRScanner() {
+  try {
+    const video = document.getElementById('qr-video');
+    const placeholder = document.getElementById('qr-placeholder');
+    const scanner = document.getElementById('qr-scanner');
+    const startBtn = document.getElementById('start-camera');
+    const stopBtn = document.getElementById('stop-camera');
+    
+    // Request camera access
+    stream = await navigator.mediaDevices.getUserMedia({ 
+      video: { facingMode: 'environment' } 
+    });
+    
+    video.srcObject = stream;
+    video.style.display = 'block';
+    placeholder.style.display = 'none';
+    scanner.style.display = 'block';
+    startBtn.style.display = 'none';
+    stopBtn.style.display = 'inline-flex';
+    
+    // Start scanning
+    video.play();
+    scanInterval = setInterval(captureAndScan, 500);
+    
+  } catch (error) {
+    console.error('Camera access error:', error);
+    alert('❌ Không thể truy cập camera. Vui lòng kiểm tra quyền truy cập camera.');
+  }
+}
+
+function stopQRScanner() {
+  try {
+    const video = document.getElementById('qr-video');
+    const placeholder = document.getElementById('qr-placeholder');
+    const scanner = document.getElementById('qr-scanner');
+    const startBtn = document.getElementById('start-camera');
+    const stopBtn = document.getElementById('stop-camera');
+    
+    if (stream) {
+      stream.getTracks().forEach(track => track.stop());
+      stream = null;
+    }
+    
+    if (scanInterval) {
+      clearInterval(scanInterval);
+      scanInterval = null;
+    }
+    
+    video.style.display = 'none';
+    placeholder.style.display = 'flex';
+    scanner.style.display = 'none';
+    startBtn.style.display = 'inline-flex';
+    stopBtn.style.display = 'none';
+    
+  } catch (error) {
+    console.error('Error stopping camera:', error);
+  }
+}
+
+function captureAndScan() {
+  const video = document.getElementById('qr-video');
+  const canvas = document.getElementById('qr-canvas');
+  
+  if (!video || video.readyState !== 4) return;
+  
+  canvas.width = video.videoWidth;
+  canvas.height = video.videoHeight;
+  const ctx = canvas.getContext('2d', { willReadFrequently: true });
+  ctx.drawImage(video, 0, 0);
+  
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+  const code = jsQR(imageData.data, imageData.width, imageData.height, {
+    inversionAttempts: "dontInvert",
+  });
+  
+  if (code) {
+    console.log('QR Code detected:', code.data);
+    document.getElementById('qr-input').value = code.data;
+    doCheckin();
+    stopQRScanner();
+  }
+}
+
+function simulateQRDetection() {
+  // This is a simulation for demo purposes
+  // In production, integrate with a real QR library like jsQR
+  const sampleCodes = ['QR-BK001', 'QR-BK002', 'QR-BK003'];
+  const randomCode = sampleCodes[Math.floor(Math.random() * sampleCodes.length)];
+  
+  // Simulate successful scan after some time
+  if (Math.random() > 0.95) { // 5% chance per scan
+    document.getElementById('qr-input').value = randomCode;
+    doCheckin();
+    stopQRScanner();
+  }
+}
+
+// SUPPORT
+function renderSupport() {
+  if (!db.tickets) return;
+  document.getElementById('tickets-table').innerHTML = db.tickets.map(t => `
+    <tr>
+      <td><span style="font-family:var(--mono);color:var(--green)">${t.id}</span></td>
+      <td><strong>${t.subject}</strong></td>
+      <td>${t.type==='bug'?'🐛 Lỗi':'💡 Đề xuất'}</td>
+      <td>${tkPrioBadge(t.priority)}</td>
+      <td>${fmtDate(t.created_at)}</td>
+      <td>${tkStatusBadge(t.status)}</td>
+    </tr>
+  `).join('') || '<tr><td colspan="6" style="text-align:center;padding:40px;color:var(--text3)">Chưa có yêu cầu hỗ trợ nào</td></tr>';
+}
+
+function openAddTicketModal() {
+  document.getElementById('modal-add-ticket').classList.add('show');
+}
+
+async function submitTicket() {
+  const subject = document.getElementById('tk-subject').value.trim();
+  const message = document.getElementById('tk-message').value.trim();
+  const type = document.getElementById('tk-type').value;
+  const priority = document.getElementById('tk-prio').value;
+
+  if (!subject || !message) return alert('Vui lòng nhập đầy đủ tiêu đề và nội dung');
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/tickets`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        tenant_id: TENANT_ID,
+        subject, message, type, priority
+      })
+    });
+    const result = await response.json();
+    if (result.success) {
+      closeModal('modal-add-ticket');
+      // Reset form
+      document.getElementById('tk-subject').value = '';
+      document.getElementById('tk-message').value = '';
+      
+      // Refresh tickets
+      const tkRes = await fetch(`${API_BASE_URL}/api/tickets/tenant/${TENANT_ID}`);
+      db.tickets = await tkRes.json();
+      renderSupport();
+      alert('🚀 Đã gửi yêu cầu thành công! Quản trị viên sẽ sớm phản hồi.');
+    } else {
+      alert('Lỗi: ' + result.message);
+    }
+  } catch (error) {
+    console.error('Error submitting ticket:', error);
+    alert('Lỗi kết nối đến server');
+  }
+}
+
+// NAVIGATION
+function showPage(pageId) {
+  // Hide all pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  // Show target page
+  document.getElementById('page-' + pageId).classList.add('active');
+  
+  // Update sidebar active state
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.classList.remove('active');
+    if (item.getAttribute('onclick')?.includes(`'${pageId}'`)) {
+      item.classList.add('active');
+    }
+  });
+
+  // Specific render calls
+  if (pageId === 'fields') renderFields();
+  if (pageId === 'schedule') renderSchedule();
+  if (pageId === 'customers') renderCustomers();
+  if (pageId === 'finance') renderFinance();
+  if (pageId === 'support') renderSupport();
+  if (pageId === 'staff') renderStaff();
+  if (pageId === 'settings') renderSettings();
+  if (pageId === 'notifications') renderNotifications();
+  if (pageId === 'checkin') renderCheckin();
+  if (pageId === 'payment') renderPayment();
+  if (pageId === 'invoice') renderInvoicePage();
+  
+  // Update topbar title
+  const titles = {
+    'dashboard': 'Dashboard',
+    'fields': 'Quản lý sân bóng',
+    'schedule': 'Lịch đặt sân',
+    'customers': 'Quản lý khách hàng',
+    'finance': 'Quản lý tài chính',
+    'checkin': 'Check-in QR',
+    'payment': 'Thu tiền',
+    'invoice': 'In hóa đơn',
+    'notifications': 'Thông báo hệ thống',
+    'support': 'Hỗ trợ & Báo lỗi',
+    'settings': 'Cài đặt hệ thống',
+    'staff': 'Quản lý nhân viên'
+  };
+  document.getElementById('topbar-title').textContent = titles[pageId] || 'Hệ thống';
+}
+
+// STAFF LOGIC
+async function renderStaff() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/staff/tenant/${TENANT_ID}`);
+    const staff = await response.json();
+    db.staff = staff;
+
+    document.getElementById('staff-table').innerHTML = staff.map(s => `
+      <tr>
+        <td><span style="font-family:var(--mono);font-size:12px;color:var(--green)">${s.id}</span></td>
+        <td><strong>${s.name}</strong></td>
+        <td>${s.phone || 'N/A'}</td>
+        <td><span class="badge badge-green">${s.status}</span></td>
+        <td>
+          <button class="btn btn-sm btn-secondary" onclick="openStaffModal('${s.id}')">✏️ Sửa</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteStaff('${s.id}')">🗑️ Xóa</button>
+        </td>
+      </tr>`).join('') || '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--text2)">Chưa có nhân viên nào</td></tr>';
+  } catch (error) {
+    console.error('Error rendering staff:', error);
+    document.getElementById('staff-table').innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:var(--red)">Lỗi tải danh sách nhân viên.</td></tr>';
+  }
+}
+
+function openStaffModal(id) {
+  const modal = document.getElementById('modal-staff');
+  const title = document.getElementById('staff-modal-title');
+  const saveBtn = document.getElementById('staff-save-btn');
+  
+  document.getElementById('staff-id').value = '';
+  document.getElementById('staff-name').value = '';
+  document.getElementById('staff-phone').value = '';
+
+  if (id) {
+    const s = db.staff.find(x => x.id === id);
+    if (s) {
+      title.textContent = '✏️ Chỉnh sửa nhân viên';
+      saveBtn.textContent = '💾 Lưu thay đổi';
+      document.getElementById('staff-id').value = s.id;
+      document.getElementById('staff-name').value = s.name;
+      document.getElementById('staff-phone').value = s.phone;
+    }
+  } else {
+    title.textContent = '👔 Thêm nhân viên mới';
+    saveBtn.textContent = '✅ Thêm nhân viên';
+  }
+  modal.classList.add('show');
+}
+
+async function saveStaff() {
+  const id = document.getElementById('staff-id').value;
+  const isUpdating = !!id;
+  const staffData = {
+    tenant_id: TENANT_ID,
+    name: document.getElementById('staff-name').value.trim(),
+    phone: document.getElementById('staff-phone').value.trim(),
+    status: 'active'
+  };
+
+  if (!staffData.name) return alert('Vui lòng nhập tên nhân viên');
+
+  const url = isUpdating ? `${API_BASE_URL}/api/staff/${id}` : `${API_BASE_URL}/api/staff`;
+  const method = isUpdating ? 'PUT' : 'POST';
+
+  try {
+    const response = await fetch(url, {
+      method: method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(staffData)
+    });
+
+    if (response.ok) {
+      closeModal('modal-staff');
+      renderStaff();
+    } else {
+      const error = await response.json();
+      alert(`Lỗi lưu nhân viên: ${error.message}`);
+    }
+  } catch (error) {
+    console.error('Error saving staff:', error);
+    alert('Lỗi kết nối khi lưu nhân viên.');
+  }
+}
+
+async function deleteStaff(id) {
+  if (!confirm('Bạn có chắc chắn muốn xóa nhân viên này?')) return;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/staff/${id}`, {
+      method: 'DELETE'
+    });
+
+    if (response.ok) {
+      renderStaff();
+    } else {
+      const error = await response.json();
+      alert(`Lỗi xóa nhân viên: ${error.message}`);
+    }
+  } catch (error) {
+    console.error('Error deleting staff:', error);
+    alert('Lỗi kết nối khi xóa nhân viên.');
+  }
+}
+
+// BOOT
+const savedUser = localStorage.getItem('ff_tenant_user');
+const lastActive = localStorage.getItem('ff_tenant_last_active');
+
+if (savedUser) {
+  try {
+    const user = JSON.parse(savedUser);
+    const now = Date.now();
+    
+    // Kiểm tra thời gian không hoạt động (5 phút)
+    if (lastActive && (now - parseInt(lastActive) > INACTIVITY_LIMIT)) {
+      alert('⚠️ Phiên làm việc đã hết hạn do bạn không hoạt động quá 5 phút. Vui lòng đăng nhập lại.');
+      doLogout();
+    } else if(user && (user.id || user.tenant_id)) {
+      TENANT_ID = user.id || user.tenant_id;
+      document.getElementById('login-page').style.display = 'none';
+      document.getElementById('app').style.display = 'block';
+      updateLastActive(); // Cập nhật lại thời gian khi load trang thành công
+      initApp();
+      startClock();
+    }
+  } catch(e) {
+    console.error('Session error', e);
+  }
+}
+</script>
+</body>
+</html>
