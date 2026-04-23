@@ -65,3 +65,12 @@ app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   initCronJobs();
 });
+
+
+const path = require('path');
+// Khai báo thư mục public chứa file html, css, js
+app.use(express.static(path.join(__dirname, '../public'))); 
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../public/tenant-admin.html'));
+});
