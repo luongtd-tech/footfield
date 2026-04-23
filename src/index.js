@@ -78,13 +78,18 @@ knex.migrate.latest()
   .then(async () => {
     console.log('Database migrated successfully!');
     
-    // HARD FIX: Đảm bảo bảng notifications có đủ cột bằng SQL thuần
+    // HARD FIX: Đảm bảo bảng notifications có đủ cột bằng SQL thuần (MySQL 8.0 syntax)
     try {
-      await db.query("ALTER TABLE notifications ADD COLUMN IF NOT EXISTS tenant_id VARCHAR(50) AFTER id");
-      await db.query("ALTER TABLE notifications ADD COLUMN IF NOT EXISTS is_read TINYINT(1) DEFAULT 0 AFTER type");
+      await db.query("ALTER TABLE notifications ADD COLUMN tenant_id VARCHAR(50) AFTER id");
+    } catch (err) {
+      console.log('Column tenant_id might already exist, skipping...');
+    }
+
+    try {
+      await db.query("ALTER TABLE notifications ADD COLUMN is_read TINYINT(1) DEFAULT 0 AFTER type");
       console.log('Notifications table hard-fixed successfully!');
     } catch (err) {
-      console.log('Notifications hard-fix skipped or failed (might already exist):', err.message);
+      console.log('Column is_read might already exist, skipping...');
     }
 
     // Kiểm tra nếu chưa có admin thì mới chạy seed
