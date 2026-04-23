@@ -13,7 +13,7 @@ const authController = {
           return res.json({ success: true, user, role: 'provider' });
         }
       } else if (type === 'tenant') {
-        const [rows] = await db.query('SELECT * FROM tenants WHERE username = ? AND password = ? AND status = "active"', [username, password]);
+        const [rows] = await db.query("SELECT * FROM tenants WHERE username = ? AND password = ? AND status = 'active'", [username, password]);
         if (rows.length > 0) {
           const user = rows[0];
           delete user.password;

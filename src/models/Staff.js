@@ -2,7 +2,7 @@ const db = require('../config/database');
 
 const Staff = {
   findByTenant: async (tenantId) => {
-    const [staff] = await db.query('SELECT * FROM staff WHERE tenant_id = ? AND status = "active"', [tenantId]);
+    const [staff] = await db.query("SELECT * FROM staff WHERE tenant_id = ? AND status = 'active'", [tenantId]);
     return staff;
   },
 

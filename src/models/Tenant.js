@@ -7,15 +7,15 @@ const Tenant = {
     return rows;
   },
   getStats: async () => {
-    const [activeTenants] = await db.query('SELECT COUNT(*) as count FROM tenants WHERE status = "active"');
+    const [activeTenants] = await db.query("SELECT COUNT(*) as count FROM tenants WHERE status = 'active'");
     const [totalTenants] = await db.query('SELECT COUNT(*) as count FROM tenants');
-    const [openTickets] = await db.query('SELECT COUNT(*) as count FROM tickets WHERE status != "resolved"');
+    const [openTickets] = await db.query("SELECT COUNT(*) as count FROM tickets WHERE status != 'resolved'");
     
     // Thống kê nhà thuê mới trong tháng (30 ngày gần nhất)
     const [newTenants] = await db.query('SELECT COUNT(*) as count FROM tenants WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)');
     
     // Thống kê nhà thuê sắp hết hạn (trong 30 ngày tới)
-    const [expiringSoon] = await db.query('SELECT COUNT(*) as count FROM tenants WHERE status = "active" AND end_date <= DATE_ADD(NOW(), INTERVAL 30 DAY) AND end_date >= NOW()');
+    const [expiringSoon] = await db.query("SELECT COUNT(*) as count FROM tenants WHERE status = 'active' AND end_date <= DATE_ADD(NOW(), INTERVAL 30 DAY) AND end_date >= NOW()");
 
     // Simple revenue calculation (sum of monthly/yearly prices of active tenants)
     const [revenue] = await db.query(`
@@ -42,17 +42,17 @@ const Tenant = {
     const today = vnTime.toISOString().slice(0, 10);
 
     // 2. Stat cards
-    const [[activeFields]] = await db.query('SELECT COUNT(*) as count FROM fields WHERE tenant_id = ? AND status = "available"', [tenantId]);
-    const [[todayBookings]] = await db.query('SELECT COUNT(*) as count FROM bookings WHERE tenant_id = ? AND date = ? AND status != "cancelled"', [tenantId, today]);
+    const [[activeFields]] = await db.query("SELECT COUNT(*) as count FROM fields WHERE tenant_id = ? AND status = 'available'", [tenantId]);
+    const [[todayBookings]] = await db.query("SELECT COUNT(*) as count FROM bookings WHERE tenant_id = ? AND date = ? AND status != 'cancelled'", [tenantId, today]);
     const [[todayRevenue]] = await db.query('SELECT SUM(total_price) as sum FROM bookings WHERE tenant_id = ? AND date = ? AND paid = 1', [tenantId, today]);
     const [[totalCustomers]] = await db.query('SELECT COUNT(*) as count FROM customers WHERE tenant_id = ?', [tenantId]);
-    const [[vipCount]] = await db.query('SELECT COUNT(*) as count FROM customers WHERE tenant_id = ? AND status = "vip"', [tenantId]);
-    const [[pendingBookings]] = await db.query('SELECT COUNT(*) as count FROM bookings WHERE tenant_id = ? AND status = "pending"', [tenantId]);
+    const [[vipCount]] = await db.query("SELECT COUNT(*) as count FROM customers WHERE tenant_id = ? AND status = 'vip'", [tenantId]);
+    const [[pendingBookings]] = await db.query("SELECT COUNT(*) as count FROM bookings WHERE tenant_id = ? AND status = 'pending'", [tenantId]);
     const [[unreadNotifs]] = await db.query('SELECT COUNT(*) as count FROM notifications WHERE (tenant_id = ? OR tenant_id IS NULL) AND is_read = 0', [tenantId]);
 
     // Extra metrics for sub-texts
-    const [[maintenanceFields]] = await db.query('SELECT COUNT(*) as count FROM fields WHERE tenant_id = ? AND status = "maintenance"', [tenantId]);
-    const [[confirmedToday]] = await db.query('SELECT COUNT(*) as count FROM bookings WHERE tenant_id = ? AND date = ? AND status IN ("confirmed", "completed")', [tenantId, today]);
+    const [[maintenanceFields]] = await db.query("SELECT COUNT(*) as count FROM fields WHERE tenant_id = ? AND status = 'maintenance'", [tenantId]);
+    const [[confirmedToday]] = await db.query("SELECT COUNT(*) as count FROM bookings WHERE tenant_id = ? AND date = ? AND status IN ('confirmed', 'completed')", [tenantId, today]);
     const [[paidTransactionsToday]] = await db.query('SELECT COUNT(*) as count FROM bookings WHERE tenant_id = ? AND date = ? AND paid = 1', [tenantId, today]);
 
     // 3. Revenue chart (last 7 days) - Ensuring all days are present
