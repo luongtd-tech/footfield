@@ -6,7 +6,7 @@ const Ticket = {
     return rows;
   },
   getOpenCount: async () => {
-    const [rows] = await db.query('SELECT COUNT(*) as count FROM tickets WHERE status != "resolved"');
+    const [rows] = await db.query("SELECT COUNT(*) as count FROM tickets WHERE status != 'resolved'");
     return rows[0].count;
   },
   updateStatus: async (id, status) => {

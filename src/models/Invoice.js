@@ -12,13 +12,13 @@ const Invoice = {
     return rows;
   },
   getStats: async () => {
-    const [paid] = await db.query('SELECT SUM(amount) as total FROM service_invoices WHERE status = "paid"');
-    const [unpaid] = await db.query('SELECT SUM(amount) as total FROM service_invoices WHERE status = "unpaid"');
-    const [overdue] = await db.query('SELECT SUM(amount) as total FROM service_invoices WHERE status = "overdue"');
+    const [paid] = await db.query("SELECT SUM(amount) as total FROM service_invoices WHERE status = 'paid'");
+    const [unpaid] = await db.query("SELECT SUM(amount) as total FROM service_invoices WHERE status = 'unpaid'");
+    const [overdue] = await db.query("SELECT SUM(amount) as total FROM service_invoices WHERE status = 'overdue'");
     
-    const [paidCount] = await db.query('SELECT COUNT(*) as count FROM service_invoices WHERE status = "paid"');
-    const [unpaidCount] = await db.query('SELECT COUNT(*) as count FROM service_invoices WHERE status = "unpaid"');
-    const [overdueCount] = await db.query('SELECT COUNT(*) as count FROM service_invoices WHERE status = "overdue"');
+    const [paidCount] = await db.query("SELECT COUNT(*) as count FROM service_invoices WHERE status = 'paid'");
+    const [unpaidCount] = await db.query("SELECT COUNT(*) as count FROM service_invoices WHERE status = 'unpaid'");
+    const [overdueCount] = await db.query("SELECT COUNT(*) as count FROM service_invoices WHERE status = 'overdue'");
 
     return {
       paid: { total: paid[0].total || 0, count: paidCount[0].count },
