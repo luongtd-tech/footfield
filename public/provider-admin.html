@@ -1410,7 +1410,7 @@ async function addPackage() {
   };
 
   try {
-    const response = await fetch(`${API_BASE_URL}/api/packages', {
+    const response = await fetch(`${API_BASE_URL}/api/packages`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newPkg)
