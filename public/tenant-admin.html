@@ -674,6 +674,11 @@ tr:hover td{background:rgba(22,163,74,.02);}
             <div style="font-family:var(--mono);font-size:14px;font-weight:700;color:var(--text2);margin-bottom:4px;" id="pay-qr-account">3036506868 - TRAN DUC LUONG</div>
             <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--green);" id="pay-qr-display">••••••</div>
           </div>
+          <div id="vnpay-note" style="display:none;background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.2);border-radius:12px;padding:20px;text-align:center;margin:16px 0;">
+            <div style="font-size:24px;margin-bottom:8px;">🔵</div>
+            <div style="font-weight:700;color:var(--blue);margin-bottom:4px;">Thanh toán qua cổng VNPay</div>
+            <div style="font-size:13px;color:var(--text2);">Hệ thống sẽ chuyển hướng bạn sang cổng thanh toán VNPay sau khi nhấn Xác nhận.</div>
+          </div>
           <div style="text-align:center;margin-top:20px;">
             <div style="font-size:32px;font-weight:800;font-family:var(--mono);color:var(--green);margin-bottom:16px;" id="pay-total">0 ₫</div>
             <button class="btn btn-primary" style="padding:14px 32px;font-size:15px;" onclick="confirmPayment()">✅ Xác nhận thanh toán</button>
@@ -1943,8 +1948,15 @@ async function renderPayment(){ await populateFieldFilters(); }
 function selectPay(el,method){
   document.querySelectorAll('.pay-method').forEach(m=>m.classList.remove('selected'));
   el.classList.add('selected');selectedPayMethod=method;
-  const qrMethods=['transfer','vnpay'];
+  const qrMethods=['transfer']; // Chỉ hiện QR khi chọn Chuyển khoản
   document.getElementById('pay-qr-section').style.display=qrMethods.includes(method)?'block':'none';
+  
+  // Hiển thị thông báo cho VNPay
+  const vnpayNote = document.getElementById('vnpay-note');
+  if (vnpayNote) {
+    vnpayNote.style.display = (method === 'vnpay') ? 'block' : 'none';
+  }
+
   if(qrMethods.includes(method)){
     updateQRImage();
   }
