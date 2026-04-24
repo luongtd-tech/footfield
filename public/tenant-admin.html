@@ -665,7 +665,12 @@ tr:hover td{background:rgba(22,163,74,.02);}
           <div class="pay-methods">
             <div class="pay-method selected" onclick="selectPay(this,'cash')"><span class="pay-method-icon">💵</span><div class="pay-method-name">Tiền mặt</div></div>
             <div class="pay-method" onclick="selectPay(this,'transfer')"><span class="pay-method-icon">🏦</span><div class="pay-method-name">Chuyển khoản</div></div>
-            <div class="pay-method" onclick="selectPay(this,'vnpay')"><span class="pay-method-icon">🔵</span><div class="pay-method-name">VNPay</div></div>
+            <div class="pay-method" onclick="selectPay(this,'vnpay')">
+              <span class="pay-method-icon">
+                <img src="https://sandbox.vnpayment.vn/paymentv2/Images/brands/logo-vnpay.png" alt="VNPay" style="width: 24px; height: 24px; object-fit: contain;">
+              </span>
+              <div class="pay-method-name">VNPay</div>
+            </div>
           </div>
           <div id="pay-qr-section" style="display:none;background:var(--bg3);border-radius:12px;padding:20px;text-align:center;margin:16px 0;">
             <div id="pay-qr-img-container" style="margin-bottom:12px;">
@@ -675,7 +680,9 @@ tr:hover td{background:rgba(22,163,74,.02);}
             <div style="font-family:var(--mono);font-size:18px;font-weight:700;color:var(--green);" id="pay-qr-display">••••••</div>
           </div>
           <div id="vnpay-note" style="display:none;background:rgba(59,130,246,0.05);border:1px solid rgba(59,130,246,0.2);border-radius:12px;padding:20px;text-align:center;margin:16px 0;">
-            <div style="font-size:24px;margin-bottom:8px;">🔵</div>
+            <div style="margin-bottom:12px;">
+              <img src="https://sandbox.vnpayment.vn/paymentv2/Images/brands/logo-vnpay.png" alt="VNPay" style="height: 40px; object-fit: contain;">
+            </div>
             <div style="font-weight:700;color:var(--blue);margin-bottom:4px;">Thanh toán qua cổng VNPay</div>
             <div style="font-size:13px;color:var(--text2);">Hệ thống sẽ chuyển hướng bạn sang cổng thanh toán VNPay sau khi nhấn Xác nhận.</div>
           </div>
