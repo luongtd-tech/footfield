@@ -2004,6 +2004,11 @@ if (savedUser) {
     console.error('Session error', e);
   }
 }
+
+function toggleSidebar() {
+  document.querySelector('.sidebar').classList.toggle('show');
+  document.querySelector('.sidebar-overlay').classList.toggle('show');
+}
 </script>
 </body>
 </html>
