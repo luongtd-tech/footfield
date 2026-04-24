@@ -6,7 +6,7 @@ function sortObject(obj) {
     let sorted = {};
     let str = [];
     let key;
-    for (key in obj) {
+    for (key in obj){
         if (obj.hasOwnProperty(key)) {
             str.push(encodeURIComponent(key));
         }
@@ -39,17 +39,23 @@ exports.createPaymentUrl = async (req, res) => {
         const date = new Date();
         const createDate = formatDate(date);
         
-        const tmnCode = process.env.VNP_TMN_CODE;
-        const secretKey = process.env.VNP_HASH_SECRET;
-        let vnpUrl = process.env.VNP_URL;
-        const returnUrl = process.env.VNP_RETURN_URL;
+        // Đảm bảo xóa dấu cách thừa nếu có
+        const tmnCode = process.env.VNP_TMN_CODE.trim();
+        const secretKey = process.env.VNP_HASH_SECRET.trim();
+        let vnpUrl = process.env.VNP_URL.trim();
+        const returnUrl = process.env.VNP_RETURN_URL.trim();
 
-        const ipAddr = req.headers['x-forwarded-for'] ||
+        let ipAddr = req.headers['x-forwarded-for'] ||
             req.connection.remoteAddress ||
             req.socket.remoteAddress ||
             req.connection.socket.remoteAddress;
 
-        const orderId = `${bookingId}_${createDate}`; // Đảm bảo txnRef là duy nhất
+        // Nếu chạy ở localhost, IP có thể là ::1, VNPay yêu cầu định dạng IPv4
+        if (ipAddr === '::1' || ipAddr === '127.0.0.1') {
+            ipAddr = '127.0.0.1';
+        }
+
+        const orderId = `${bookingId}_${date.getTime()}`; 
 
         let vnp_Params = {
             'vnp_Version': '2.1.0',
@@ -58,8 +64,8 @@ exports.createPaymentUrl = async (req, res) => {
             'vnp_Locale': 'vn',
             'vnp_CurrCode': 'VND',
             'vnp_TxnRef': orderId,
-            'vnp_OrderInfo': 'Thanh toan cho ma dat san: ' + bookingId,
-            'vnp_OrderType': 'other',
+            'vnp_OrderInfo': 'Thanh toan GD ' + bookingId,
+            'vnp_OrderType': 'billpayment',
             'vnp_Amount': amount * 100,
             'vnp_ReturnUrl': returnUrl,
             'vnp_IpAddr': ipAddr,
