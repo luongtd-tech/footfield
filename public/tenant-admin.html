@@ -436,39 +436,34 @@ tr:hover td{background:rgba(22,163,74,.02);}
           </div>
         </div>
         <div class="stats-grid">
-          <div class="stat-card"><div class="stat-icon-box green">⚽</div><div class="stat-label">Sân đang hoạt động</div><div class="stat-value green" id="d-fields">4</div><div class="stat-sub" id="d-fields-sub">1 sân đang bảo trì</div></div>
-          <div class="stat-card"><div class="stat-icon-box blue">📅</div><div class="stat-label">Đặt sân hôm nay</div><div class="stat-value blue" id="d-today">2</div><div class="stat-sub" id="d-today-sub">2 đã xác nhận</div></div>
-          <div class="stat-card"><div class="stat-icon-box yellow">💰</div><div class="stat-label">Doanh thu hôm nay</div><div class="stat-value yellow" id="d-rev">990K</div><div class="stat-sub" id="d-rev-sub">2 giao dịch thành công</div></div>
-          <div class="stat-card"><div class="stat-icon-box purple">👥</div><div class="stat-label">Tổng khách hàng</div><div class="stat-value" style="color:var(--purple)" id="d-cust">5</div><div class="stat-sub" id="d-cust-sub">2 khách VIP</div></div>
+          <div class="stat-card"><div class="stat-icon-box green">⚽</div><div class="stat-label">Sân đang hoạt động</div><div class="stat-value green" id="d-fields">---</div><div class="stat-sub" id="d-fields-sub">Đang tải...</div></div>
+          <div class="stat-card"><div class="stat-icon-box blue">📅</div><div class="stat-label">Đặt sân hôm nay</div><div class="stat-value blue" id="d-today">---</div><div class="stat-sub" id="d-today-sub">Đang tải...</div></div>
+          <div class="stat-card"><div class="stat-icon-box yellow">💰</div><div class="stat-label">Doanh thu hôm nay</div><div class="stat-value yellow" id="d-rev">---</div><div class="stat-sub" id="d-rev-sub">Đang tải...</div></div>
+          <div class="stat-card"><div class="stat-icon-box purple">👥</div><div class="stat-label">Tổng khách hàng</div><div class="stat-value" style="color:var(--purple)" id="d-cust">---</div><div class="stat-sub" id="d-cust-sub">Đang tải...</div></div>
         </div>
         <div class="grid-2">
           <div class="card">
             <div class="card-header"><div class="card-title">📈 Doanh thu 7 ngày gần nhất</div></div>
             <div style="position:relative;padding-bottom:24px;">
               <div class="rev-chart">
-                <div class="rev-bar" style="height:40%;background:linear-gradient(180deg,#16a34a,#15803d);"><div class="rev-bar-val">540K</div><div class="rev-bar-label">T2</div></div>
-                <div class="rev-bar" style="height:65%;background:linear-gradient(180deg,#16a34a,#15803d);"><div class="rev-bar-val">720K</div><div class="rev-bar-label">T3</div></div>
-                <div class="rev-bar" style="height:50%;background:linear-gradient(180deg,#16a34a,#15803d);"><div class="rev-bar-val">630K</div><div class="rev-bar-label">T4</div></div>
-                <div class="rev-bar" style="height:80%;background:linear-gradient(180deg,#16a34a,#15803d);"><div class="rev-bar-val">990K</div><div class="rev-bar-label">T5</div></div>
-                <div class="rev-bar" style="height:70%;background:linear-gradient(180deg,#16a34a,#15803d);"><div class="rev-bar-val">810K</div><div class="rev-bar-label">T6</div></div>
-                <div class="rev-bar" style="height:90%;background:linear-gradient(180deg,#f59e0b,#d97706);"><div class="rev-bar-val">1.17M</div><div class="rev-bar-label">T7</div></div>
-                <div class="rev-bar" style="height:60%;background:linear-gradient(180deg,#3b82f6,#2563eb);"><div class="rev-bar-val">990K</div><div class="rev-bar-label">CN</div></div>
+                <!-- Sẽ được load bởi JS -->
+                <div style="width:100%; text-align:center; color:var(--text3); font-size:12px;">Đang tải biểu đồ...</div>
               </div>
             </div>
           </div>
           <div class="card">
             <div class="card-header"><div class="card-title">📋 Đặt sân hôm nay</div><div class="card-action" onclick="showPage('schedule')">Xem tất cả →</div></div>
-            <div id="today-bookings"></div>
+            <div id="today-bookings"><div style="text-align:center;padding:20px;color:var(--text3)">Đang tải...</div></div>
           </div>
         </div>
         <div class="grid-equal">
           <div class="card">
             <div class="card-header"><div class="card-title">⚽ Tình trạng sân</div><div class="card-action" onclick="showPage('fields')">Quản lý →</div></div>
-            <div id="dash-fields"></div>
+            <div id="dash-fields"><div style="text-align:center;padding:20px;color:var(--text3)">Đang tải...</div></div>
           </div>
           <div class="card">
             <div class="card-header"><div class="card-title">⭐ Khách VIP</div><div class="card-action" onclick="showPage('customers')">Xem tất cả →</div></div>
-            <div id="dash-vips"></div>
+            <div id="dash-vips"><div style="text-align:center;padding:20px;color:var(--text3)">Đang tải...</div></div>
           </div>
         </div>
       </div>
@@ -528,9 +523,9 @@ tr:hover td{background:rgba(22,163,74,.02);}
           <p>Danh sách và thống kê khách hàng</p>
         </div>
         <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
-          <div class="stat-card"><div class="stat-icon-box yellow">⭐</div><div class="stat-label">Khách VIP</div><div class="stat-value yellow" id="c-vip">2</div></div>
-          <div class="stat-card"><div class="stat-icon-box blue">👤</div><div class="stat-label">Khách thường xuyên</div><div class="stat-value blue" id="c-reg">2</div></div>
-          <div class="stat-card"><div class="stat-icon-box green">🌟</div><div class="stat-label">Khách mới</div><div class="stat-value green" id="c-new">1</div></div>
+          <div class="stat-card"><div class="stat-icon-box yellow">⭐</div><div class="stat-label">Khách VIP</div><div class="stat-value yellow" id="c-vip">---</div></div>
+          <div class="stat-card"><div class="stat-icon-box blue">👤</div><div class="stat-label">Khách thường xuyên</div><div class="stat-value blue" id="c-reg">---</div></div>
+          <div class="stat-card"><div class="stat-icon-box green">🌟</div><div class="stat-label">Khách mới</div><div class="stat-value green" id="c-new">---</div></div>
         </div>
         <div class="card">
           <div class="card-header">
@@ -561,10 +556,10 @@ tr:hover td{background:rgba(22,163,74,.02);}
           <p>Doanh thu, chi phí và báo cáo tài chính</p>
         </div>
         <div class="stats-grid">
-          <div class="stat-card"><div class="stat-icon-box green">💰</div><div class="stat-label">Doanh thu tháng 3</div><div class="stat-value green" id="total-revenue">1.99M</div><div class="stat-sub" id="growth-percentage">▲ +15% vs T2</div></div>
-          <div class="stat-card"><div class="stat-icon-box blue">✅</div><div class="stat-label">Đã thu</div><div class="stat-value blue" id="paid-count">1.55M</div><div class="stat-sub" id="paid-transactions">5 giao dịch</div></div>
-          <div class="stat-card"><div class="stat-icon-box yellow">⏳</div><div class="stat-label">Chưa thu</div><div class="stat-value yellow" id="unpaid-amount">360K</div><div class="stat-sub" id="unpaid-count">1 đặt chưa thanh toán</div></div>
-          <div class="stat-card"><div class="stat-icon-box purple">📊</div><div class="stat-label">Tỉ lệ lấp đầy</div><div class="stat-value purple" id="occupancy-rate" style="color:var(--purple)">73%</div><div class="stat-sub">Tốt hơn trung bình</div></div>
+          <div class="stat-card"><div class="stat-icon-box green">💰</div><div class="stat-label">Doanh thu tháng này</div><div class="stat-value green" id="total-revenue">---</div><div class="stat-sub" id="growth-percentage">Đang tải...</div></div>
+          <div class="stat-card"><div class="stat-icon-box blue">✅</div><div class="stat-label">Đã thu</div><div class="stat-value blue" id="paid-count">---</div><div class="stat-sub" id="paid-transactions">Đang tải...</div></div>
+          <div class="stat-card"><div class="stat-icon-box yellow">⏳</div><div class="stat-label">Chưa thu</div><div class="stat-value yellow" id="unpaid-amount">---</div><div class="stat-sub" id="unpaid-count">Đang tải...</div></div>
+          <div class="stat-card"><div class="stat-icon-box purple">📊</div><div class="stat-label">Tỉ lệ lấp đầy</div><div class="stat-value purple" id="occupancy-rate" style="color:var(--purple)">---</div><div class="stat-sub">Đang tải...</div></div>
         </div>
         <div class="grid-equal">
           <div class="card">
