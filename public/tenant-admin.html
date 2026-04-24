@@ -1982,6 +1982,27 @@ async function confirmPayment(){
   const amt = +document.getElementById('pay-amount').value;
   const method = selectedPayMethod;
   if(!amt || !bkId) return alert('❌ Chọn lượt đặt sân và nhập số tiền');
+
+  // Handle VNPay separately
+  if (method === 'vnpay') {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/payment/vnpay/create-url`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId: bkId, amount: amt })
+      });
+      const data = await response.json();
+      if (data.paymentUrl) {
+        window.location.href = data.paymentUrl; // Redirect to VNPay
+      } else {
+        alert('❌ Lỗi tạo link VNPay: ' + (data.message || 'Không rõ nguyên nhân'));
+      }
+    } catch (err) {
+      console.error('VNPay error:', err);
+      alert('❌ Lỗi kết nối khi tạo link thanh toán VNPay.');
+    }
+    return;
+  }
   
   try {
     const response = await fetch(`${API_BASE_URL}/api/bookings/${bkId}/payment`, {

@@ -18,6 +18,7 @@ const customerRoutes = require('./routes/customerRoutes');
 const financeRoutes = require('./routes/financeRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const chatbotRoutes = require('./routes/chatbotRoutes');
+const paymentRoutes = require('./routes/paymentRoutes');
 const initCronJobs = require('./jobs/cronJobs');
 
 const app = express();
@@ -47,6 +48,7 @@ app.use('/api/customers', customerRoutes);
 app.use('/api/finance', financeRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/chatbot', chatbotRoutes);
+app.use('/api/payment', paymentRoutes);
 
 // --- CẤU HÌNH CÁC TRANG HTML (Routes) ---
 // Trang chủ: Dành cho Chủ sân (Tenant Admin)
