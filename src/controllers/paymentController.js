@@ -58,7 +58,7 @@ exports.createPaymentUrl = async (req, res) => {
             'vnp_Locale': 'vn',
             'vnp_CurrCode': 'VND',
             'vnp_TxnRef': orderId,
-            'vnp_OrderInfo': `Thanh toan don hang ${bookingId}`,
+            'vnp_OrderInfo': 'Thanh toan cho ma dat san: ' + bookingId,
             'vnp_OrderType': 'other',
             'vnp_Amount': amount * 100,
             'vnp_ReturnUrl': returnUrl,
