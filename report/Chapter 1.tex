@@ -1,0 +1,39 @@
+\section*{CHAPTER 1. INTRODUCTION AND THEORETICAL BASIS}
+\addcontentsline{toc}{section}{\numberline{}CHAPTER 1. INTRODUCTION AND THEORETICAL BASIS}
+\setcounter{section}{1}
+\setcounter{subsection}{0}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+
+\subsection{Current Situation and Necessity of the Project}
+In recent years, the demand for recreational sports, particularly artificial football fields, has grown significantly. However, the management of these facilities remains predominantly traditional. Facility owners often rely on manual bookkeeping, physical ledgers, or fragmented spreadsheets to track bookings, manage customers, and handle finances. 
+
+These conventional methods lead to several inefficiencies, including overlapping schedules, high manual workload, inability to track customer loyalty, and lack of real-time availability checking for customers. Furthermore, the absence of a unified system makes it difficult for facility owners to scale their businesses. Therefore, the development of a comprehensive, centralized software solution to automate and optimize the management of football fields is highly necessary.
+
+\subsection{Software as a Service (SaaS) and Multi-Tenant Architecture}
+To address the needs of multiple independent facility owners without developing separate software instances for each, the Software as a Service (SaaS) model is adopted. SaaS is a software distribution model where a cloud provider hosts applications and makes them available to end-users over the internet.
+
+A core component of this SaaS platform is the Multi-tenant Architecture. In a multi-tenant environment, a single instance of the software and its supporting infrastructure serves multiple customers (tenants). Each tenant's data is isolated and remains invisible to other tenants. In this project, data isolation is achieved at the database row level by utilizing a unique \texttt{tenant\_id} for every record, ensuring security and low operational costs.
+
+\subsection{Theoretical Basis and Technologies Used}
+
+\subsubsection{Node.js and Express.js}
+Node.js is a cross-platform, open-source JavaScript runtime environment that executes JavaScript code outside a web browser. Express.js is a minimal and flexible Node.js web application framework that provides a robust set of features for web and mobile applications. These technologies were selected for the backend to ensure high performance, scalability, and rapid development for the RESTful APIs driving the platform.
+
+\subsubsection{Frontend Technologies and Monolithic Hybrid Design}
+To maximize page loading speed and reduce complexity, the frontend is built using Vanilla HTML5, CSS, and JavaScript without heavy frameworks like React or Vue. The project employs a Monolithic Hybrid architecture, where the Node.js server serves both the backend APIs and the static frontend files, significantly simplifying deployment.
+
+\subsubsection{MySQL and Knex.js}
+MySQL is a widely used relational database management system, chosen for its reliability and strong support for structured data, which is crucial for managing financial and booking records. To interact with MySQL securely, the Knex.js Query Builder is used. Knex.js prevents SQL injection attacks and provides a clean, promise-based interface for writing complex queries and handling database migrations.
+
+\subsubsection{Ionic Capacitor}
+Capacitor is a cross-platform native runtime that allows web developers to build native iOS and Android apps using web technologies. In this project, Capacitor is used to wrap the web-based Tenant and Provider dashboards into native Android applications. This integration grants the web app access to native device hardware, specifically the camera, enabling rapid QR code scanning for customer check-ins.
+
+\subsubsection{Google Gemini AI and Function Calling}
+Google Gemini 2.5 Flash is integrated to serve as an intelligent virtual assistant for customers. Unlike traditional chatbots that rely on pre-programmed conversation trees, Gemini utilizes Natural Language Processing (NLP) to understand customer intent. Through the "Function Calling" capability, the AI can seamlessly query the MySQL database in real-time to check field availability and automatically execute booking transactions based on user requests.
+
+\subsubsection{VNPay Payment Gateway}
+VNPay is a leading electronic payment gateway in Vietnam. Its integration allows customers to securely pay for their bookings online using bank accounts, QR payments, or e-wallets, ensuring immediate transaction verification and reducing no-show rates for facility owners.
+
+\subsubsection{Cloud Deployment Services}
+The platform is designed to be cloud-native. The web services (Node.js) are hosted on Render, a Platform-as-a-Service (PaaS) that offers seamless deployment from GitHub. The MySQL database is managed independently using Aiven, a robust Database-as-a-Service (DBaaS) provider, ensuring high availability and automated backups.
