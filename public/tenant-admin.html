@@ -156,8 +156,18 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
 }
 
 @media (max-width: 768px) {
+  .topbar { 
+    padding: env(safe-area-inset-top) 16px 0 16px; 
+    height: calc(64px + env(safe-area-inset-top));
+    display: flex;
+    align-items: center;
+  }
+  .menu-toggle { 
+    padding: 12px; 
+    margin-left: -12px;
+    font-size: 28px;
+  }
   .content { padding: 16px; }
-  .topbar { padding: 0 16px; }
   .page-header h1 { font-size: 20px; }
   
   .stats-grid { grid-template-columns: 1fr; gap: 12px; }
