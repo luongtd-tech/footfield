@@ -19,6 +19,9 @@
   "license": "ISC",
   "type": "commonjs",
   "dependencies": {
+    "@capacitor/android": "^8.3.1",
+    "@capacitor/cli": "^8.3.1",
+    "@capacitor/core": "^8.3.1",
     "@google/generative-ai": "^0.24.1",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
@@ -31,6 +34,7 @@
     "qs": "^6.15.1"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.5",
     "nodemon": "^3.1.14"
   }
 }

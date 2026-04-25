@@ -1,0 +1,9 @@
+{
+  "appId": "tech.luongtd.footfield.provider",
+  "appName": "FootField Provider",
+  "webDir": "../public",
+  "server": {
+    "url": "https://footfield.onrender.com/provider-admin.html",
+    "cleartext": true
+  }
+}
