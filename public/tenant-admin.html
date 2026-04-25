@@ -175,11 +175,17 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   
   /* Modal Optimization */
   .modal { 
-    width: 95%; 
+    width: 92%; 
+    max-width: 92vw;
     padding: 20px; 
-    margin: 10px; 
+    margin: 0; 
     border-radius: 20px;
     max-height: 85vh;
+  }
+  .modal-overlay {
+    padding: 10px;
+    align-items: center;
+    justify-content: center;
   }
   .form-row { grid-template-columns: 1fr !important; gap: 12px; }
   
