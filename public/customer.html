@@ -1325,6 +1325,23 @@
       70% { box-shadow: 0 0 0 15px rgba(22, 163, 74, 0); }
       100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
     }
+
+    /* ✅ MOBILE RESPONSIVE FIXES */
+    @media (max-width: 768px) {
+      .footer-inner {
+        grid-template-columns: 1fr !important;
+        gap: 32px !important;
+        text-align: center;
+      }
+      .footer-link {
+        display: block;
+        padding: 6px 0;
+        word-break: break-word;
+      }
+      .nav-links {
+        display: none; /* Already handled by toggleNav usually, but just in case */
+      }
+    }
   </style>
 </head>
 
