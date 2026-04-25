@@ -1,0 +1,11 @@
+\section*{ABSTRACT}
+\phantomsection\addcontentsline{toc}{section}{\numberline {}ABSTRACT}
+The rapid digitalization across various industries has highlighted the need for efficient management systems in sports facilities, particularly artificial football fields. Traditional management methods relying on manual bookkeeping are prone to errors, schedule conflicts, and lack customer relationship management capabilities. This thesis presents the design and implementation of FootField, a comprehensive Software as a Service (SaaS) platform tailored for football field management.
+
+The system adopts a multi-tenant architecture, allowing a single platform to serve multiple independent facility owners (tenants) securely and efficiently. FootField provides three primary interfaces: a Provider Dashboard for system-wide administration, a Tenant Dashboard for facility operations (including time-grid scheduling and CRM), and a Customer Storefront for end-users.
+
+To enhance the user experience and operational efficiency, modern technologies have been integrated. The backend is built with Node.js and Express, interacting with a MySQL database via Knex.js. The frontend utilizes responsive vanilla web technologies. Notably, the system incorporates Google Gemini AI to serve as an intelligent chatbot capable of handling customer inquiries and automated bookings via Function Calling. Furthermore, VNPay is integrated for secure online transactions, and Ionic Capacitor is utilized to package the web application into a native Android application, enabling hardware features such as QR code scanning for automated check-ins. The deployment is handled via Render for the web services and Aiven for the managed database.
+
+The resulting platform significantly reduces manual workload, prevents scheduling conflicts, and provides a modern, seamless booking experience for football players, proving the viability of a specialized SaaS model in the sports facility management sector.
+\newpage
+\cleardoublepage
