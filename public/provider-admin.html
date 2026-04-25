@@ -198,7 +198,17 @@ body { font-family:var(--font); background:var(--bg); color:var(--text); min-hei
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
   }
-  table { min-width: 700px; }
+  table { min-width: 650px; font-size: 12px; }
+  th { padding: 8px 10px; font-size: 10px; }
+  td { padding: 10px; }
+  
+  /* Shorten headers for mobile */
+  .mobile-short-header::after {
+    content: attr(data-short);
+  }
+  .mobile-short-header span {
+    display: none;
+  }
   
   /* Detail Grid in Modals */
   .detail-grid {
@@ -594,10 +604,12 @@ tr:hover td { background:rgba(0,212,170,.03); }
         <div class="grid-3" id="packages-grid"></div>
         <div class="card">
           <div class="card-header"><div class="card-title">📊 Thống kê sử dụng gói</div></div>
-          <table>
-            <thead><tr><th>Gói</th><th>Số nhà thuê</th><th>Doanh thu/tháng</th><th>Doanh thu/năm</th><th>Trạng thái</th></tr></thead>
-            <tbody id="pkg-stats-table"></tbody>
-          </table>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Gói</th><th class="mobile-short-header" data-short="Số nhà"><span>Số nhà thuê</span></th><th class="mobile-short-header" data-short="DT/tháng"><span>Doanh thu/tháng</span></th><th class="mobile-short-header" data-short="DT/năm"><span>Doanh thu/năm</span></th><th>Trạng thái</th></tr></thead>
+              <tbody id="pkg-stats-table"></tbody>
+            </table>
+          </div>
         </div>
       </div>
 
