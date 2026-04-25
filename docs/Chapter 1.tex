@@ -1,0 +1,53 @@
+\section*{CHAPTER 1: INTRODUCTION}
+\addcontentsline{toc}{section}{\numberline{}CHAPTER 1: INTRODUCTION}
+\setcounter{section}{1}
+\setcounter{subsection}{0}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+
+\subsection{Background and Motivation}
+In recent years, the sports and recreation industry, particularly the management of artificial football fields, has experienced significant growth. With increasing awareness of health and fitness, the demand for accessible sports facilities has surged. In urban areas, artificial football fields serve as primary venues for amateur leagues, corporate team-building events, and casual recreational matches. 
+
+Despite this rapid expansion in demand, the operational management of these facilities remains predominantly traditional and localized. Facility owners often operate independently, lacking standardized software to manage their daily workflows. The reliance on manual processes not only increases the administrative burden but also limits the scalability of the business. The motivation for this project stems from the urgent need to bridge the gap between traditional sports facility management and modern cloud-based software solutions, thereby democratizing access to enterprise-grade management tools for small and medium-sized sports facility owners.
+
+\subsection{Problem Statement}
+The current landscape of football field management is plagued by several critical inefficiencies:
+\begin{itemize}
+    \item \textbf{Manual Bookkeeping and Scheduling Errors:} Facility owners typically rely on physical ledgers or disjointed spreadsheet software. This manual approach is highly susceptible to human error, leading to overlapping bookings (double-booking) and lost revenue.
+    \item \textbf{Poor Customer Experience:} Customers must manually call or message facility managers to inquire about field availability. This process is time-consuming, lacks transparency, and heavily depends on the manager's availability to respond.
+    \item \textbf{Inefficient Payment and Verification:} Payments are mostly handled via cash or manual bank transfers without automated reconciliation. Verifying whether a customer has paid or arrived at the field is a tedious process for the staff.
+    \item \textbf{Lack of Scalability:} Developing a custom software application for a single facility is financially unviable for most owners. The high costs of software development, server maintenance, and IT support act as significant barriers to digital transformation.
+\end{itemize}
+
+\subsection{Objectives of the Study}
+To address the aforementioned problems, this project aims to design and develop "FootField," a comprehensive, cloud-based platform. The specific objectives are as follows:
+\begin{enumerate}
+    \item \textbf{Develop a Multi-Tenant SaaS Platform:} Create a single, unified software ecosystem capable of securely hosting and managing multiple independent football facility businesses simultaneously, drastically reducing the cost of software distribution.
+    \item \textbf{Automate Booking and Scheduling:} Implement a robust scheduling engine with an intuitive time-grid interface to eliminate double-booking and streamline daily operations for facility managers.
+    \item \textbf{Integrate Artificial Intelligence:} Deploy a Large Language Model (LLM) powered chatbot to serve as a 24/7 virtual assistant, enabling customers to query availability and execute bookings using natural language.
+    \item \textbf{Digitize Check-in Processes:} Develop a cross-platform mobile application that leverages the device's native camera for rapid QR code scanning, allowing on-site staff to verify electronic tickets instantly.
+    \item \textbf{Streamline Financial Transactions:} Integrate a secure online payment gateway (VNPay) to automate transaction verification and invoice generation.
+\end{enumerate}
+
+\subsection{Scope and Limitations}
+The scope of this project encompasses the development of three interconnected modules: the Provider Admin dashboard (for SaaS ecosystem management), the Tenant Admin dashboard (for facility owners), and the Customer Storefront (for end-users). The system supports core functionalities including field management, booking workflows, customer relationship management (CRM), and financial reporting.
+
+However, the project is subject to certain limitations. Currently, the AI chatbot is dependent on the Google Gemini API, which introduces external network latency and relies on a constant internet connection. Furthermore, the payment integration is strictly limited to the VNPay Sandbox environment for demonstration purposes, and the system does not yet support hardware integrations such as IoT-enabled smart lighting for the football fields.
+
+\subsection{Research Methodology}
+The development of the FootField platform follows the Agile Software Development Life Cycle (SDLC). This methodology allows for iterative development, continuous testing, and rapid adaptation to changing requirements. 
+The process was divided into several sprints:
+\begin{itemize}
+    \item \textbf{Sprint 1:} Requirements gathering, system architecture design, and database schema formulation.
+    \item \textbf{Sprint 2:} Backend API development using Node.js and implementation of the multi-tenant data isolation logic.
+    \item \textbf{Sprint 3:} Frontend development for the administration dashboards and the customer booking interface.
+    \item \textbf{Sprint 4:} Integration of third-party services, specifically the Google Gemini AI for natural language processing and VNPay for payment processing.
+    \item \textbf{Sprint 5:} Packaging the web application into a native mobile wrapper using Capacitor, followed by extensive system testing and cloud deployment.
+\end{itemize}
+
+\subsection{Structure of the Thesis}
+The remainder of this thesis is structured as follows:
+\textbf{Chapter 2} provides the theoretical background, reviewing the technologies and architectural paradigms utilized in the project. 
+\textbf{Chapter 3} delves into the system analysis and design, presenting use case diagrams, sequence diagrams, and the database schema. 
+\textbf{Chapter 4} details the implementation phase, showcasing the core algorithms, API integrations, and the resulting user interfaces. 
+Finally, \textbf{Chapter 5} discusses the deployment process, evaluates the system's performance, and outlines conclusions and future development directions.

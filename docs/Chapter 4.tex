@@ -1,0 +1,95 @@
+\section*{CHAPTER 4: SYSTEM IMPLEMENTATION AND RESULTS}
+\addcontentsline{toc}{section}{\numberline{}CHAPTER 4: SYSTEM IMPLEMENTATION AND RESULTS}
+\setcounter{section}{4}
+\setcounter{subsection}{0}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+
+This chapter describes the practical implementation of the theoretical designs discussed in Chapter 3. It highlights key code segments, architectural configurations, and showcases the final user interfaces resulting from the development phase.
+
+\subsection{Backend Architecture Implementation}
+The backend is structured using a Model-View-Controller (MVC) inspired pattern adapted for a RESTful API service. The \texttt{src} directory is logically divided into \texttt{routes}, \texttt{controllers}, \texttt{services}, and \texttt{models}.
+
+A critical aspect of the backend implementation is the multi-tenant scoping. Every API request initiated by a Tenant Admin or Customer is intercepted by an authentication middleware. This middleware extracts the \texttt{tenant\_id} from the session or URL parameters and injects it into the request context. 
+
+When querying the database using Knex.js, the models strictly enforce the tenant boundary. For instance, retrieving the list of fields for a tenant is implemented as:
+\begin{verbatim}
+// src/models/Field.js
+class Field {
+  static async findByTenant(tenantId) {
+    return db('fields').where('tenant_id', tenantId);
+  }
+}
+\end{verbatim}
+This simple yet highly effective pattern guarantees that no tenant can access data belonging to another, forming the backbone of the SaaS security model.
+
+\subsection{AI Integration: Implementing Function Calling}
+The integration of Google Gemini 2.5 Flash is implemented in the \texttt{aiService.js} module. Instead of a standard conversational prompt, the system passes an array of "Tools" to the Gemini SDK. 
+
+One such tool is the \texttt{check\_availability} function. The JSON schema provided to the AI describes this function:
+\begin{verbatim}
+{
+  "name": "check_availability",
+  "description": "Checks if any fields are available at a given time.",
+  "parameters": {
+    "type": "object",
+    "properties": {
+      "time": { "type": "string", "description": "Time in HH:mm" },
+      "date": { "type": "string", "description": "Date in YYYY-MM-DD" }
+    },
+    "required": ["time", "date"]
+  }
+}
+\end{verbatim}
+
+When the user asks, "Is there a field available at 5 PM today?", the LLM outputs a "function call" request. The Node.js server intercepts this, parses the \texttt{time} ("17:00") and \texttt{date} parameters, queries the database to find unoccupied fields, and feeds the resulting array back to the LLM. The LLM then generates a human-readable response based on that array.
+
+\subsection{Mobile App Implementation: Capacitor QR Scanner}
+To bridge the web software with physical hardware, the \texttt{mobile-tenant} directory contains an Ionic Capacitor project. Capacitor wraps the standard HTML/JS web files into an Android APK.
+
+To implement the rapid check-in feature, the native Camera plugin is invoked via JavaScript:
+\begin{verbatim}
+// Triggering native camera from web code
+import { BarcodeScanner } from '@capacitor/barcode-scanner';
+
+const startScan = async () => {
+  await BarcodeScanner.checkPermission({ force: true });
+  BarcodeScanner.hideBackground();
+  const result = await BarcodeScanner.startScan();
+  if (result.hasContent) {
+    verifyBookingStatus(result.content); // Send to backend
+  }
+};
+\end{verbatim}
+This hybrid approach drastically reduces development time compared to writing native Java/Kotlin code, while still achieving the exact same functionality.
+
+\subsection{User Interface Showcasing}
+
+The following figures demonstrate the final, responsive user interfaces developed using Vanilla HTML, CSS, and JavaScript.
+
+% [PLACEHOLDER FOR PROVIDER ADMIN UI]
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.9\textwidth]{Figures/ui_provider.png}
+%     \caption{Provider Admin Dashboard: Managing SaaS Tenants and Subscription Packages}
+%     \label{fig:ui_provider}
+% \end{figure}
+
+% [PLACEHOLDER FOR TENANT ADMIN UI]
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.9\textwidth]{Figures/ui_tenant.png}
+%     \caption{Tenant Admin Dashboard: Interactive Time-grid Schedule Viewer}
+%     \label{fig:ui_tenant}
+% \end{figure}
+
+% [PLACEHOLDER FOR CUSTOMER UI]
+% \begin{figure}[H]
+%     \centering
+%     \includegraphics[width=0.45\textwidth]{Figures/ui_customer_mobile.png}
+%     \includegraphics[width=0.45\textwidth]{Figures/ui_ai_chat.png}
+%     \caption{Customer Storefront (Mobile View) and AI Chatbot Interface}
+%     \label{fig:ui_customer}
+% \end{figure}
+
+The Customer Storefront (Figure \ref{fig:ui_customer}) is deliberately designed with a "Mobile-First" philosophy, recognizing that over 80\% of sports facility bookings are made via smartphones. The Tenant Admin Dashboard (Figure \ref{fig:ui_tenant}) prioritizes data density, ensuring facility staff can comprehend the entire day's schedule at a single glance.

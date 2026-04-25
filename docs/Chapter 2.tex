@@ -1,0 +1,49 @@
+\section*{CHAPTER 2: THEORETICAL BACKGROUND}
+\addcontentsline{toc}{section}{\numberline{}CHAPTER 2: THEORETICAL BACKGROUND}
+\setcounter{section}{2}
+\setcounter{subsection}{0}
+\setcounter{figure}{0}
+\setcounter{table}{0}
+
+This chapter provides an in-depth review of the underlying technologies and architectural paradigms that form the foundation of the FootField platform. It explores the principles of Software as a Service (SaaS), modern web development frameworks, artificial intelligence integration, and cross-platform mobile development.
+
+\subsection{Software as a Service (SaaS) and Multi-Tenant Architecture}
+Software as a Service (SaaS) is a cloud computing model where software applications are hosted by a third-party provider and made available to customers over the internet. Unlike the traditional on-premises software model, SaaS eliminates the need for organizations to install and run applications on their own computers or data centers, thereby reducing hardware acquisition, provisioning, and maintenance costs \cite{saas_architecture}.
+
+A fundamental characteristic of a highly scalable SaaS application is its \textbf{Multi-Tenant Architecture}. In a multi-tenant environment, a single instance of the software and its underlying database serves multiple distinct customer organizations (tenants). There are several approaches to implementing multi-tenancy at the database level:
+\begin{itemize}
+    \item \textbf{Separate Databases:} Each tenant is allocated a completely isolated database. This provides the highest level of data security but incurs immense infrastructure costs and makes schema updates extremely difficult to manage across thousands of databases.
+    \item \textbf{Shared Database, Separate Schemas:} All tenants share the same database instance, but each has its own schema (a distinct set of tables). This offers a middle ground between isolation and resource sharing.
+    \item \textbf{Shared Database, Shared Schema:} All tenants share the exact same database and the same tables. Data isolation is achieved logically at the application level by associating every row of data with a unique identifier, commonly referred to as a \texttt{tenant\_id}. 
+\end{itemize}
+
+The FootField platform adopts the \textbf{Shared Database, Shared Schema} approach. This method was selected for its exceptional cost-efficiency and ease of maintenance. Every query executed by the backend must be strictly scoped using the \texttt{tenant\_id} to guarantee that tenants cannot access or modify each other's data.
+
+\subsection{Backend Technologies: Node.js and Express.js}
+Node.js is an asynchronous, event-driven JavaScript runtime built on Chrome's V8 JavaScript engine \cite{nodejs}. Traditional web servers, such as Apache, handle concurrent requests by spawning a new thread for each connection, which consumes significant memory. In contrast, Node.js operates on a single-threaded event loop. When it encounters an I/O operation (such as querying a database), it delegates the task to the operating system and continues processing other requests. Once the I/O operation completes, a callback function is placed in the event queue to be executed. This non-blocking architecture makes Node.js highly scalable and exceptionally well-suited for data-intensive, real-time applications like booking systems.
+
+Express.js is a minimal and flexible web application framework running on top of Node.js \cite{expressjs}. It provides a robust set of features for routing HTTP requests, handling middleware, and serving static files. In this project, Express.js acts as the backbone of the Monolithic Hybrid architecture, managing RESTful API endpoints while concurrently serving the frontend HTML, CSS, and client-side JavaScript assets.
+
+\subsection{Relational Databases and Query Builders}
+For structured financial and operational data, relational database management systems (RDBMS) are the industry standard. MySQL, an open-source RDBMS, was chosen for its reliability, ACID (Atomicity, Consistency, Isolation, Durability) compliance, and widespread community support \cite{mysql}.
+
+To interact with MySQL securely and efficiently from within the Node.js environment, the project utilizes Knex.js \cite{knexjs}. Knex.js is a "batteries-included" SQL query builder. Unlike Object-Relational Mappers (ORMs) which can sometimes obscure the underlying SQL and lead to performance bottlenecks, a query builder allows developers to write SQL-like syntax in JavaScript. Crucially, Knex.js automatically parametrizes queries, which is the primary defense mechanism against SQL Injection vulnerabilities. It also provides a robust migration system, allowing developers to version-control changes to the database schema.
+
+\subsection{Artificial Intelligence and Function Calling Mechanics}
+The integration of Artificial Intelligence transforms the platform from a passive tool into an active assistant. The platform leverages Google Gemini 2.5 Flash, an advanced Large Language Model (LLM) \cite{gemini_api}. 
+
+While traditional chatbots rely on rigid, pre-programmed decision trees (e.g., "Press 1 for Booking, Press 2 for Support"), LLMs utilize Natural Language Processing (NLP) to understand the semantic intent behind a user's unstructured input. However, an LLM on its own is a "closed system"; it can generate text but cannot interact with external databases.
+
+To overcome this, the project utilizes a relatively new paradigm known as \textbf{Function Calling} (or Tool Use). The workflow is as follows:
+\begin{enumerate}
+    \item \textbf{Definition:} The backend developer defines a set of functions (e.g., \texttt{check\_availability}, \texttt{create\_booking}) and provides the LLM with a JSON schema describing what these functions do and what parameters they require.
+    \item \textbf{Inference:} The user sends a message (e.g., "Book a 7-a-side field for tomorrow at 18:00"). The LLM analyzes the text, recognizes that the user wants to book a field, and instead of replying with text, it outputs a structured JSON object requesting the backend to execute the \texttt{create\_booking} function with the extracted parameters.
+    \item \textbf{Execution:} The Node.js backend intercepts this request, executes the corresponding SQL query via Knex.js, and obtains the result (e.g., success or failure).
+    \item \textbf{Resolution:} The backend sends the result back to the LLM. The LLM then synthesizes a natural language response (e.g., "I have successfully booked the 7-a-side field for you!") and presents it to the user.
+\end{enumerate}
+This mechanism bridges the gap between conversational AI and deterministic software execution.
+
+\subsection{Cross-Platform Mobile Development with Capacitor}
+To provide facility staff with a tool to rapidly verify customer bookings on the field, a mobile application is required. Developing native applications separately for iOS (using Swift) and Android (using Kotlin) requires maintaining two separate codebases, which is highly resource-intensive.
+
+Ionic Capacitor solves this problem by providing a cross-platform native runtime \cite{capacitor}. It allows developers to build mobile applications using standard web technologies (HTML, CSS, JavaScript). Capacitor acts as a bridge; it wraps the web application in a native WebView and exposes a set of JavaScript APIs that can communicate with native device hardware. In the context of the FootField platform, Capacitor is used to grant the web-based Tenant Admin dashboard access to the device's native camera, enabling the implementation of a high-speed QR code scanner for customer check-ins without the need for native code development.
