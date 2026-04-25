@@ -1969,7 +1969,9 @@ async function renderFinance(){
     document.getElementById('growth-percentage').textContent = stats.growthPercentage >= 0 ? 
       `▲ +${stats.growthPercentage.toFixed(1)}% vs ${stats.prevMonthName}` : 
       `▼ ${Math.abs(stats.growthPercentage).toFixed(1)}% vs ${stats.prevMonthName}`;
-    document.getElementById('occupancy-rate').textContent = `${stats.occupancyRate.toFixed(0)}%`;
+    document.getElementById('occupancy-rate').textContent = `${stats.occupancyRate.toFixed(1)}%`;
+    const occSub = document.getElementById('occupancy-rate').nextElementSibling;
+    if (occSub) occSub.textContent = 'Hiệu suất sử dụng tháng này';
     document.getElementById('paid-transactions').textContent = `Số giao dịch thành công`;
     
     // Payment breakdown

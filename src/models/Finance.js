@@ -35,15 +35,18 @@ const Finance = {
       WHERE tenant_id = ? AND date BETWEEN ? AND ? AND paid = 0
     `, [tenantId, startOfMonth, endOfMonth]);
 
-    // 4. Occupancy Rate (Rough estimate for today)
+    // 4. Occupancy Rate (Monthly performance)
     const [[totalFields]] = await db.query('SELECT COUNT(*) as count FROM fields WHERE tenant_id = ?', [tenantId]);
-    const [[occupiedToday]] = await db.query(`
-      SELECT COUNT(DISTINCT field_id) as count 
+    const [[bookedHours]] = await db.query(`
+      SELECT SUM(duration) as total 
       FROM bookings 
-      WHERE tenant_id = ? AND date = ? AND status IN ('confirmed', 'completed')
-    `, [tenantId, vnTime.toISOString().slice(0, 10)]);
+      WHERE tenant_id = ? AND date BETWEEN ? AND ? AND status != 'cancelled'
+    `, [tenantId, startOfMonth, endOfMonth]);
 
-    const occupancyRate = totalFields.count > 0 ? (occupiedToday.count / totalFields.count * 100) : 0;
+    // Capacity = Total Fields * 15 hours/day * days in current month
+    const daysInMonth = new Date(vnTime.getFullYear(), vnTime.getMonth() + 1, 0).getDate();
+    const totalCapacity = (totalFields.count || 0) * 15 * daysInMonth;
+    const occupancyRate = totalCapacity > 0 ? ((bookedHours.total || 0) / totalCapacity * 100) : 0;
     const growth = prevMonthRev.sum > 0 ? ((currMonthRev.sum - prevMonthRev.sum) / prevMonthRev.sum * 100) : 0;
 
     return {
