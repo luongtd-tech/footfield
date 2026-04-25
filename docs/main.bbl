@@ -49,22 +49,16 @@ Knex.js - a sql query builder for javascript. [Online]. Available:
   \url{https://knexjs.org/}
 \BIBentrySTDinterwordspacing
 
-\bibitem{capacitor}
-\BIBentryALTinterwordspacing
-Ionic capacitor documentation. [Online]. Available:
-  \url{https://capacitorjs.com/docs}
-\BIBentrySTDinterwordspacing
-
 \bibitem{gemini_api}
 \BIBentryALTinterwordspacing
 Google gemini api documentation - function calling. [Online]. Available:
   \url{https://ai.google.dev/docs/function_calling}
 \BIBentrySTDinterwordspacing
 
-\bibitem{vnpay_sandbox}
+\bibitem{capacitor}
 \BIBentryALTinterwordspacing
-Vnpay sandbox documentation. [Online]. Available:
-  \url{https://sandbox.vnpayment.vn/apis/docs/}
+Ionic capacitor documentation. [Online]. Available:
+  \url{https://capacitorjs.com/docs}
 \BIBentrySTDinterwordspacing
 
 \end{thebibliography}
