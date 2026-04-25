@@ -1761,6 +1761,20 @@
       if (settings.hero_banner) {
         document.documentElement.style.setProperty('--hero-bg-image', `url('${settings.hero_banner}')`);
       }
+
+      // Dynamic Logo
+      if (settings.logo) {
+        const logoIcon = document.querySelector('.nav-logo-icon');
+        if (logoIcon) {
+          if (settings.logo.startsWith('http') || settings.logo.startsWith('/') || settings.logo.startsWith('data:')) {
+            logoIcon.style.backgroundImage = `url('${settings.logo}')`;
+            logoIcon.textContent = ''; // Xóa icon quả bóng nếu dùng logo ảnh
+          } else {
+            logoIcon.textContent = settings.logo;
+            logoIcon.style.backgroundImage = 'none';
+          }
+        }
+      }
     }
 
     let currentBooking = { field_id: '', date: '', duration: 0, staff: '', start_time: '' };

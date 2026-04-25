@@ -824,9 +824,9 @@ tr:hover td { background:rgba(0,212,170,.03); }
         </select>
       </div>
     </div>
-    <div class="input-group" style="margin-bottom:16px;">
-      <label>Địa chỉ</label>
-      <input id="edit-nt-address">
+    <div class="form-row">
+      <div class="input-group"><label>Địa chỉ</label><input id="edit-nt-address"></div>
+      <div class="input-group"><label>Logo URL</label><input id="edit-nt-logo" placeholder="https://example.com/logo.png"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-edit-tenant')">Hủy</button>
@@ -868,9 +868,9 @@ tr:hover td { background:rgba(0,212,170,.03); }
         </select>
       </div>
     </div>
-    <div class="input-group" style="margin-bottom:16px;">
-      <label>Địa chỉ</label>
-      <input id="nt-address" placeholder="Địa chỉ cơ sở kinh doanh">
+    <div class="form-row">
+      <div class="input-group"><label>Địa chỉ</label><input id="nt-address" placeholder="Địa chỉ cơ sở kinh doanh"></div>
+      <div class="input-group"><label>Logo URL</label><input id="nt-logo" placeholder="https://example.com/logo.png"></div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-secondary" onclick="closeModal('modal-add-tenant')">Hủy</button>
@@ -1194,7 +1194,9 @@ function renderTenants() {
     const bdgText = displayStatus==='active'?'✓ Hoạt động':(displayStatus==='suspended'?'⏸ Tạm dừng':'✗ Đã hết hạn');
 
     return `<div class="tenant-card" style="margin-bottom:14px; border-left: 4px solid ${displayStatus==='active'?'var(--green)':displayStatus==='suspended'?'var(--yellow)':'var(--red)'}">
-      <div class="tenant-avatar" style="background:${displayStatus==='active'?'rgba(0,212,170,0.1)':displayStatus==='suspended'?'rgba(255,209,102,0.1)':'rgba(255,77,109,0.1)'}">${t.logo||'🏢'}</div>
+      <div class="tenant-avatar" style="background:${displayStatus==='active'?'rgba(0,212,170,0.1)':displayStatus==='suspended'?'rgba(255,209,102,0.1)':'rgba(255,77,109,0.1)'};overflow:hidden;display:flex;align-items:center;justify-content:center;">
+        ${renderLogo(t.logo)}
+      </div>
       <div class="tenant-info">
         <div class="tenant-name" style="display:flex;align-items:center;gap:10px">
           ${t.name} ${isLocked ? `<small style="color:var(--red);font-size:10px;">[${displayStatus==='suspended'?'ĐÃ KHÓA':'HẾT HẠN'}]</small>` : ''}
@@ -1293,7 +1295,9 @@ function viewTenantDetail(id) {
   const content = document.getElementById('tenant-detail-content');
   content.innerHTML = `
     <div class="modal-header-flex" style="display:flex;gap:20px;align-items:flex-start;margin-bottom:20px;">
-      <div style="font-size:60px;background:var(--bg2);padding:20px;border-radius:15px;border:1px solid var(--border);">${t.logo||'🏢'}</div>
+      <div style="width:100px;height:100px;background:var(--bg2);border-radius:15px;border:1px solid var(--border);overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:40px;">
+        ${renderLogo(t.logo, 100)}
+      </div>
       <div style="flex:1;">
         <h2 style="margin-bottom:5px;">${t.name}</h2>
         <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
@@ -1353,6 +1357,7 @@ function openEditTenantModal(id) {
   document.getElementById('edit-nt-pass').value = t.password;
   document.getElementById('edit-nt-pkg').value = t.package_id;
   document.getElementById('edit-nt-cycle').value = t.billing_cycle;
+  document.getElementById('edit-nt-logo').value = t.logo || '';
 
   document.getElementById('modal-edit-tenant').classList.add('show');
 }
@@ -1368,7 +1373,8 @@ async function saveEditTenant() {
     username: document.getElementById('edit-nt-user').value,
     password: document.getElementById('edit-nt-pass').value,
     package_id: document.getElementById('edit-nt-pkg').value,
-    billing_cycle: document.getElementById('edit-nt-cycle').value
+    billing_cycle: document.getElementById('edit-nt-cycle').value,
+    logo: document.getElementById('edit-nt-logo').value
   };
 
   try {
@@ -1406,7 +1412,7 @@ async function addTenant() {
     billing_cycle:cycle,
     status:'active', start_date:new Date().toISOString().split('T')[0],
     end_date:new Date(Date.now() + daysToAdd * 86400000).toISOString().split('T')[0],
-    logo:'🏟️'
+    logo:document.getElementById('nt-logo').value || '🏟️'
   };
 
   try {
@@ -1429,6 +1435,13 @@ async function addTenant() {
 }
 
 // Helper to refresh all tenant-related data
+function renderLogo(logo, size = 40) {
+  if (!logo) return '🏢';
+  if (logo.startsWith('http') || logo.startsWith('/') || logo.startsWith('data:')) {
+    return `<img src="${logo}" style="width:100%;height:100%;object-fit:contain;" onerror="this.outerHTML='🏟️'">`;
+  }
+  return logo;
+}
 async function refreshTenantData() {
   try {
     const [statsRes, tenantsRes] = await Promise.all([
