@@ -34,7 +34,7 @@ Dự án áp dụng kiến trúc **Monolithic Hybrid** tích hợp cơ chế chi
 - **Backend:** Node.js, Express.js.
 - **Cơ Sở Dữ Liệu:** MySQL (Sử dụng Knex.js Query Builder để chống SQL Injection).
 - **Mobile Native App:** Ionic Capacitor (Đóng gói Web App thành Android Native App, tích hợp quyền thiết bị).
-- **AI Engine:** Google Gemini Pro (Function Calling).
+- **AI Engine:** Google Gemini 2.5 Flash (Function Calling).
 - **Payment Gateway:** Cổng thanh toán VNPay Sandbox/Prod.
 
 ### 📂 Tổ Chức Mã Nguồn (Directory Structure)
