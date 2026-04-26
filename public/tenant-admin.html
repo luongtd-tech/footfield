@@ -222,6 +222,17 @@ body{font-family:var(--font);background:var(--bg);color:var(--text);min-height:1
   .login-wrap { width: 92%; }
   .login-card { padding: 24px; }
   .pay-methods { grid-template-columns: 1fr; }
+  
+  /* Invoice Responsive */
+  .invoice-print { padding: 15px !important; }
+  .inv-header { flex-direction: column; align-items: center !important; text-align: center; gap: 15px; }
+  .inv-header-right { text-align: center !important; }
+  .inv-details { grid-template-columns: 1fr !important; gap: 15px !important; }
+  .inv-details-right { text-align: left !important; }
+  .inv-table-wrap { overflow-x: auto; margin-bottom: 20px; -webkit-overflow-scrolling: touch; }
+  .inv-table-wrap table { min-width: 450px; }
+  .inv-footer { flex-direction: column !important; align-items: center !important; text-align: center; gap: 20px; }
+  .inv-footer-right { text-align: center !important; }
 }
 
 /* CARD */
@@ -2250,7 +2261,7 @@ function renderInvoicePreview(){
 
   document.getElementById('invoice-preview').innerHTML=`
     <div class="invoice-print" style="padding:40px; background:#fff; color:#000; border-radius:8px; box-shadow:0 4px 20px rgba(0,0,0,0.05);">
-      <div style="display:flex; justify-content:space-between; align-items:start; border-bottom:2px solid #eee; padding-bottom:20px; margin-bottom:20px;">
+      <div class="inv-header" style="display:flex; justify-content:space-between; align-items:start; border-bottom:2px solid #eee; padding-bottom:20px; margin-bottom:20px;">
         <div style="display:flex; align-items:center; gap:12px;">
           <div style="font-size:40px;">⚽</div>
           <div>
@@ -2259,20 +2270,20 @@ function renderInvoicePreview(){
             <div style="font-size:12px; color:#666;">Hotline: ${db.tenant?.phone || '0912.345.678'}</div>
           </div>
         </div>
-        <div style="text-align:right;">
+        <div class="inv-header-right" style="text-align:right;">
           <div style="font-size:14px; font-weight:700; color:#999; margin-bottom:4px;">PHIẾU THANH TOÁN</div>
           <div style="font-size:18px; font-weight:800; font-family:var(--mono); color:#16a34a;">${bk.id}</div>
           <div style="font-size:11px; color:#666; margin-top:4px;">Ngày lập: ${new Date().toLocaleDateString('vi-VN')}</div>
         </div>
       </div>
 
-      <div style="display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-bottom:30px;">
+      <div class="inv-details" style="display:grid; grid-template-columns:1fr 1fr; gap:30px; margin-bottom:30px;">
         <div>
           <div style="font-size:11px; font-weight:700; color:#999; text-transform:uppercase; margin-bottom:8px;">Khách hàng</div>
           <div style="font-size:15px; font-weight:700;">${bk.customer_name}</div>
           <div style="font-size:13px; color:#444;">SĐT: ${bk.customer_phone}</div>
         </div>
-        <div style="text-align:right;">
+        <div class="inv-details-right" style="text-align:right;">
           <div style="font-size:11px; font-weight:700; color:#999; text-transform:uppercase; margin-bottom:8px;">Chi tiết thuê sân</div>
           <div style="font-size:14px; font-weight:700;">${bk.field_name}</div>
           <div style="font-size:13px; color:#444;">Ngày đá: ${fmtDate(bk.date)}</div>
@@ -2280,32 +2291,34 @@ function renderInvoicePreview(){
         </div>
       </div>
 
-      <table style="width:100%; border-collapse:collapse; margin-bottom:30px;">
-        <thead>
-          <tr style="background:#f8fdf9; border-bottom:2px solid #16a34a;">
-            <th style="padding:12px 8px; text-align:left; font-size:12px; color:#16a34a;">Dịch vụ</th>
-            <th style="padding:12px 8px; text-align:right; font-size:12px; color:#16a34a;">Đơn giá</th>
-            <th style="padding:12px 8px; text-align:right; font-size:12px; color:#16a34a;">Thời lượng</th>
-            <th style="padding:12px 8px; text-align:right; font-size:12px; color:#16a34a;">Thành tiền</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr style="border-bottom:1px solid #eee;">
-            <td style="padding:15px 8px; font-size:14px; font-weight:600;">Thuê sân bóng ${bk.field_name}</td>
-            <td style="padding:15px 8px; text-align:right; font-family:var(--mono); font-size:14px;">${fmt(bk.total_price/bk.duration)}</td>
-            <td style="padding:15px 8px; text-align:right; font-size:14px;">${bk.duration} h</td>
-            <td style="padding:15px 8px; text-align:right; font-family:var(--mono); font-size:15px; font-weight:700;">${fmt(bk.total_price)}</td>
-          </tr>
-        </tbody>
-      </table>
+      <div class="inv-table-wrap">
+        <table style="width:100%; border-collapse:collapse; margin-bottom:10px;">
+          <thead>
+            <tr style="background:#f8fdf9; border-bottom:2px solid #16a34a;">
+              <th style="padding:12px 8px; text-align:left; font-size:12px; color:#16a34a;">Dịch vụ</th>
+              <th style="padding:12px 8px; text-align:right; font-size:12px; color:#16a34a;">Đơn giá</th>
+              <th style="padding:12px 8px; text-align:right; font-size:12px; color:#16a34a;">Thời lượng</th>
+              <th style="padding:12px 8px; text-align:right; font-size:12px; color:#16a34a;">Thành tiền</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr style="border-bottom:1px solid #eee;">
+              <td style="padding:15px 8px; font-size:14px; font-weight:600;">Thuê sân bóng ${bk.field_name}</td>
+              <td style="padding:15px 8px; text-align:right; font-family:var(--mono); font-size:14px;">${fmt(bk.total_price/bk.duration)}</td>
+              <td style="padding:15px 8px; text-align:right; font-size:14px;">${bk.duration} h</td>
+              <td style="padding:15px 8px; text-align:right; font-family:var(--mono); font-size:15px; font-weight:700;">${fmt(bk.total_price)}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
 
-      <div style="display:flex; justify-content:space-between; align-items:end;">
+      <div class="inv-footer" style="display:flex; justify-content:space-between; align-items:end;">
         <div>
           <div style="font-size:12px; color:#666; margin-bottom:4px;">Phương thức thanh toán:</div>
           <div style="font-size:14px; font-weight:700; color:#444;">${pmBadge(bk.payment_method)}</div>
           <div style="margin-top:6px;">${bk.paid?'<span style="color:#16a34a; font-weight:700; font-size:12px; padding:4px 8px; background:#e8f5e9; border-radius:4px;">✅ ĐÃ THANH TOÁN</span>':'<span style="color:#dc2626; font-weight:700; font-size:12px; padding:4px 8px; background:#fef2f2; border-radius:4px;">⏳ CHƯA THU TIỀN</span>'}</div>
         </div>
-        <div style="text-align:right;">
+        <div class="inv-footer-right" style="text-align:right;">
           <div style="font-size:13px; color:#666; margin-bottom:5px;">TỔNG CỘNG</div>
           <div style="font-size:32px; font-weight:900; color:#16a34a; font-family:var(--mono);">${fmt(bk.total_price)}</div>
         </div>
