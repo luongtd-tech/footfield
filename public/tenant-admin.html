@@ -540,25 +540,21 @@ tr:hover td{background:rgba(22,163,74,.02);}
 
       <!-- MONITORING -->
       <div class="page" id="page-monitoring">
-        <div class="page-header">
-          <h1>Giám sát sân 📷</h1>
-          <p>Xem trực tiếp camera tại các sân bóng</p>
-        </div>
-        <div class="card">
-          <div id="monitoring-status" style="margin-bottom:10px; font-weight:bold; color:var(--green);">Đang chờ kết nối camera...</div>
-          <div style="background:#000; border-radius:12px; overflow:hidden; position:relative; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center;">
-              <video id="remoteVideo" autoplay playsinline style="width:100%; height:100%; object-fit:contain;"></video>
-              <div id="no-signal" style="position:absolute; color:#fff; text-align:center;">
-                  <div style="font-size:48px; margin-bottom:10px;">📡</div>
-                  <div>Chưa có tín hiệu camera</div>
-              </div>
+        <div class="page-header" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+          <div>
+            <h1>Giám sát sân 📷</h1>
+            <p>Xem trực tiếp camera tại từng sân bóng</p>
           </div>
-          <div style="margin-top:20px; display:flex; gap:10px; align-items:center;">
-              <button class="btn btn-primary" onclick="startWatching()">📺 Kết nối camera</button>
-              <div style="font-size:12px; color:var(--text2);">Tip: Mở <b>/camera-source.html?tenant=${TENANT_ID}</b> trên điện thoại để phát.</div>
+          <button class="btn btn-primary" onclick="connectAllCameras()" id="btn-connect-all">📡 Kết nối tất cả camera</button>
+        </div>
+        <div id="monitoring-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px;">
+          <div style="text-align:center; padding:60px; color:var(--text3); grid-column:1/-1;">
+            <div style="font-size:48px; margin-bottom:12px;">📷</div>
+            <div>Đang tải danh sách sân...</div>
           </div>
         </div>
       </div>
+
 
       <!-- FIELDS -->
       <div class="page" id="page-fields">
@@ -1324,52 +1320,118 @@ async function loadDashboardData() {
   }
 }
 
-// MONITORING (WebRTC)
+// MONITORING (WebRTC Multi-Field)
 let monitorSocket;
-let rtcPeer;
+const rtcPeers = {}; // fieldId -> RTCPeerConnection
 
 function renderMonitoring() {
-  if (!monitorSocket) {
-    monitorSocket = io();
-    
-    monitorSocket.on('offer', async (payload) => {
-        console.log("Nhận offer từ camera:", payload.sender);
-        rtcPeer = new RTCPeerConnection({
-            iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
-        });
+  const fields = db.fields || [];
+  const grid = document.getElementById('monitoring-grid');
 
-        rtcPeer.onicecandidate = (event) => {
-            if (event.candidate) {
-                monitorSocket.emit('ice-candidate', { target: payload.sender, candidate: event.candidate });
-            }
-        };
-
-        rtcPeer.ontrack = (event) => {
-            console.log("Nhận track video!");
-            document.getElementById('remoteVideo').srcObject = event.streams[0];
-            document.getElementById('no-signal').style.display = 'none';
-            document.getElementById('monitoring-status').textContent = "🔴 Đang xem trực tiếp";
-        };
-
-        await rtcPeer.setRemoteDescription(new RTCSessionDescription(payload.sdp));
-        const answer = await rtcPeer.createAnswer();
-        await rtcPeer.setLocalDescription(answer);
-        monitorSocket.emit('answer', { target: payload.sender, sdp: rtcPeer.localDescription });
-    });
-
-    monitorSocket.on('ice-candidate', (payload) => {
-        if (rtcPeer) rtcPeer.addIceCandidate(new RTCIceCandidate(payload.candidate));
-    });
+  if (!fields.length) {
+    grid.innerHTML = `<div style="text-align:center;padding:60px;color:var(--text3);grid-column:1/-1;">
+      <div style="font-size:48px;margin-bottom:12px;">📷</div>
+      <div>Chưa có sân nào. Hãy thêm sân trước.</div>
+    </div>`;
+    return;
   }
+
+  grid.innerHTML = fields.map(f => `
+    <div class="card" style="padding:0;overflow:hidden;" id="cam-card-${f.id}">
+      <div style="background:#000;position:relative;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;">
+        <video id="video-field-${f.id}" autoplay playsinline style="width:100%;height:100%;object-fit:cover;display:none;"></video>
+        <div id="no-signal-${f.id}" style="text-align:center;color:#94a3b8;">
+          <div style="font-size:36px;margin-bottom:8px;">📡</div>
+          <div style="font-size:13px;">Chưa có tín hiệu</div>
+        </div>
+        <div id="live-badge-${f.id}" style="display:none;position:absolute;top:8px;right:8px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;animation:pulse 1.5s infinite;">● LIVE</div>
+      </div>
+      <div style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-weight:700;font-size:13px;">${f.name}</div>
+          <div id="cam-status-${f.id}" style="font-size:11px;color:var(--text2);margin-top:2px;">⏳ Chờ kết nối...</div>
+        </div>
+        <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;" onclick="watchField(${f.id})">📺 Xem</button>
+      </div>
+    </div>
+  `).join('');
+
+  initMonitorSocket();
 }
 
-function startWatching() {
-    if (!monitorSocket) renderMonitoring();
-    monitorSocket.emit('join-room', TENANT_ID);
-    document.getElementById('monitoring-status').textContent = "📡 Đang tìm kiếm camera...";
+function initMonitorSocket() {
+  if (monitorSocket) return;
+  monitorSocket = io();
+
+  monitorSocket.on('offer', async (payload) => {
+    const roomId = payload.roomId;
+    if (!roomId) return;
+
+    // Extract fieldId from roomId: "tenant1-field-3" -> "3"
+    const fieldId = roomId.split('-field-')[1];
+    if (!fieldId) return;
+
+    console.log(`📥 Nhận stream cho sân ${fieldId}`);
+
+    const peer = new RTCPeerConnection({
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+    });
+    rtcPeers[fieldId] = peer;
+
+    peer.onicecandidate = (e) => {
+      if (e.candidate) {
+        monitorSocket.emit('ice-candidate', { target: payload.sender, candidate: e.candidate });
+      }
+    };
+
+    peer.ontrack = (e) => {
+      const video = document.getElementById(`video-field-${fieldId}`);
+      const noSignal = document.getElementById(`no-signal-${fieldId}`);
+      const liveBadge = document.getElementById(`live-badge-${fieldId}`);
+      const status = document.getElementById(`cam-status-${fieldId}`);
+      if (video) {
+        video.srcObject = e.streams[0];
+        video.style.display = 'block';
+        if (noSignal) noSignal.style.display = 'none';
+        if (liveBadge) liveBadge.style.display = 'block';
+        if (status) status.textContent = '🔴 Đang phát LIVE';
+      }
+    };
+
+    await peer.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+    const answer = await peer.createAnswer();
+    await peer.setLocalDescription(answer);
+    monitorSocket.emit('answer', { target: payload.sender, sdp: peer.localDescription });
+  });
+
+  monitorSocket.on('ice-candidate', (payload) => {
+    // Find which peer this belongs to
+    for (const peer of Object.values(rtcPeers)) {
+      if (peer) peer.addIceCandidate(new RTCIceCandidate(payload.candidate)).catch(() => {});
+    }
+  });
+}
+
+function watchField(fieldId) {
+  if (!monitorSocket) initMonitorSocket();
+  const roomId = `${TENANT_ID}-field-${fieldId}`;
+  monitorSocket.emit('join-room', roomId);
+  const status = document.getElementById(`cam-status-${fieldId}`);
+  if (status) status.textContent = '📡 Đang tìm camera...';
+}
+
+function connectAllCameras() {
+  const fields = db.fields || [];
+  if (!fields.length) return;
+  fields.forEach(f => watchField(f.id));
+  document.getElementById('btn-connect-all').textContent = '✅ Đã kết nối tất cả';
+  setTimeout(() => {
+    document.getElementById('btn-connect-all').textContent = '🔄 Kết nối lại';
+  }, 3000);
 }
 
 // DASHBOARD
+
 function renderDashboard(data){
   if (!data) return;
 

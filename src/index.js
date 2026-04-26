@@ -41,13 +41,14 @@ io.on('connection', (socket) => {
   socket.on('join-room', (roomId) => {
     socket.join(roomId);
     console.log(`User ${socket.id} joined room: ${roomId}`);
-    socket.to(roomId).emit('user-joined', socket.id);
+    socket.to(roomId).emit('user-joined', { userId: socket.id, roomId });
   });
 
   socket.on('offer', (payload) => {
     io.to(payload.target).emit('offer', {
       sdp: payload.sdp,
-      sender: socket.id
+      sender: socket.id,
+      roomId: payload.roomId
     });
   });
 

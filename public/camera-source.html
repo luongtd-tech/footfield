@@ -6,48 +6,105 @@
     <title>FootField - Camera Source</title>
     <script src="/socket.io/socket.io.js"></script>
     <style>
-        body { font-family: sans-serif; background: #000; color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
-        video { width: 100%; max-width: 600px; border: 2px solid #16a34a; border-radius: 12px; background: #222; }
-        .controls { margin-top: 20px; text-align: center; }
-        .status { margin-bottom: 10px; color: #16a34a; font-weight: bold; }
-        .btn { padding: 12px 24px; background: #16a34a; border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #fff; min-height: 100vh; display: flex; flex-direction: column; align-items: center; padding: 20px; }
+        h1 { font-size: 20px; margin-bottom: 4px; color: #4ade80; }
+        p { font-size: 13px; color: #94a3b8; margin-bottom: 20px; }
+        video { width: 100%; max-width: 600px; border-radius: 12px; border: 2px solid #16a34a; background: #1e293b; display: block; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; width: 100%; max-width: 600px; margin-top: 16px; }
+        label { font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 6px; }
+        select { width: 100%; padding: 10px 14px; background: #0f172a; border: 1.5px solid #334155; border-radius: 8px; color: #fff; font-size: 14px; outline: none; margin-bottom: 14px; }
+        .btn { display: block; width: 100%; padding: 14px; background: #16a34a; border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; transition: 0.2s; }
+        .btn:hover { background: #15803d; }
+        .btn:disabled { background: #334155; cursor: not-allowed; }
+        .status { text-align: center; padding: 10px; font-weight: 700; color: #4ade80; margin-bottom: 12px; font-size: 14px; }
+        .badge { display: inline-block; padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 700; background: rgba(22,163,74,.15); color: #4ade80; border: 1px solid rgba(22,163,74,.3); margin-left: 8px; }
+        .live-badge { background: rgba(239,68,68,.15); color: #ef4444; border: 1px solid rgba(239,68,68,.3); animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
     </style>
 </head>
 <body>
-    <div class="status" id="status">Đang khởi tạo camera...</div>
+    <h1>⚽ FootField Camera</h1>
+    <p>Biến điện thoại thành camera giám sát sân bóng</p>
+
     <video id="localVideo" autoplay playsinline muted></video>
-    <div class="controls">
-        <p>Tenant ID: <span id="display-tenant-id">...</span></p>
-        <button class="btn" onclick="startBroadcasting()">🚀 Bắt đầu phát</button>
+
+    <div class="card">
+        <div class="status" id="status">🔄 Đang tải danh sách sân...</div>
+        <div>
+            <label>Chọn sân cần giám sát</label>
+            <select id="field-select" disabled>
+                <option value="">-- Đang tải... --</option>
+            </select>
+        </div>
+        <button class="btn" id="btn-broadcast" onclick="startBroadcasting()" disabled>🚀 Bắt đầu phát</button>
     </div>
 
     <script>
         const socket = io();
         const urlParams = new URLSearchParams(window.location.search);
-        const TENANT_ID = urlParams.get('tenant') || 'test-tenant';
-        document.getElementById('display-tenant-id').textContent = TENANT_ID;
+        const TENANT_ID = urlParams.get('tenant') || 'tenant1';
+        const API_BASE = window.location.origin;
 
         let localStream;
-        const peers = {}; // Lưu trữ các kết nối tới người xem
+        const peers = {};
+        let currentRoomId = null;
+        let isBroadcasting = false;
 
+        // 1. Khởi động camera
         async function init() {
             try {
-                localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: true });
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
+                    audio: false
+                });
                 document.getElementById('localVideo').srcObject = localStream;
-                document.getElementById('status').textContent = "📷 Camera đã sẵn sàng";
+                document.getElementById('status').textContent = "📷 Camera sẵn sàng – Chọn sân để bắt đầu";
+                await loadFields();
             } catch (err) {
-                console.error("Lỗi truy cập camera:", err);
-                document.getElementById('status').textContent = "❌ Lỗi: Không thể truy cập camera";
+                document.getElementById('status').textContent = "❌ Không thể truy cập camera";
+                console.error(err);
             }
         }
 
-        function startBroadcasting() {
-            socket.emit('join-room', TENANT_ID);
-            document.getElementById('status').textContent = "📡 Đang phát trực tiếp...";
+        // 2. Tải danh sách sân từ API
+        async function loadFields() {
+            try {
+                const res = await fetch(`${API_BASE}/api/fields/${TENANT_ID}`);
+                const fields = await res.json();
+                const sel = document.getElementById('field-select');
+                sel.innerHTML = '<option value="">-- Chọn sân --</option>' +
+                    fields.map(f => `<option value="${f.id}">${f.name}</option>`).join('');
+                sel.disabled = false;
+                document.getElementById('btn-broadcast').disabled = false;
+                document.getElementById('status').textContent = `✅ Đã tải ${fields.length} sân – Sẵn sàng phát`;
+            } catch (err) {
+                document.getElementById('status').textContent = "❌ Không thể tải danh sách sân";
+            }
         }
 
-        socket.on('user-joined', (userId) => {
-            console.log("Người xem mới tham gia:", userId);
+        // 3. Bắt đầu phát
+        function startBroadcasting() {
+            const fieldId = document.getElementById('field-select').value;
+            if (!fieldId) return alert('Vui lòng chọn sân trước!');
+            if (!localStream) return alert('Camera chưa sẵn sàng!');
+
+            if (isBroadcasting && currentRoomId) {
+                socket.emit('leave-room', currentRoomId);
+            }
+
+            const fieldName = document.getElementById('field-select').selectedOptions[0].text;
+            currentRoomId = `${TENANT_ID}-field-${fieldId}`;
+            socket.emit('join-room', currentRoomId);
+            isBroadcasting = true;
+            document.getElementById('status').innerHTML = `🔴 Đang phát <span class="badge live-badge">LIVE</span> – ${fieldName}`;
+            document.getElementById('btn-broadcast').textContent = '🔄 Đổi sân';
+        }
+
+        // 4. Khi có người xem kết nối vào
+        socket.on('user-joined', ({ userId, roomId }) => {
+            if (roomId !== currentRoomId) return;
+            console.log("Người xem tham gia:", userId);
             createPeer(userId);
         });
 
@@ -55,7 +112,6 @@
             const peer = new RTCPeerConnection({
                 iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
             });
-
             peers[userId] = peer;
 
             localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
@@ -66,19 +122,22 @@
                 }
             };
 
-            peer.createOffer().then(offer => {
-                return peer.setLocalDescription(offer);
-            }).then(() => {
-                socket.emit('offer', { target: userId, sdp: peer.localDescription });
-            });
+            peer.createOffer().then(offer => peer.setLocalDescription(offer))
+                .then(() => {
+                    socket.emit('offer', { target: userId, sdp: peer.localDescription, roomId: currentRoomId });
+                });
         }
 
         socket.on('answer', (payload) => {
-            peers[payload.sender].setRemoteDescription(new RTCSessionDescription(payload.sdp));
+            if (peers[payload.sender]) {
+                peers[payload.sender].setRemoteDescription(new RTCSessionDescription(payload.sdp));
+            }
         });
 
         socket.on('ice-candidate', (payload) => {
-            peers[payload.sender].addIceCandidate(new RTCIceCandidate(payload.candidate));
+            if (peers[payload.sender]) {
+                peers[payload.sender].addIceCandidate(new RTCIceCandidate(payload.candidate));
+            }
         });
 
         init();
