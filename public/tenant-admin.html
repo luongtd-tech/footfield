@@ -2294,10 +2294,7 @@ async function addBooking(){
       document.getElementById('bk-cust').value = '';
       document.getElementById('bk-phone').value = '';
       document.getElementById('bk-note').value = '';
-      
-      // Sync customer data
-      syncCustomerFromBooking(bookingData);
-      
+
       await renderSchedule();
       await renderCustomers(); // Refresh customer list
       await loadDashboardData(); // Refresh dashboard stats
@@ -2313,40 +2310,8 @@ async function addBooking(){
 }
 
 // CUSTOMERS
-function syncCustomerFromBooking(booking) {
-  let customer = myCustomers().find(c => c.phone === booking.customer_phone);
-  
-  if (!customer) {
-    // Tạo customer mới
-    customer = {
-      id: 'c' + Date.now(),
-      tenant_id: TENANT_ID,
-      name: booking.customer_name,
-      phone: booking.customer_phone,
-      email: booking.customer_email || '',
-      total_bookings: 1,
-      total_spent: booking.total_price,
-      last_visit: booking.date,
-      status: 'new',
-      joined: new Date().toISOString().split('T')[0]
-    };
-    db.customers.push(customer);
-  } else {
-    // Cập nhật customer có sẵn
-    customer.total_bookings += 1;
-    customer.total_spent += booking.total_price;
-    customer.last_visit = booking.date;
-    
-    // Auto upgrade status
-    updateCustomerStatus(customer);
-  }
-  
-  saveDB();
-  return customer;
-}
-
 function updateCustomerStatus(customer) {
-  // Not used on frontend anymore as backend handles this, but kept for reference
+  // Handled by backend API
 }
 
 async function renderCustomers(){
