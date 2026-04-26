@@ -1192,8 +1192,8 @@
    ============================================= */
     #chatbot-bubble {
       position: fixed;
-      bottom: 24px;
-      left: 24px;
+      bottom: 20px;
+      right: 20px;
       width: 60px;
       height: 60px;
       background: linear-gradient(135deg, var(--green), var(--green2));
@@ -1221,7 +1221,7 @@
     #chatbot-window {
       position: fixed;
       bottom: 96px;
-      left: 24px;
+      right: 20px;
       width: 380px;
       height: 520px;
       background: rgba(255, 255, 255, 0.95);
@@ -1233,7 +1233,7 @@
       box-shadow: var(--shadow-lg);
       z-index: 1000;
       transform: translateY(20px);
-      transform-origin: bottom left;
+      transform-origin: bottom right;
       opacity: 0;
       pointer-events: none;
       transition: all 0.3s ease;
@@ -1344,11 +1344,21 @@
         display: none; /* Already handled by toggleNav usually, but just in case */
       }
       #chatbot-window {
-        width: calc(100vw - 48px);
-        left: 24px;
-        right: 24px;
+        width: calc(100vw - 40px);
+        left: 20px;
+        right: 20px;
         height: 60vh;
       }
+    }
+    
+    /* Override Zalo Chat Widget position to sit above AI Chatbot */
+    .zalo-chat-widget,
+    .zalo-chat-widget iframe,
+    div[class*="zalo-chat-widget"] iframe,
+    #zalo-chat-widget,
+    #zalo-chat-widget iframe,
+    div[class*="zalo-chat-widget"] {
+      bottom: 96px !important;
     }
   </style>
 </head>
