@@ -2045,15 +2045,26 @@ function selectPay(el, method) {
   selectedPayMethod = method;
   document.getElementById('pay-qr-section').style.display = method === 'transfer' ? 'block' : 'none';
   document.getElementById('vnpay-note').style.display = method === 'vnpay' ? 'block' : 'none';
-  if (method === 'transfer') {
-    const amount = parseInt(document.getElementById('pay-amount').value) || 0;
-    const servicesPrice = currentSelectedServices.reduce((sum, s) => sum + (s.price * s.quantity), 0);
-    const total = amount + servicesPrice;
-    const qrUrl = `https://img.vietqr.io/image/MB-3036506868-compact2.png?amount=${total}&addInfo=Thanh+toan+san+bong+FootField`;
-    document.getElementById('pay-qr-image').src = qrUrl;
-    document.getElementById('pay-qr-display').textContent = fmt(total);
-  }
+  if (method === 'transfer') updateQRImage();
 }
+
+function updateQRImage() {
+  const bkId = document.getElementById('pay-booking').value || 'OD';
+  const bookingPrice = parseInt(document.getElementById('pay-amount').value) || 0;
+  const servicesPrice = currentSelectedServices.reduce((sum, s) => sum + (s.price * s.quantity), 0);
+  const total = bookingPrice + servicesPrice;
+  const t = db.tenant || {};
+  const bankId = (t.bank_name || 'MB').toUpperCase();
+  const accNum = t.bank_account || '3036506868';
+  const accName = encodeURIComponent(t.bank_holder || 'TRAN DUC LUONG');
+  const memo = encodeURIComponent(`Thanh toan san bong FootField #${bkId}`);
+  document.getElementById('pay-qr-image').src =
+    `https://img.vietqr.io/image/${bankId}-${accNum}-compact2.png?amount=${total}&addInfo=${memo}&accountName=${accName}`;
+  document.getElementById('pay-qr-display').textContent = fmt(total);
+  const accLabel = document.getElementById('pay-qr-account');
+  if (accLabel) accLabel.textContent = `${accNum} - ${t.bank_holder || 'TRAN DUC LUONG'}`;
+}
+
 
 async function confirmPayment() {
   const bId = document.getElementById('pay-booking').value;
@@ -2503,103 +2514,7 @@ async function renderFinance(){
   }
 }
 
-// PAYMENT
-let selectedPayMethod='cash';
-async function renderPayment(){ await populateFieldFilters(); }
-function selectPay(el,method){
-  document.querySelectorAll('.pay-method').forEach(m=>m.classList.remove('selected'));
-  el.classList.add('selected');selectedPayMethod=method;
-  const qrMethods=['transfer']; // Chỉ hiện QR khi chọn Chuyển khoản
-  document.getElementById('pay-qr-section').style.display=qrMethods.includes(method)?'block':'none';
-  
-  // Hiển thị thông báo cho VNPay
-  const vnpayNote = document.getElementById('vnpay-note');
-  if (vnpayNote) {
-    vnpayNote.style.display = (method === 'vnpay') ? 'block' : 'none';
-  }
 
-  if(qrMethods.includes(method)){
-    updateQRImage();
-  }
-}
-function updateQRImage() {
-  const method = selectedPayMethod;
-  const bkId = document.getElementById('pay-booking').value || 'OD';
-  const amt = document.getElementById('pay-amount').value || '0';
-  const qrDisplay = document.getElementById('pay-qr-display');
-  const qrImg = document.getElementById('pay-qr-image');
-  
-  if (method === 'transfer' || method === 'vnpay') {
-    const t = db.tenant || {};
-    const bankId = (t.bank_name || 'tcb').toLowerCase();
-    const accNum = t.bank_account || '3036506868';
-    const accName = encodeURIComponent(t.bank_holder || 'TRAN DUC LUONG');
-    const memo = encodeURIComponent(`Thanh toan FF ${bkId}`);
-    
-    qrImg.src = `https://img.vietqr.io/image/${bankId}-${accNum}-compact2.png?amount=${amt}&addInfo=${memo}&accountName=${accName}`;
-    qrDisplay.textContent = parseInt(amt).toLocaleString('vi-VN') + ' ₫';
-    
-    const accLabel = document.getElementById('pay-qr-account');
-    if(accLabel) accLabel.textContent = `${accNum} - ${t.bank_holder || 'TRAN DUC LUONG'}`;
-  }
-}
-function updatePayAmount(){
-  const v=+document.getElementById('pay-amount').value||0;
-  document.getElementById('pay-total').textContent=fmt(v);
-  if (selectedPayMethod === 'transfer' || selectedPayMethod === 'vnpay') {
-    updateQRImage();
-  }
-}
-async function confirmPayment(){
-  const bkId = document.getElementById('pay-booking').value;
-  const amt = +document.getElementById('pay-amount').value;
-  const method = selectedPayMethod;
-  if(!amt || !bkId) return alert('❌ Chọn lượt đặt sân và nhập số tiền');
-
-  // Handle VNPay separately
-  if (method === 'vnpay') {
-    try {
-      const response = await fetch(`${API_BASE_URL}/api/payment/vnpay/create-url`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ bookingId: bkId, amount: amt })
-      });
-      const data = await response.json();
-      if (data.paymentUrl) {
-        window.location.href = data.paymentUrl; // Redirect to VNPay
-      } else {
-        alert('❌ Lỗi tạo link VNPay: ' + (data.message || 'Không rõ nguyên nhân'));
-      }
-    } catch (err) {
-      console.error('VNPay error:', err);
-      alert('❌ Lỗi kết nối khi tạo link thanh toán VNPay.');
-    }
-    return;
-  }
-  
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/bookings/${bkId}/payment`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paid: true, payment_method: method })
-    });
-
-    if (response.ok) {
-      alert(`✅ Thanh toán ${fmt(amt)} thành công!\nPhương thức: ${pmBadge(method)}`);
-      await renderFinance();
-      await renderSchedule();
-      await renderPayment(); // Làm mới dropdown sau khi thanh toán
-      document.getElementById('pay-amount').value = '0';
-      updatePayAmount();
-    } else {
-      const error = await response.json();
-      alert(`❌ Lỗi thanh toán: ${error.message}`);
-    }
-  } catch (error) {
-    console.error('Payment error:', error);
-    alert('❌ Lỗi kết nối khi thanh toán.');
-  }
-}
 
 async function renderCheckin(){
   const today = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString().slice(0, 10);
