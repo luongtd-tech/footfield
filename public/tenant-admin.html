@@ -970,8 +970,39 @@ tr:hover td{background:rgba(22,163,74,.02);}
       <div class="input-group"><label>Ngày</label><input type="date" id="bk-date"></div>
     </div>
     <div class="form-row">
-      <div class="input-group"><label>Giờ bắt đầu</label><input type="time" id="bk-start" value="08:00" onchange="calcBkPrice()"></div>
-      <div class="input-group"><label>Giờ kết thúc</label><input type="time" id="bk-end" value="10:00" onchange="calcBkPrice()"></div>
+      <div class="input-group"><label>Giờ bắt đầu</label>
+        <select id="bk-start" onchange="calcBkPrice()">
+          <option value="05:00">05:00</option><option value="05:30">05:30</option>
+          <option value="06:00">06:00</option><option value="06:30">06:30</option>
+          <option value="07:00">07:00</option><option value="07:30">07:30</option>
+          <option value="08:00">08:00</option><option value="08:30">08:30</option>
+          <option value="09:00">09:00</option><option value="09:30">09:30</option>
+          <option value="10:00">10:00</option><option value="10:30">10:30</option>
+          <option value="11:00">11:00</option><option value="11:30">11:30</option>
+          <option value="12:00">12:00</option><option value="12:30">12:30</option>
+          <option value="13:00">13:00</option><option value="13:30">13:30</option>
+          <option value="14:00">14:00</option><option value="14:30">14:30</option>
+          <option value="15:00">15:00</option><option value="15:30">15:30</option>
+          <option value="16:00">16:00</option><option value="16:30">16:30</option>
+          <option value="17:00">17:00</option><option value="17:30" selected>17:30</option>
+          <option value="18:00">18:00</option><option value="18:30">18:30</option>
+          <option value="19:00">19:00</option><option value="19:30">19:30</option>
+          <option value="20:00">20:00</option><option value="20:30">20:30</option>
+          <option value="21:00">21:00</option><option value="21:30">21:30</option>
+          <option value="22:00">22:00</option><option value="22:30">22:30</option>
+          <option value="23:00">23:00</option>
+        </select>
+      </div>
+      <div class="input-group"><label>Thời lượng</label>
+        <select id="bk-duration" onchange="calcBkPrice()">
+          <option value="1">1 giờ</option>
+          <option value="1.5" selected>1.5 giờ</option>
+          <option value="2">2 giờ</option>
+          <option value="2.5">2.5 giờ</option>
+          <option value="3">3 giờ</option>
+        </select>
+      </div>
+      <input type="hidden" id="bk-end" value="19:00">
     </div>
     <div class="input-group" style="margin-bottom:14px;"><label>Ghi chú</label><input id="bk-note" placeholder="Thông tin thêm..."></div>
     <div style="background:rgba(22,163,74,.05);border:1px solid rgba(22,163,74,.2);border-radius:10px;padding:14px;text-align:center;">
@@ -2186,23 +2217,38 @@ async function confirmPayment() {
 }
 function openBookingModal(){
   populateFieldFilters();
+  
+  // Set default date to today if empty
+  if (!document.getElementById('bk-date').value) {
+    document.getElementById('bk-date').value = new Date(new Date().getTime() + (7 * 60 * 60 * 1000)).toISOString().slice(0, 10);
+  }
+  
+  calcBkPrice();
   document.getElementById('modal-booking').classList.add('show');
 }
 function calcBkPrice(){
   const fieldSelect = document.getElementById('bk-field');
   const fieldId = fieldSelect.value;
-  const field = db.fields.find(f => f.id === fieldId);
+  const field = (db.fields || []).find(f => String(f.id) === String(fieldId));
   const pricePerHour = field ? field.price_per_hour : 0;
 
   const s = document.getElementById('bk-start').value || '';
-  const e = document.getElementById('bk-end').value || '';
+  const durStr = document.getElementById('bk-duration').value || '1.5';
 
-  if(s && e && pricePerHour){
+  if (s && durStr && pricePerHour) {
+    const duration = parseFloat(durStr);
     const [sh, sm] = s.split(':').map(Number);
-    const [eh, em] = e.split(':').map(Number);
-    const duration = ((eh * 60 + em) - (sh * 60 + sm)) / 60;
+    const totalMins = sh * 60 + sm + duration * 60;
+    const eh = Math.floor(totalMins / 60);
+    const em = totalMins % 60;
+    
+    const e = `${String(eh).padStart(2, '0')}:${String(em).padStart(2, '0')}`;
+    document.getElementById('bk-end').value = e;
+
     const price = duration > 0 ? Math.round(duration * pricePerHour) : 0;
     document.getElementById('bk-price-display').textContent = fmt(price);
+  } else {
+    document.getElementById('bk-price-display').textContent = '0 ₫';
   }
 }
 
