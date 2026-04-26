@@ -1329,10 +1329,19 @@ function renderMonitoring() {
   const grid = document.getElementById('monitoring-grid');
 
   if (!fields.length) {
-    grid.innerHTML = `<div style="text-align:center;padding:60px;color:var(--text3);grid-column:1/-1;">
-      <div style="font-size:48px;margin-bottom:12px;">📷</div>
-      <div>Chưa có sân nào. Hãy thêm sân trước.</div>
-    </div>`;
+    // Try to load fields first then re-render
+    fetch(`${API_BASE_URL}/api/fields/${TENANT_ID}`)
+      .then(r => r.json())
+      .then(data => {
+        db.fields = data;
+        renderMonitoring();
+      })
+      .catch(() => {
+        grid.innerHTML = `<div style="text-align:center;padding:60px;color:var(--text3);grid-column:1/-1;">
+          <div style="font-size:48px;margin-bottom:12px;">📷</div>
+          <div>Chưa có sân nào hoặc không thể tải dữ liệu.</div>
+        </div>`;
+      });
     return;
   }
 
@@ -1351,7 +1360,7 @@ function renderMonitoring() {
           <div style="font-weight:700;font-size:13px;">${f.name}</div>
           <div id="cam-status-${f.id}" style="font-size:11px;color:var(--text2);margin-top:2px;">⏳ Chờ kết nối...</div>
         </div>
-        <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;" onclick="watchField(${f.id})">📺 Xem</button>
+        <button class="btn btn-secondary" style="padding:6px 12px;font-size:12px;" onclick="watchField('${f.id}')">📺 Xem</button>
       </div>
     </div>
   `).join('');
