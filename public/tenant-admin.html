@@ -1277,7 +1277,7 @@ function doLogout(){
 }
 
 // NAV
-const pageTitles={dashboard:'Dashboard',fields:'Quản lý sân bóng',schedule:'Lịch đặt sân',customers:'Quản lý khách hàng',finance:'Quản lý tài chính',checkin:'Check-in QR',payment:'Thu tiền',invoice:'In hóa đơn',notifications:'Thông báo hệ thống',settings:'Cài đặt hệ thống'};
+const pageTitles={dashboard:'Dashboard',fields:'Quản lý sân bóng',schedule:'Lịch đặt sân',customers:'Quản lý khách hàng',finance:'Quản lý tài chính',checkin:'Check-in QR',payment:'Thu tiền',invoice:'In hóa đơn',notifications:'Thông báo hệ thống',settings:'Cài đặt hệ thống',canteen:'Quản lý căng tin'};
 function showPage(name){
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
@@ -1894,21 +1894,28 @@ async function markBookingPaid(id) {
 
 // CANTEEN LOGIC
 async function renderCanteen() {
-  await loadCanteenData();
-  const table = document.getElementById('canteen-table');
-  const servicesData = Array.isArray(db.services) ? db.services : [];
-  table.innerHTML = servicesData.map(s => `
-    <tr>
-      <td><strong>${s.name}</strong></td>
-      <td><span class="badge ${s.category==='drink'?'badge-blue':'badge-gray'}">${s.category==='drink'?'Nước/Đồ ăn':'Đồ thuê/Khác'}</span></td>
-      <td><strong style="font-family:var(--mono)">${fmt(s.price)}</strong></td>
-      <td>${s.unit}</td>
-      <td>
-        <button class="btn btn-sm btn-secondary" onclick="openServiceModal('${s.id}')">✏️</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteService('${s.id}')">🗑️</button>
-      </td>
-    </tr>
-  `).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px;">Chưa có dịch vụ nào</td></tr>';
+  try {
+    await loadCanteenData();
+    const table = document.getElementById('canteen-table');
+    if (!table) return;
+    const servicesData = Array.isArray(db.services) ? db.services : [];
+    table.innerHTML = servicesData.map(s => `
+      <tr>
+        <td><strong>${s.name}</strong></td>
+        <td><span class="badge ${s.category==='drink'?'badge-blue':'badge-gray'}">${s.category==='drink'?'Nước/Đồ ăn':'Đồ thuê/Khác'}</span></td>
+        <td><strong style="font-family:var(--mono)">${fmt(Number(s.price) || 0)}</strong></td>
+        <td>${s.unit}</td>
+        <td>
+          <button class="btn btn-sm btn-secondary" onclick="openServiceModal('${s.id}')">✏️</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteService('${s.id}')">🗑️</button>
+        </td>
+      </tr>
+    `).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px;">Chưa có dịch vụ nào</td></tr>';
+  } catch (err) {
+    console.error(err);
+    const table = document.getElementById('canteen-table');
+    if (table) table.innerHTML = `<tr><td colspan="5" style="color:red;text-align:center;padding:20px;">Lỗi hiển thị: ${err.message}</td></tr>`;
+  }
 }
 
 function openServiceModal(id) {
