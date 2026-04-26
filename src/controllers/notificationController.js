@@ -1,4 +1,5 @@
 const Notification = require('../models/Notification');
+const db = require('../config/database');
 
 const notificationController = {
   getTenantNotifications: async (req, res) => {
@@ -27,6 +28,22 @@ const notificationController = {
       res.json(notifications);
     } catch (error) {
       res.status(500).json({ message: 'Error retrieving notifications', error: error.message });
+    }
+  },
+
+  updateFCMToken: async (req, res) => {
+    try {
+      const { type, id, token } = req.body; // type: 'tenant' or 'admin'
+      if (!id || !token) return res.status(400).json({ success: false, message: 'Missing id or token' });
+
+      if (type === 'tenant') {
+        await db.query('UPDATE tenants SET fcm_token = ? WHERE id = ?', [token, id]);
+      } else {
+        await db.query('UPDATE admins SET fcm_token = ? WHERE id = ?', [token, id]);
+      }
+      res.json({ success: true, message: 'FCM token updated' });
+    } catch (error) {
+      res.status(500).json({ success: false, message: 'Error updating FCM token', error: error.message });
     }
   },
 

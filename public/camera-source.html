@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FootField - Camera Source</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #000; color: #fff; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        video { width: 100%; max-width: 600px; border: 2px solid #16a34a; border-radius: 12px; background: #222; }
+        .controls { margin-top: 20px; text-align: center; }
+        .status { margin-bottom: 10px; color: #16a34a; font-weight: bold; }
+        .btn { padding: 12px 24px; background: #16a34a; border: none; border-radius: 8px; color: #fff; font-weight: bold; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div class="status" id="status">Đang khởi tạo camera...</div>
+    <video id="localVideo" autoplay playsinline muted></video>
+    <div class="controls">
+        <p>Tenant ID: <span id="display-tenant-id">...</span></p>
+        <button class="btn" onclick="startBroadcasting()">🚀 Bắt đầu phát</button>
+    </div>
+
+    <script>
+        const socket = io();
+        const urlParams = new URLSearchParams(window.location.search);
+        const TENANT_ID = urlParams.get('tenant') || 'test-tenant';
+        document.getElementById('display-tenant-id').textContent = TENANT_ID;
+
+        let localStream;
+        const peers = {}; // Lưu trữ các kết nối tới người xem
+
+        async function init() {
+            try {
+                localStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" }, audio: true });
+                document.getElementById('localVideo').srcObject = localStream;
+                document.getElementById('status').textContent = "📷 Camera đã sẵn sàng";
+            } catch (err) {
+                console.error("Lỗi truy cập camera:", err);
+                document.getElementById('status').textContent = "❌ Lỗi: Không thể truy cập camera";
+            }
+        }
+
+        function startBroadcasting() {
+            socket.emit('join-room', TENANT_ID);
+            document.getElementById('status').textContent = "📡 Đang phát trực tiếp...";
+        }
+
+        socket.on('user-joined', (userId) => {
+            console.log("Người xem mới tham gia:", userId);
+            createPeer(userId);
+        });
+
+        function createPeer(userId) {
+            const peer = new RTCPeerConnection({
+                iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+            });
+
+            peers[userId] = peer;
+
+            localStream.getTracks().forEach(track => peer.addTrack(track, localStream));
+
+            peer.onicecandidate = (event) => {
+                if (event.candidate) {
+                    socket.emit('ice-candidate', { target: userId, candidate: event.candidate });
+                }
+            };
+
+            peer.createOffer().then(offer => {
+                return peer.setLocalDescription(offer);
+            }).then(() => {
+                socket.emit('offer', { target: userId, sdp: peer.localDescription });
+            });
+        }
+
+        socket.on('answer', (payload) => {
+            peers[payload.sender].setRemoteDescription(new RTCSessionDescription(payload.sdp));
+        });
+
+        socket.on('ice-candidate', (payload) => {
+            peers[payload.sender].addIceCandidate(new RTCIceCandidate(payload.candidate));
+        });
+
+        init();
+    </script>
+</body>
+</html>

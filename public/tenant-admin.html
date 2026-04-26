@@ -454,11 +454,13 @@ tr:hover td{background:rgba(22,163,74,.02);}
       <div class="nav-section">Quản lý sân</div>
       <div class="nav-item" onclick="showPage('fields')"><span>⚽</span> Quản lý sân bóng</div>
       <div class="nav-item" onclick="showPage('schedule')"><span>📅</span> Lịch đặt sân<span class="nav-badge" id="nb-pending">1</span></div>
+      <div class="nav-item" onclick="showPage('monitoring')"><span>📷</span> Giám sát sân</div>
       <div class="nav-section">Nhân sự & Khách hàng</div>
       <div class="nav-item" onclick="showPage('staff')"><span>👔</span> Quản lý nhân viên</div>
       <div class="nav-item" onclick="showPage('customers')"><span>👥</span> Quản lý khách hàng</div>
       <div class="nav-section" id="nav-finance-sec">Thu chi</div>
       <div class="nav-item" onclick="showPage('finance')" id="nav-finance"><span>💰</span> Quản lý tài chính</div>
+      <div class="nav-item" onclick="showPage('canteen')"><span>🥤</span> Quản lý căng tin</div>
       <div class="nav-section" id="nav-util-sec">Tiện ích</div>
       <div class="nav-item" onclick="showPage('checkin')" id="nav-checkin"><span>📱</span> Check-in QR</div>
       <div class="nav-item" onclick="showPage('payment')" id="nav-payment"><span>💳</span> Thu tiền</div>
@@ -533,6 +535,29 @@ tr:hover td{background:rgba(22,163,74,.02);}
             <div id="dash-vips"><div style="text-align:center;padding:20px;color:var(--text3)">Đang tải...</div></div>
           </div>
         </div>
+        </div>
+      </div>
+
+      <!-- MONITORING -->
+      <div class="page" id="page-monitoring">
+        <div class="page-header">
+          <h1>Giám sát sân 📷</h1>
+          <p>Xem trực tiếp camera tại các sân bóng</p>
+        </div>
+        <div class="card">
+          <div id="monitoring-status" style="margin-bottom:10px; font-weight:bold; color:var(--green);">Đang chờ kết nối camera...</div>
+          <div style="background:#000; border-radius:12px; overflow:hidden; position:relative; aspect-ratio:16/9; display:flex; align-items:center; justify-content:center;">
+              <video id="remoteVideo" autoplay playsinline style="width:100%; height:100%; object-fit:contain;"></video>
+              <div id="no-signal" style="position:absolute; color:#fff; text-align:center;">
+                  <div style="font-size:48px; margin-bottom:10px;">📡</div>
+                  <div>Chưa có tín hiệu camera</div>
+              </div>
+          </div>
+          <div style="margin-top:20px; display:flex; gap:10px; align-items:center;">
+              <button class="btn btn-primary" onclick="startWatching()">📺 Kết nối camera</button>
+              <div style="font-size:12px; color:var(--text2);">Tip: Mở <b>/camera-source.html?tenant=${TENANT_ID}</b> trên điện thoại để phát.</div>
+          </div>
+        </div>
       </div>
 
       <!-- FIELDS -->
@@ -546,6 +571,25 @@ tr:hover td{background:rgba(22,163,74,.02);}
           <p>Quản lý tất cả sân bóng tại cơ sở của bạn</p>
         </div>
         <div class="field-grid" id="fields-grid"></div>
+      </div>
+
+      <!-- CANTEEN -->
+      <div class="page" id="page-canteen">
+        <div class="page-header">
+          <div class="ph-row">
+            <h1>Quản lý căng tin 🥤</h1>
+            <button class="btn btn-primary" onclick="openServiceModal()">+ Thêm món mới</button>
+          </div>
+          <p>Quản lý danh sách nước uống, đồ ăn và dịch vụ thuê đồ</p>
+        </div>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Tên món</th><th>Loại</th><th>Đơn giá</th><th>Đơn vị</th><th>Thao tác</th></tr></thead>
+              <tbody id="canteen-table"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- SCHEDULE -->
@@ -720,7 +764,7 @@ tr:hover td{background:rgba(22,163,74,.02);}
           <div class="card-header"><div class="card-title">💳 Tạo giao dịch thu tiền</div></div>
           <div class="form-row">
             <div class="input-group"><label>Đặt sân</label>
-              <select id="pay-booking">
+              <select id="pay-booking" onchange="updatePayAmount()">
                 <option value="">-- Chọn đặt sân --</option>
               </select>
             </div>
@@ -753,9 +797,27 @@ tr:hover td{background:rgba(22,163,74,.02);}
             <div style="font-weight:700;color:var(--blue);margin-bottom:4px;">Thanh toán qua cổng VNPay</div>
             <div style="font-size:13px;color:var(--text2);">Hệ thống sẽ chuyển hướng bạn sang cổng thanh toán VNPay sau khi nhấn Xác nhận.</div>
           </div>
-          <div style="text-align:center;margin-top:20px;">
+          <div style="margin-top:20px; border-top:1px solid var(--border); padding-top:20px;">
+            <div style="font-size:14px; font-weight:700; margin-bottom:12px;">🥤 Dịch vụ căng tin & Đồ thuê</div>
+            <div id="pay-services-selected" style="margin-bottom:12px;">
+                <!-- Danh sách món đã chọn sẽ hiện ở đây -->
+            </div>
+            <div style="display:flex; gap:8px;">
+                <select id="pay-select-service" style="flex:1;">
+                    <option value="">-- Chọn món (Nước, thuê giày...) --</option>
+                </select>
+                <input type="number" id="pay-service-qty" value="1" min="1" style="width:70px; text-align:center;">
+                <button class="btn btn-secondary" onclick="addServiceToCurrentPayment()">+ Thêm</button>
+            </div>
+          </div>
+          <div style="text-align:center;margin-top:24px; background:var(--bg2); padding:20px; border-radius:12px;">
+            <div id="pay-discount-row" style="display:none; justify-content:space-between; font-size:13px; color:var(--green); margin-bottom:10px; border-bottom:1px dashed var(--green); padding-bottom:10px;">
+                <span>🎁 Ưu đãi thành viên (<span id="pay-customer-type">VIP</span>)</span>
+                <span id="pay-discount-val">-0 ₫</span>
+            </div>
+            <div style="font-size:13px; color:var(--text2); margin-bottom:4px;">Tổng tiền thanh toán</div>
             <div style="font-size:32px;font-weight:800;font-family:var(--mono);color:var(--green);margin-bottom:16px;" id="pay-total">0 ₫</div>
-            <button class="btn btn-primary" style="padding:14px 32px;font-size:15px;" onclick="confirmPayment()">✅ Xác nhận thanh toán</button>
+            <button class="btn btn-primary" style="padding:14px 32px;font-size:15px; width:100%;" onclick="confirmPayment()">✅ Xác nhận thanh toán</button>
           </div>
         </div>
       </div>
@@ -953,6 +1015,32 @@ tr:hover td{background:rgba(22,163,74,.02);}
   </div>
 </div>
 
+<div class="modal-overlay" id="modal-service">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title" id="service-modal-title">Thêm món mới</div>
+      <button class="modal-close" onclick="closeModal('modal-service')">✕</button>
+    </div>
+    <input type="hidden" id="service-id">
+    <div class="input-group" style="margin-bottom:14px;"><label>Tên món / Dịch vụ</label><input id="service-name" placeholder="VD: Nước suối Lavie"></div>
+    <div class="form-row">
+      <div class="input-group"><label>Đơn giá (₫)</label><input type="number" id="service-price" placeholder="10000"></div>
+      <div class="input-group"><label>Đơn vị</label><input id="service-unit" placeholder="Chai, Đôi, Cái..."></div>
+    </div>
+    <div class="input-group" style="margin-bottom:14px;"><label>Loại</label>
+      <select id="service-category">
+        <option value="drink">Nước uống / Đồ ăn</option>
+        <option value="rental">Thuê đồ (Giày, áo...)</option>
+        <option value="other">Dịch vụ khác</option>
+      </select>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-service')">Hủy</button>
+      <button id="service-save-btn" class="btn btn-primary" onclick="saveService()">✅ Lưu lại</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="modal-add-customer">
   <div class="modal">
     <div class="modal-header">
@@ -1024,7 +1112,10 @@ tr:hover td{background:rgba(22,163,74,.02);}
   </div>
 </div>
 
+<script src="/socket.io/socket.io.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-messaging-compat.js"></script>
 <script>
 // ===== APP LOGIC =====
 const API_BASE_URL = window.location.origin;
@@ -1156,11 +1247,11 @@ function showPage(name){
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
   document.querySelectorAll('.nav-item').forEach(n=>{if(n.textContent.includes(pageTitles[name]))n.classList.add('active');});
-  document.getElementById('topbar-title').textContent=pageTitles[name];
+  document.getElementById('topbar-title').textContent=pageTitles[name] || name;
   
   if(name === 'dashboard') loadDashboardData();
   
-  const renders={fields:renderFields,schedule:renderSchedule,customers:renderCustomers,finance:renderFinance,checkin:renderCheckin,payment:renderPayment,invoice:renderInvoicePage,notifications:renderNotifications,settings:renderSettings,staff:renderStaff};
+  const renders={fields:renderFields,schedule:renderSchedule,customers:renderCustomers,finance:renderFinance,checkin:renderCheckin,payment:renderPayment,invoice:renderInvoicePage,notifications:renderNotifications,settings:renderSettings,staff:renderStaff,monitoring:renderMonitoring,canteen:renderCanteen};
   if(renders[name])renders[name]();
   
   // Custom logic for marking notifications as read
@@ -1184,6 +1275,16 @@ async function initApp(){
   const linkObj = new URL('customer.html', window.location.href);
   linkObj.searchParams.set('tenant', TENANT_ID);
   if(previewBtn) previewBtn.href = linkObj.href;
+
+  // Load canteen services
+  loadCanteenData();
+}
+
+async function loadCanteenData() {
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/services/tenant/${TENANT_ID}`);
+    db.services = await res.json();
+  } catch (err) { console.error('Error loading services:', err); }
 }
 
 function copyStoreLink() {
@@ -1221,6 +1322,51 @@ async function loadDashboardData() {
     console.error('Error loading dashboard data:', error);
     document.getElementById('page-dashboard').innerHTML = `<div style="text-align:center;padding:40px;color:var(--red)">Lỗi tải dữ liệu Dashboard. Vui lòng kiểm tra lại kết nối và API.</div>`;
   }
+}
+
+// MONITORING (WebRTC)
+let monitorSocket;
+let rtcPeer;
+
+function renderMonitoring() {
+  if (!monitorSocket) {
+    monitorSocket = io();
+    
+    monitorSocket.on('offer', async (payload) => {
+        console.log("Nhận offer từ camera:", payload.sender);
+        rtcPeer = new RTCPeerConnection({
+            iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+        });
+
+        rtcPeer.onicecandidate = (event) => {
+            if (event.candidate) {
+                monitorSocket.emit('ice-candidate', { target: payload.sender, candidate: event.candidate });
+            }
+        };
+
+        rtcPeer.ontrack = (event) => {
+            console.log("Nhận track video!");
+            document.getElementById('remoteVideo').srcObject = event.streams[0];
+            document.getElementById('no-signal').style.display = 'none';
+            document.getElementById('monitoring-status').textContent = "🔴 Đang xem trực tiếp";
+        };
+
+        await rtcPeer.setRemoteDescription(new RTCSessionDescription(payload.sdp));
+        const answer = await rtcPeer.createAnswer();
+        await rtcPeer.setLocalDescription(answer);
+        monitorSocket.emit('answer', { target: payload.sender, sdp: rtcPeer.localDescription });
+    });
+
+    monitorSocket.on('ice-candidate', (payload) => {
+        if (rtcPeer) rtcPeer.addIceCandidate(new RTCIceCandidate(payload.candidate));
+    });
+  }
+}
+
+function startWatching() {
+    if (!monitorSocket) renderMonitoring();
+    monitorSocket.emit('join-room', TENANT_ID);
+    document.getElementById('monitoring-status').textContent = "📡 Đang tìm kiếm camera...";
 }
 
 // DASHBOARD
@@ -1469,8 +1615,21 @@ async function toggleFieldStatus(id, currentStatus){
 
 // SCHEDULE
 async function populateFieldFilters(){
+  // Đảm bảo db.fields đã có dữ liệu
+  if (!db.fields || db.fields.length === 0) {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/fields/${TENANT_ID}`);
+      db.fields = await response.json();
+    } catch (err) {
+      console.error('Lỗi tải danh sách sân:', err);
+    }
+  }
+
   const opts = myFields().map(f=>`<option value="${f.id}">${f.name}</option>`).join('');
-  ['bk-field-filter','bk-field'].forEach(id=>{const el=document.getElementById(id);if(el&&el.tagName==='SELECT')el.innerHTML=(id==='bk-field-filter'?'<option value="">Tất cả sân</option>':'')+opts;});
+  ['bk-field-filter','bk-field'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el&&el.tagName==='SELECT') el.innerHTML=(id==='bk-field-filter'?'<option value="">Tất cả sân</option>':'')+opts;
+  });
   
   try {
     const res = await fetch(`${API_BASE_URL}/api/bookings/tenant/${TENANT_ID}`);
@@ -1598,37 +1757,225 @@ async function markBookingPaid(id) {
     const response = await fetch(`${API_BASE_URL}/api/bookings/${id}/payment`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paid: true, payment_method: 'cash' }) // Default to cash for now
+      body: JSON.stringify({ paid: true, payment_method: 'cash' })
     });
     if (response.ok) {
-      // Update customer total_spent when payment is made
-      const booking = myBookings().find(b => b.id === id);
-      if (booking) {
-        const customer = myCustomers().find(c => c.phone === booking.customer_phone);
+      // Logic for canteen services would go here if paying directly from schedule
+      renderSchedule();
+      await loadDashboardData();
+    }
+  } catch (error) { console.error(error); }
+}
+
+// CANTEEN LOGIC
+async function renderCanteen() {
+  await loadCanteenData();
+  const table = document.getElementById('canteen-table');
+  table.innerHTML = (db.services || []).map(s => `
+    <tr>
+      <td><strong>${s.name}</strong></td>
+      <td><span class="badge ${s.category==='drink'?'badge-blue':'badge-gray'}">${s.category==='drink'?'Nước/Đồ ăn':'Đồ thuê/Khác'}</span></td>
+      <td><strong style="font-family:var(--mono)">${fmt(s.price)}</strong></td>
+      <td>${s.unit}</td>
+      <td>
+        <button class="btn btn-sm btn-secondary" onclick="openServiceModal(${s.id})">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteService(${s.id})">🗑️</button>
+      </td>
+    </tr>
+  `).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px;">Chưa có dịch vụ nào</td></tr>';
+}
+
+function openServiceModal(id) {
+  const modal = document.getElementById('modal-service');
+  const title = document.getElementById('service-modal-title');
+  const saveBtn = document.getElementById('service-save-btn');
+  
+  document.getElementById('service-id').value = '';
+  document.getElementById('service-name').value = '';
+  document.getElementById('service-price').value = '';
+  document.getElementById('service-unit').value = 'Chai';
+  document.getElementById('service-category').value = 'drink';
+
+  if (id) {
+    const s = db.services.find(x => x.id === id);
+    if (s) {
+      title.textContent = '✏️ Chỉnh sửa món';
+      saveBtn.textContent = '💾 Lưu thay đổi';
+      document.getElementById('service-id').value = s.id;
+      document.getElementById('service-name').value = s.name;
+      document.getElementById('service-price').value = s.price;
+      document.getElementById('service-unit').value = s.unit;
+      document.getElementById('service-category').value = s.category;
+    }
+  } else {
+    title.textContent = '🥤 Thêm món mới';
+    saveBtn.textContent = '✅ Lưu lại';
+  }
+  modal.classList.add('show');
+}
+
+async function saveService() {
+  const id = document.getElementById('service-id').value;
+  const data = {
+    tenant_id: TENANT_ID,
+    name: document.getElementById('service-name').value,
+    price: parseInt(document.getElementById('service-price').value),
+    unit: document.getElementById('service-unit').value,
+    category: document.getElementById('service-category').value
+  };
+
+  const method = id ? 'PUT' : 'POST';
+  const url = id ? `${API_BASE_URL}/api/services/${id}` : `${API_BASE_URL}/api/services`;
+
+  try {
+    const res = await fetch(url, {
+      method,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    if (res.ok) {
+      closeModal('modal-service');
+      renderCanteen();
+    }
+  } catch (error) { alert('Lỗi lưu dịch vụ'); }
+}
+
+async function deleteService(id) {
+  if (!confirm('Xóa món này?')) return;
+  await fetch(`${API_BASE_URL}/api/services/${id}`, { method: 'DELETE' });
+  renderCanteen();
+}
+
+// PAYMENT UPGRADE
+let currentSelectedServices = [];
+
+async function renderPayment() {
+  await populateFieldFilters(); // Load bookings
+  await loadCanteenData();
+  
+  const select = document.getElementById('pay-select-service');
+  select.innerHTML = '<option value="">-- Chọn món (Nước, thuê giày...) --</option>' +
+    (db.services || []).map(s => `<option value="${s.id}">${s.name} (${fmt(s.price)})</option>`).join('');
+    
+  currentSelectedServices = [];
+  renderCurrentPaymentServices();
+  updatePayAmount();
+}
+
+function addServiceToCurrentPayment() {
+  const sId = parseInt(document.getElementById('pay-select-service').value);
+  const qty = parseInt(document.getElementById('pay-service-qty').value);
+  if (!sId) return;
+  
+  const service = db.services.find(s => s.id === sId);
+  if (service) {
+    const existing = currentSelectedServices.find(x => x.service_id === sId);
+    if (existing) {
+      existing.quantity += qty;
+    } else {
+      currentSelectedServices.push({
+        service_id: sId,
+        name: service.name,
+        price: service.price,
+        quantity: qty
+      });
+    }
+    renderCurrentPaymentServices();
+    updatePayAmount();
+  }
+}
+
+function renderCurrentPaymentServices() {
+  const container = document.getElementById('pay-services-selected');
+  container.innerHTML = currentSelectedServices.map((s, idx) => `
+    <div style="display:flex; justify-content:space-between; align-items:center; background:var(--bg3); padding:8px 12px; border-radius:8px; margin-bottom:4px; font-size:13px;">
+      <div><strong>${s.name}</strong> x${s.quantity}</div>
+      <div style="display:flex; gap:10px; align-items:center;">
+        <span style="font-family:var(--mono);">${fmt(s.price * s.quantity)}</span>
+        <span style="cursor:pointer; color:var(--red);" onclick="removeServiceFromPayment(${idx})">✕</span>
+      </div>
+    </div>
+  `).join('');
+}
+
+function removeServiceFromPayment(idx) {
+  currentSelectedServices.splice(idx, 1);
+  renderCurrentPaymentServices();
+  updatePayAmount();
+}
+
+function updatePayAmount() {
+  const bId = document.getElementById('pay-booking').value;
+  const bookingPrice = parseInt(document.getElementById('pay-amount').value) || 0;
+  const servicesPrice = currentSelectedServices.reduce((sum, s) => sum + (s.price * s.quantity), 0);
+  const subtotal = bookingPrice + servicesPrice;
+  
+  let discount = 0;
+  let customerType = 'Thành viên';
+  
+  if (bId) {
+    const booking = (db.bookings || []).find(b => b.id === bId);
+    if (booking) {
+        const customer = (db.customers || []).find(c => c.phone === booking.customer_phone);
         if (customer) {
-          customer.total_spent += booking.total_price;
-          updateCustomerStatus(customer);
-          saveDB();
+            if (customer.status === 'vip') {
+                discount = Math.round(subtotal * 0.1); // 10% cho VIP
+                customerType = '⭐ VIP - Giảm 10%';
+            } else if (customer.status === 'regular') {
+                discount = Math.round(subtotal * 0.05); // 5% cho Regular
+                customerType = '👤 Thường xuyên - Giảm 5%';
+            }
         }
+    }
+  }
+
+  const discountRow = document.getElementById('pay-discount-row');
+  if (discount > 0) {
+      discountRow.style.display = 'flex';
+      document.getElementById('pay-customer-type').textContent = customerType;
+      document.getElementById('pay-discount-val').textContent = '-' + fmt(discount);
+  } else {
+      discountRow.style.display = 'none';
+  }
+
+  const total = subtotal - discount;
+  document.getElementById('pay-total').textContent = fmt(total);
+}
+
+async function confirmPayment() {
+  const bId = document.getElementById('pay-booking').value;
+  if (!bId) return alert('Vui lòng chọn lượt đặt sân');
+  
+  const amount = parseInt(document.getElementById('pay-amount').value);
+  const method = document.querySelector('.pay-method.selected').onclick.toString().match(/'(.*?)'/)[1];
+
+  // 1. Mark booking as paid
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/bookings/${bId}/payment`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paid: true, payment_method: method })
+    });
+    
+    if (res.ok) {
+      // 2. Save canteen services
+      for (const s of currentSelectedServices) {
+        await fetch(`${API_BASE_URL}/api/services/booking`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            booking_id: bId,
+            service_id: s.service_id,
+            quantity: s.quantity,
+            price_at_time: s.price
+          })
+        });
       }
       
-      renderSchedule();
-      // Potentially re-render finance page if it's visible
-      if (document.getElementById('page-finance').classList.contains('active')) {
-        renderFinance();
-      }
-      // Re-render customers to update stats
-      if (document.getElementById('page-customers').classList.contains('active')) {
-        renderCustomers();
-      }
-      await loadDashboardData(); // Sync dashboard after payment
-    } else {
-      alert('Lỗi cập nhật thanh toán.');
+      alert('✅ Thanh toán thành công!');
+      showPage('dashboard');
     }
-  } catch (error) {
-    console.error('Error updating payment status:', error);
-    alert('Lỗi kết nối khi cập nhật thanh toán.');
-  }
+  } catch (err) { alert('Lỗi thanh toán'); }
 }
 function openBookingModal(){
   populateFieldFilters();
@@ -2333,7 +2680,21 @@ function renderInvoicePreview(){
 function printInvoice(){
   const id=document.getElementById('inv-booking').value;
   if(!id){alert('Chọn đặt sân cần in');return;}
-  window.print();
+  
+  const content = document.getElementById('invoice-preview').innerHTML;
+  
+  if (window.cordova && window.cordova.plugins && window.cordova.plugins.printer) {
+    window.cordova.plugins.printer.check(function (available) {
+      if (available) {
+        window.cordova.plugins.printer.print(content, { name: 'HoaDon_FootField_' + id });
+      } else {
+        alert('❌ Không tìm thấy máy in khả dụng hoặc dịch vụ in bị tắt.');
+      }
+    });
+  } else {
+    // Fallback for web browser
+    window.print();
+  }
 }
 
 // NOTIFICATIONS
@@ -2795,11 +3156,93 @@ if (savedUser) {
       updateLastActive(); // Cập nhật lại thời gian khi load trang thành công
       initApp();
       startClock();
+      if (window.Capacitor) {
+        initNotifications();
+      }
     }
   } catch(e) {
     console.error('Session error', e);
   }
 }
+
+// CAPACITOR & WEB NOTIFICATIONS
+async function initNotifications() {
+  if (window.Capacitor) {
+    const { PushNotifications } = Capacitor.Plugins;
+    const { LocalNotifications } = Capacitor.Plugins;
+
+    // Request permission
+    let perm = await PushNotifications.checkPermissions();
+    if (perm.receive === 'prompt') {
+      perm = await PushNotifications.requestPermissions();
+    }
+    if (perm.receive !== 'granted') return;
+
+    await PushNotifications.register();
+    PushNotifications.addListener('registration', async (token) => {
+      updateFCMToken('tenant', TENANT_ID, token.value);
+    });
+
+    PushNotifications.addListener('pushNotificationReceived', (notification) => {
+      showWebNotification(notification.title, notification.body);
+    });
+  } else if ('Notification' in window) {
+    // WEB BROWSER LOGIC
+    const permission = await Notification.requestPermission();
+    if (permission === 'granted') {
+      try {
+        // Initialize Firebase for Web (User needs to fill config)
+        const firebaseConfig = {
+          apiKey: "AIzaSyDzfWF3Bt_JRSz1a_PIieo8troLfkglzDE",
+          projectId: "footfield-db573",
+          messagingSenderId: "843846666103",
+          appId: "1:843846666103:web:9446c24d839f2b1be78372"
+        };
+        
+        if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+        const messaging = firebase.messaging();
+        
+        const currentToken = await messaging.getToken({ vapidKey: 'BKhBnMN02jYjxDRIPwmqiI9Z2nXOYSB34DQZMp_cf-9bA24hx1quLGzn8B8gRiJi-BZ0J2IDjCNt8LTzUcoGcbU' });
+        if (currentToken) {
+          updateFCMToken('tenant', TENANT_ID, currentToken);
+        }
+
+        messaging.onMessage((payload) => {
+          showWebNotification(payload.notification.title, payload.notification.body);
+        });
+      } catch (err) { console.warn('Web Push initialization failed:', err); }
+    }
+  }
+}
+
+async function updateFCMToken(type, id, token) {
+  try {
+    await fetch(`${API_BASE_URL}/api/notifications/fcm-token`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type, id, token })
+    });
+  } catch (err) { console.error('Error updating FCM token:', err); }
+}
+
+function showWebNotification(title, body) {
+  // Show visual toast
+  const toast = document.createElement('div');
+  toast.style = `position:fixed; top:20px; right:20px; background:var(--accent); color:white; padding:15px 25px; 
+    border-radius:10px; box-shadow:var(--shadow-lg); z-index:9999; animation: slideIn 0.3s ease;`;
+  toast.innerHTML = `<strong>${title}</strong><br>${body}`;
+  document.body.appendChild(toast);
+  
+  // Play sound
+  const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2358/2358-preview.mp3');
+  audio.play().catch(e => console.log('Audio autoplay blocked'));
+
+  setTimeout(() => {
+    toast.style.animation = 'slideOut 0.3s ease';
+    setTimeout(() => toast.remove(), 300);
+  }, 5000);
+}
+
 
 function toggleSidebar() {
   document.querySelector('.sidebar').classList.toggle('show');

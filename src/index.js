@@ -1,5 +1,7 @@
 const express = require('express');
 const cors = require('cors');
+const http = require('http');
+const { Server } = require('socket.io');
 const path = require('path'); // Đưa lên đầu
 require('dotenv').config();
 const db = require('./config/database');
@@ -19,10 +21,54 @@ const financeRoutes = require('./routes/financeRoutes');
 const uploadRoutes = require('./routes/uploadRoutes');
 const chatbotRoutes = require('./routes/chatbotRoutes');
 const paymentRoutes = require('./routes/paymentRoutes');
+const serviceRoutes = require('./routes/serviceRoutes');
 const initCronJobs = require('./jobs/cronJobs');
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: {
+    origin: "*",
+    methods: ["GET", "POST"]
+  }
+});
 const PORT = process.env.PORT || 10000;
+
+// Socket.io Signaling Logic
+io.on('connection', (socket) => {
+  console.log('User connected:', socket.id);
+
+  socket.on('join-room', (roomId) => {
+    socket.join(roomId);
+    console.log(`User ${socket.id} joined room: ${roomId}`);
+    socket.to(roomId).emit('user-joined', socket.id);
+  });
+
+  socket.on('offer', (payload) => {
+    io.to(payload.target).emit('offer', {
+      sdp: payload.sdp,
+      sender: socket.id
+    });
+  });
+
+  socket.on('answer', (payload) => {
+    io.to(payload.target).emit('answer', {
+      sdp: payload.sdp,
+      sender: socket.id
+    });
+  });
+
+  socket.on('ice-candidate', (payload) => {
+    io.to(payload.target).emit('ice-candidate', {
+      candidate: payload.candidate,
+      sender: socket.id
+    });
+  });
+
+  socket.on('disconnect', () => {
+    console.log('User disconnected:', socket.id);
+  });
+});
 
 // Middleware
 app.use(cors());
@@ -49,6 +95,7 @@ app.use('/api/finance', financeRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/chatbot', chatbotRoutes);
 app.use('/api/payment', paymentRoutes);
+app.use('/api/services', serviceRoutes);
 
 // --- CẤU HÌNH CÁC TRANG HTML (Routes) ---
 // Trang chủ: Dành cho Chủ sân (Tenant Admin)
@@ -97,7 +144,7 @@ app.get('/api/debug-db', async (req, res) => {
 // Test DB Connection
 
 // Start Server
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
   initCronJobs();
 });

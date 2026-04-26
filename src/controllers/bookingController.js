@@ -1,6 +1,7 @@
 const Booking = require('../models/Booking');
 const Field = require('../models/Field'); 
 const Customer = require('../models/Customer');
+const pushNotifier = require('../utils/pushNotifier');
 
 exports.getBookingsByTenant = async (req, res) => {
   try {
@@ -80,6 +81,13 @@ exports.createBooking = async (req, res) => {
     }
 
     res.status(201).json(newBooking);
+
+    // Notify Tenant about new booking
+    pushNotifier.sendToTenant(
+      tenant_id, 
+      '⚽ Đơn đặt sân mới!', 
+      `Khách hàng ${customer_name} vừa đặt sân ${newBooking.field_name} vào lúc ${newBooking.start_time.substring(0,5)}.`
+    );
   } catch (error) {
     res.status(500).json({ message: 'Error creating booking', error: error.message });
   }
@@ -122,6 +130,16 @@ exports.updateBookingStatus = async (req, res) => {
     const success = await Booking.updateStatus(id, status);
     if (success) {
       res.json({ success: true, message: `Booking status updated to ${status}` });
+      
+      // Get booking details to notify tenant
+      const booking = await Booking.findById(id);
+      if (booking) {
+        pushNotifier.sendToTenant(
+          booking.tenant_id,
+          '🔔 Cập nhật trạng thái!',
+          `Đơn đặt sân ${id} đã chuyển sang trạng thái: ${status}.`
+        );
+      }
     } else {
       res.status(404).json({ message: 'Booking not found' });
     }

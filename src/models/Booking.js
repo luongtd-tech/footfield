@@ -1,6 +1,10 @@
 const db = require('../config/database');
 
 const Booking = {
+  findById: async (id) => {
+    const [rows] = await db.query('SELECT * FROM bookings WHERE id = ?', [id]);
+    return rows[0];
+  },
   findByTenant: async (tenantId, filters) => {
     let query = 'SELECT b.*, f.name as field_name FROM bookings b JOIN fields f ON b.field_id = f.id WHERE b.tenant_id = ?';
     const params = [tenantId];

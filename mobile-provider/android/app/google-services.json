@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "843846666103",
+    "project_id": "footfield-db573",
+    "storage_bucket": "footfield-db573.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:843846666103:android:af9dadef248f385be78372",
+        "android_client_info": {
+          "package_name": "tech.luongtd.footfield.provider"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6xe1xA7Ytg1zNce5EQXeIBR2Ty0Cq8xU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:843846666103:android:6594be2ca7ab4566e78372",
+        "android_client_info": {
+          "package_name": "tech.luongtd.footfield.tenant"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC6xe1xA7Ytg1zNce5EQXeIBR2Ty0Cq8xU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
