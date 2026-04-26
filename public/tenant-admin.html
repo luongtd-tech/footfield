@@ -1896,7 +1896,8 @@ async function markBookingPaid(id) {
 async function renderCanteen() {
   await loadCanteenData();
   const table = document.getElementById('canteen-table');
-  table.innerHTML = (db.services || []).map(s => `
+  const servicesData = Array.isArray(db.services) ? db.services : [];
+  table.innerHTML = servicesData.map(s => `
     <tr>
       <td><strong>${s.name}</strong></td>
       <td><span class="badge ${s.category==='drink'?'badge-blue':'badge-gray'}">${s.category==='drink'?'Nước/Đồ ăn':'Đồ thuê/Khác'}</span></td>
