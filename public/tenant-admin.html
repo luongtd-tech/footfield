@@ -1322,29 +1322,29 @@ async function loadDashboardData() {
 
 // MONITORING (WebRTC Multi-Field)
 let monitorSocket;
-const rtcPeers = {}; // fieldId -> RTCPeerConnection
+const rtcPeers = {};
+const pendingStreams = {}; // fieldId -> MediaStream (if offer arrives before DOM)
 
-function renderMonitoring() {
-  const fields = db.fields || [];
+async function renderMonitoring() {
   const grid = document.getElementById('monitoring-grid');
+  grid.innerHTML = `<div style="text-align:center;padding:40px;color:var(--text3);grid-column:1/-1;">⏳ Đang tải...</div>`;
 
+  // Luôn fetch mới nhất
+  try {
+    const r = await fetch(`${API_BASE_URL}/api/fields/${TENANT_ID}`);
+    db.fields = await r.json();
+  } catch(e) { db.fields = []; }
+
+  const fields = db.fields;
   if (!fields.length) {
-    // Try to load fields first then re-render
-    fetch(`${API_BASE_URL}/api/fields/${TENANT_ID}`)
-      .then(r => r.json())
-      .then(data => {
-        db.fields = data;
-        renderMonitoring();
-      })
-      .catch(() => {
-        grid.innerHTML = `<div style="text-align:center;padding:60px;color:var(--text3);grid-column:1/-1;">
-          <div style="font-size:48px;margin-bottom:12px;">📷</div>
-          <div>Chưa có sân nào hoặc không thể tải dữ liệu.</div>
-        </div>`;
-      });
+    grid.innerHTML = `<div style="text-align:center;padding:60px;color:var(--text3);grid-column:1/-1;">
+      <div style="font-size:48px;margin-bottom:12px;">📷</div>
+      <div>Chưa có sân nào.</div>
+    </div>`;
     return;
   }
 
+  // Render lưới video theo từng sân
   grid.innerHTML = fields.map(f => `
     <div class="card" style="padding:0;overflow:hidden;" id="cam-card-${f.id}">
       <div style="background:#000;position:relative;aspect-ratio:16/9;display:flex;align-items:center;justify-content:center;">
@@ -1353,7 +1353,7 @@ function renderMonitoring() {
           <div style="font-size:36px;margin-bottom:8px;">📡</div>
           <div style="font-size:13px;">Chưa có tín hiệu</div>
         </div>
-        <div id="live-badge-${f.id}" style="display:none;position:absolute;top:8px;right:8px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;animation:pulse 1.5s infinite;">● LIVE</div>
+        <div id="live-badge-${f.id}" style="display:none;position:absolute;top:8px;right:8px;background:#ef4444;color:#fff;font-size:11px;font-weight:700;padding:3px 8px;border-radius:20px;">● LIVE</div>
       </div>
       <div style="padding:12px 14px;display:flex;justify-content:space-between;align-items:center;">
         <div>
@@ -1365,7 +1365,27 @@ function renderMonitoring() {
     </div>
   `).join('');
 
+  // Nếu có stream đang chờ (offer đến trước DOM), hiển thị ngay
+  for (const [fieldId, stream] of Object.entries(pendingStreams)) {
+    showStream(fieldId, stream);
+    delete pendingStreams[fieldId];
+  }
+
   initMonitorSocket();
+}
+
+function showStream(fieldId, stream) {
+  const video = document.getElementById(`video-field-${fieldId}`);
+  const noSignal = document.getElementById(`no-signal-${fieldId}`);
+  const liveBadge = document.getElementById(`live-badge-${fieldId}`);
+  const status = document.getElementById(`cam-status-${fieldId}`);
+  if (video) {
+    video.srcObject = stream;
+    video.style.display = 'block';
+    if (noSignal) noSignal.style.display = 'none';
+    if (liveBadge) liveBadge.style.display = 'block';
+    if (status) status.textContent = '🔴 Đang phát LIVE';
+  }
 }
 
 function initMonitorSocket() {
@@ -1375,35 +1395,28 @@ function initMonitorSocket() {
   monitorSocket.on('offer', async (payload) => {
     const roomId = payload.roomId;
     if (!roomId) return;
-
-    // Extract fieldId from roomId: "tenant1-field-3" -> "3"
     const fieldId = roomId.split('-field-')[1];
     if (!fieldId) return;
 
     console.log(`📥 Nhận stream cho sân ${fieldId}`);
 
     const peer = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+      iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
     });
     rtcPeers[fieldId] = peer;
 
     peer.onicecandidate = (e) => {
-      if (e.candidate) {
-        monitorSocket.emit('ice-candidate', { target: payload.sender, candidate: e.candidate });
-      }
+      if (e.candidate) monitorSocket.emit('ice-candidate', { target: payload.sender, candidate: e.candidate });
     };
 
     peer.ontrack = (e) => {
-      const video = document.getElementById(`video-field-${fieldId}`);
-      const noSignal = document.getElementById(`no-signal-${fieldId}`);
-      const liveBadge = document.getElementById(`live-badge-${fieldId}`);
-      const status = document.getElementById(`cam-status-${fieldId}`);
-      if (video) {
-        video.srcObject = e.streams[0];
-        video.style.display = 'block';
-        if (noSignal) noSignal.style.display = 'none';
-        if (liveBadge) liveBadge.style.display = 'block';
-        if (status) status.textContent = '🔴 Đang phát LIVE';
+      const stream = e.streams[0];
+      const videoEl = document.getElementById(`video-field-${fieldId}`);
+      if (videoEl) {
+        showStream(fieldId, stream);
+      } else {
+        // DOM chưa sẵn sàng → lưu vào buffer
+        pendingStreams[fieldId] = stream;
       }
     };
 
@@ -1414,7 +1427,6 @@ function initMonitorSocket() {
   });
 
   monitorSocket.on('ice-candidate', (payload) => {
-    // Find which peer this belongs to
     for (const peer of Object.values(rtcPeers)) {
       if (peer) peer.addIceCandidate(new RTCIceCandidate(payload.candidate)).catch(() => {});
     }
@@ -1429,14 +1441,16 @@ function watchField(fieldId) {
   if (status) status.textContent = '📡 Đang tìm camera...';
 }
 
-function connectAllCameras() {
+async function connectAllCameras() {
+  // Đảm bảo DOM đã render xong trước khi join room
+  await renderMonitoring();
   const fields = db.fields || [];
-  if (!fields.length) return;
   fields.forEach(f => watchField(f.id));
-  document.getElementById('btn-connect-all').textContent = '✅ Đã kết nối tất cả';
-  setTimeout(() => {
-    document.getElementById('btn-connect-all').textContent = '🔄 Kết nối lại';
-  }, 3000);
+  const btn = document.getElementById('btn-connect-all');
+  if (btn) {
+    btn.textContent = '✅ Đã kết nối ' + fields.length + ' sân';
+    setTimeout(() => { btn.textContent = '🔄 Kết nối lại'; }, 3000);
+  }
 }
 
 // DASHBOARD
