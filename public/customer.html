@@ -1192,8 +1192,8 @@
    ============================================= */
     #chatbot-bubble {
       position: fixed;
-      bottom: 100px;
-      right: 24px;
+      bottom: 24px;
+      left: 24px;
       width: 60px;
       height: 60px;
       background: linear-gradient(135deg, var(--green), var(--green2));
@@ -1220,8 +1220,8 @@
 
     #chatbot-window {
       position: fixed;
-      bottom: 100px;
-      right: 24px;
+      bottom: 96px;
+      left: 24px;
       width: 380px;
       height: 520px;
       background: rgba(255, 255, 255, 0.95);
@@ -1233,6 +1233,7 @@
       box-shadow: var(--shadow-lg);
       z-index: 1000;
       transform: translateY(20px);
+      transform-origin: bottom left;
       opacity: 0;
       pointer-events: none;
       transition: all 0.3s ease;
@@ -1341,6 +1342,12 @@
       }
       .nav-links {
         display: none; /* Already handled by toggleNav usually, but just in case */
+      }
+      #chatbot-window {
+        width: calc(100vw - 48px);
+        left: 24px;
+        right: 24px;
+        height: 60vh;
       }
     }
   </style>
