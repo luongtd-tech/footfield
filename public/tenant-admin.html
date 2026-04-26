@@ -1863,8 +1863,8 @@ async function renderCanteen() {
       <td><strong style="font-family:var(--mono)">${fmt(s.price)}</strong></td>
       <td>${s.unit}</td>
       <td>
-        <button class="btn btn-sm btn-secondary" onclick="openServiceModal(${s.id})">✏️</button>
-        <button class="btn btn-sm btn-danger" onclick="deleteService(${s.id})">🗑️</button>
+        <button class="btn btn-sm btn-secondary" onclick="openServiceModal('${s.id}')">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="deleteService('${s.id}')">🗑️</button>
       </td>
     </tr>
   `).join('') || '<tr><td colspan="5" style="text-align:center;padding:20px;">Chưa có dịch vụ nào</td></tr>';
@@ -1882,7 +1882,7 @@ function openServiceModal(id) {
   document.getElementById('service-category').value = 'drink';
 
   if (id) {
-    const s = db.services.find(x => x.id === id);
+    const s = (db.services || []).find(x => String(x.id) === String(id));
     if (s) {
       title.textContent = '✏️ Chỉnh sửa món';
       saveBtn.textContent = '💾 Lưu thay đổi';
@@ -1935,31 +1935,41 @@ async function deleteService(id) {
 let currentSelectedServices = [];
 
 async function renderPayment() {
-  await populateFieldFilters(); // Load bookings
+  // Fetch bookings chưa thanh toán
+  try {
+    const res = await fetch(`${API_BASE_URL}/api/bookings/tenant/${TENANT_ID}`);
+    const all = await res.json();
+    db.bookings = all;
+    const unpaid = all.filter(b => !b.paid && b.status !== 'cancelled');
+    const sel = document.getElementById('pay-booking');
+    sel.innerHTML = '<option value="">-- Chọn đặt sân --</option>' +
+      unpaid.map(b => `<option value="${b.id}">${b.customer_name} · ${b.field_name || 'Sân'} · ${b.booking_date} ${b.start_time}-${b.end_time} (${fmt(b.total_price)})</option>`).join('');
+  } catch(e) { console.error('Lỗi tải đặt sân:', e); }
+
   await loadCanteenData();
-  
   const select = document.getElementById('pay-select-service');
   select.innerHTML = '<option value="">-- Chọn món (Nước, thuê giày...) --</option>' +
-    (db.services || []).map(s => `<option value="${s.id}">${s.name} (${fmt(s.price)})</option>`).join('');
-    
+    (db.services || []).map(s => `<option value="${s.id}">${s.name} (${fmt(s.price)}/${s.unit})</option>`).join('');
+
   currentSelectedServices = [];
   renderCurrentPaymentServices();
   updatePayAmount();
 }
 
 function addServiceToCurrentPayment() {
-  const sId = parseInt(document.getElementById('pay-select-service').value);
-  const qty = parseInt(document.getElementById('pay-service-qty').value);
-  if (!sId) return;
-  
-  const service = db.services.find(s => s.id === sId);
+  const rawId = document.getElementById('pay-select-service').value;
+  const qty = parseInt(document.getElementById('pay-service-qty').value) || 1;
+  if (!rawId) return;
+
+  // So sánh dạng chuỗi để tránh lỗi type mismatch
+  const service = (db.services || []).find(s => String(s.id) === String(rawId));
   if (service) {
-    const existing = currentSelectedServices.find(x => x.service_id === sId);
+    const existing = currentSelectedServices.find(x => String(x.service_id) === String(rawId));
     if (existing) {
       existing.quantity += qty;
     } else {
       currentSelectedServices.push({
-        service_id: sId,
+        service_id: service.id,
         name: service.name,
         price: service.price,
         quantity: qty
@@ -2027,23 +2037,65 @@ function updatePayAmount() {
   document.getElementById('pay-total').textContent = fmt(total);
 }
 
+// Lưu phương thức thanh toán được chọn (tránh dùng regex trên .toString())
+let selectedPayMethod = 'cash';
+function selectPay(el, method) {
+  document.querySelectorAll('.pay-method').forEach(e => e.classList.remove('selected'));
+  el.classList.add('selected');
+  selectedPayMethod = method;
+  document.getElementById('pay-qr-section').style.display = method === 'transfer' ? 'block' : 'none';
+  document.getElementById('vnpay-note').style.display = method === 'vnpay' ? 'block' : 'none';
+  if (method === 'transfer') {
+    const amount = parseInt(document.getElementById('pay-amount').value) || 0;
+    const servicesPrice = currentSelectedServices.reduce((sum, s) => sum + (s.price * s.quantity), 0);
+    const total = amount + servicesPrice;
+    const qrUrl = `https://img.vietqr.io/image/MB-3036506868-compact2.png?amount=${total}&addInfo=Thanh+toan+san+bong+FootField`;
+    document.getElementById('pay-qr-image').src = qrUrl;
+    document.getElementById('pay-qr-display').textContent = fmt(total);
+  }
+}
+
 async function confirmPayment() {
   const bId = document.getElementById('pay-booking').value;
   if (!bId) return alert('Vui lòng chọn lượt đặt sân');
-  
-  const amount = parseInt(document.getElementById('pay-amount').value);
-  const method = document.querySelector('.pay-method.selected').onclick.toString().match(/'(.*?)'/)[1];
+  if (!selectedPayMethod) return alert('Vui lòng chọn phương thức thanh toán');
 
-  // 1. Mark booking as paid
+  // Tính tổng có trừ discount
+  const bookingPrice = parseInt(document.getElementById('pay-amount').value) || 0;
+  const servicesPrice = currentSelectedServices.reduce((sum, s) => sum + (s.price * s.quantity), 0);
+  const subtotal = bookingPrice + servicesPrice;
+
+  // Tính discount theo loại khách
+  let discount = 0;
+  const booking = (db.bookings || []).find(b => String(b.id) === String(bId));
+  if (booking) {
+    const customer = (db.customers || []).find(c => c.phone === booking.customer_phone);
+    if (customer?.status === 'vip') discount = Math.round(subtotal * 0.1);
+    else if (customer?.status === 'regular') discount = Math.round(subtotal * 0.05);
+  }
+  const finalAmount = subtotal - discount;
+
+  if (selectedPayMethod === 'vnpay') {
+    try {
+      const vnRes = await fetch(`${API_BASE_URL}/api/vnpay/create-payment`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ amount: finalAmount, bookingId: bId, orderInfo: `Thanh toan dat san FootField #${bId}` })
+      });
+      const vnData = await vnRes.json();
+      if (vnData.paymentUrl) { window.location.href = vnData.paymentUrl; return; }
+    } catch(e) { return alert('Lỗi tạo giao dịch VNPay'); }
+  }
+
   try {
     const res = await fetch(`${API_BASE_URL}/api/bookings/${bId}/payment`, {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paid: true, payment_method: method })
+      body: JSON.stringify({ paid: true, payment_method: selectedPayMethod, paid_amount: finalAmount })
     });
-    
+
     if (res.ok) {
-      // 2. Save canteen services
+      // Lưu các dịch vụ căng tin đã dùng
       for (const s of currentSelectedServices) {
         await fetch(`${API_BASE_URL}/api/services/booking`, {
           method: 'POST',
@@ -2056,11 +2108,12 @@ async function confirmPayment() {
           })
         });
       }
-      
-      alert('✅ Thanh toán thành công!');
+      alert('✅ Thanh toán thành công! Tổng: ' + fmt(finalAmount));
       showPage('dashboard');
+    } else {
+      alert('❌ Lỗi khi xác nhận thanh toán.');
     }
-  } catch (err) { alert('Lỗi thanh toán'); }
+  } catch (err) { alert('Lỗi kết nối khi thanh toán'); }
 }
 function openBookingModal(){
   populateFieldFilters();
