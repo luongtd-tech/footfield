@@ -1120,7 +1120,18 @@ function populatePackageSelects() {
 }
 
 // ===== HELPERS =====
-const fmt = n => (n||0).toLocaleString('vi-VN') + ' ₫';
+const fmt = n => {
+  const num = parseFloat(n) || 0;
+  // Hiển thị dạng triệu (M) cho số lớn để dễ đọc
+  if (num >= 1000000) {
+    return (num / 1000000).toFixed(2).replace(/\.?0+$/, '') + 'M ₫';
+  }
+  // Hiển thị dạng nghìn (K) cho số trung bình
+  if (num >= 1000) {
+    return (num / 1000).toFixed(0) + 'K ₫';
+  }
+  return num.toLocaleString('vi-VN') + ' ₫';
+};
 const fmtDate = s => s ? new Date(s).toLocaleDateString('vi-VN') : '';
 function getPkg(id) { return db.packages.find(p=>p.id===id) || {}; }
 function statusBadge(s) {
