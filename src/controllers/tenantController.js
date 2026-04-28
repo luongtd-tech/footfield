@@ -84,7 +84,11 @@ const tenantController = {
   deleteTenant: async (req, res) => {
     try {
       const { id } = req.params;
-      const options = req.body;
+      const options = req.body || {};
+      // Mặc định xóa toàn bộ dữ liệu tenant nếu không chỉ định cụ thể
+      if (!options.bookings && !options.fields && !options.customers && !options.invoices && !options.services && !options.fullAccount) {
+        options.fullAccount = true;
+      }
       const result = await Tenant.delete(id, options);
       res.json({ success: true, message: 'Tenant data deleted successfully' });
     } catch (error) {
