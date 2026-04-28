@@ -1223,7 +1223,10 @@ function updateLastActive() {
 });
 
 // HELPERS
-const fmt=n=>n.toLocaleString('vi-VN')+' ₫';
+const fmt=n=>{
+  const num=Math.round(parseFloat(n)||0);
+  return num.toLocaleString('vi-VN')+' ₫';
+};
 const fmtDate=s=>s?new Date(s).toLocaleDateString('vi-VN'):'';// ... }}
 function myBookings(){return(db.bookings||[]).filter(b=>b.tenant_id===TENANT_ID);}
 function myCustomers(){return(db.customers||[]).filter(c=>c.tenant_id===TENANT_ID);}
