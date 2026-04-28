@@ -1318,20 +1318,29 @@ async function renewTenant(id) {
 }
 async function deleteTenant(id) {
   if (!confirm('Xác nhận xóa nhà thuê này?')) return;
-  
+
   try {
     const response = await fetch(`${API_BASE_URL}/api/tenants/${id}`, {
-      method: 'DELETE'
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' }
     });
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      alert('Lỗi server (' + response.status + '): ' + errorText);
+      return;
+    }
+
     const data = await response.json();
     if (data.success) {
+      alert('Đã xóa nhà thuê thành công!');
       await refreshTenantData();
     } else {
-      alert('Lỗi: ' + data.message);
+      alert('Lỗi: ' + (data.message || 'Không thể xóa nhà thuê'));
     }
   } catch (error) {
     console.error('Error deleting tenant:', error);
-    alert('Lỗi kết nối đến server');
+    alert('Lỗi kết nối đến server: ' + error.message);
   }
 }
 function viewTenantDetail(id) {
