@@ -84,10 +84,11 @@ const tenantController = {
   deleteTenant: async (req, res) => {
     try {
       const { id } = req.params;
-      const result = await Tenant.delete(id);
-      res.json({ success: true, message: 'Tenant deleted successfully' });
+      const options = req.body;
+      const result = await Tenant.delete(id, options);
+      res.json({ success: true, message: 'Tenant data deleted successfully' });
     } catch (error) {
-      res.status(500).json({ success: false, message: 'Error deleting tenant', error: error.message });
+      res.status(500).json({ success: false, message: 'Error deleting tenant data', error: error.message });
     }
   }
 };

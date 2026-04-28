@@ -789,6 +789,49 @@ tr:hover td { background:rgba(0,212,170,.03); }
   </div>
 </div>
 
+<!-- MODAL LỰA CHỌN XÓA DỮ LIỆU TENANT -->
+<div class="modal-overlay" id="modal-delete-tenant-options">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🗑️ Lựa chọn xóa dữ liệu: <span id="delete-tenant-name" style="color:var(--accent);"></span></div>
+      <button class="modal-close" onclick="closeModal('modal-delete-tenant-options')">✕</button>
+    </div>
+    <p style="font-size:13px; color:var(--text2); margin-bottom:20px;">
+      Vui lòng chọn các mục dữ liệu bạn muốn xóa bỏ. Hành động này không thể khôi phục.
+    </p>
+    
+    <div style="display:flex; flex-direction:column; gap:12px; background:var(--bg2); padding:16px; border-radius:12px; border:1px solid var(--border);">
+      <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-size:14px;">
+        <input type="checkbox" id="del-bookings" style="width:18px; height:18px;"> 📅 Lịch đặt sân & Giao dịch
+      </label>
+      <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-size:14px;">
+        <input type="checkbox" id="del-fields" style="width:18px; height:18px;"> ⚽ Danh sách sân bóng
+      </label>
+      <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-size:14px;">
+        <input type="checkbox" id="del-customers" style="width:18px; height:18px;"> 👥 Thông tin khách hàng
+      </label>
+      <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-size:14px;">
+        <input type="checkbox" id="del-invoices" style="width:18px; height:18px;"> 💳 Hóa đơn thuê dịch vụ
+      </label>
+      <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-size:14px;">
+        <input type="checkbox" id="del-services" style="width:18px; height:18px;"> 🥤 Dịch vụ căng tin
+      </label>
+      
+      <div style="margin-top:8px; padding-top:12px; border-top:1px solid var(--border);">
+        <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-size:14px; color:var(--red); font-weight:700;">
+          <input type="checkbox" id="del-full" style="width:18px; height:18px;" onchange="if(this.checked){ document.querySelectorAll('#modal-delete-tenant-options input[type=\'checkbox\']').forEach(c=>c.checked=true); }"> 
+          🚨 XÓA TOÀN BỘ TÀI KHOẢN (FULL ACCOUNT)
+        </label>
+      </div>
+    </div>
+    
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="closeModal('modal-delete-tenant-options')">Hủy bỏ</button>
+      <button class="btn btn-danger" onclick="confirmSelectiveDelete()">Xác nhận xóa đã chọn</button>
+    </div>
+  </div>
+</div>
+
 <!-- MODAL CHỈNH SỬA NHÀ THUÊ -->
 <div class="modal-overlay" id="modal-edit-tenant">
   <div class="modal">
@@ -942,6 +985,7 @@ tr:hover td { background:rgba(0,212,170,.03); }
 <script>
 // ===== APP LOGIC =====
 let db = {};
+let tenantIdToDelete = null;
 const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 phút
 
 function updateLastActive() {

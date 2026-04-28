@@ -216,9 +216,58 @@ const Tenant = {
 
     return result;
   },
-  delete: async (id) => {
-    const [result] = await db.query('DELETE FROM tenants WHERE id = ?', [id]);
-    return result;
+  delete: async (id, options = {}) => {
+    const connection = await db.getConnection();
+    await connection.beginTransaction();
+    try {
+      // 1. Delete Bookings (including related booking_services)
+      if (options.bookings || options.fullAccount) {
+        // Delete booking_services first
+        await connection.query('DELETE FROM booking_services WHERE booking_id IN (SELECT id FROM bookings WHERE tenant_id = ?)', [id]);
+        // Delete service_invoices related to this tenant (if any)
+        await connection.query('DELETE FROM service_invoices WHERE tenant_id = ?', [id]);
+        // Delete bookings
+        await connection.query('DELETE FROM bookings WHERE tenant_id = ?', [id]);
+      }
+
+      // 2. Delete Fields
+      if (options.fields || options.fullAccount) {
+        // Note: Bookings must be deleted before fields if FK constraint exists
+        await connection.query('DELETE FROM fields WHERE tenant_id = ?', [id]);
+      }
+
+      // 3. Delete Customers
+      if (options.customers || options.fullAccount) {
+        await connection.query('DELETE FROM customers WHERE tenant_id = ?', [id]);
+      }
+
+      // 4. Delete Invoices (Tenant side invoices)
+      if (options.invoices || options.fullAccount) {
+        await connection.query('DELETE FROM invoices WHERE tenant_id = ?', [id]);
+      }
+
+      // 5. Delete Services (Canteen)
+      if (options.services || options.fullAccount) {
+        await connection.query('DELETE FROM services WHERE tenant_id = ?', [id]);
+      }
+
+      // 6. Delete other related data (Staff, Notifications, etc.)
+      if (options.fullAccount) {
+        await connection.query('DELETE FROM staff WHERE tenant_id = ?', [id]);
+        await connection.query('DELETE FROM notifications WHERE tenant_id = ?', [id]);
+        
+        // Final: Delete the tenant itself
+        await connection.query('DELETE FROM tenants WHERE id = ?', [id]);
+      }
+
+      await connection.commit();
+      return { success: true };
+    } catch (error) {
+      await connection.rollback();
+      throw error;
+    } finally {
+      connection.release();
+    }
   }
 };
 
