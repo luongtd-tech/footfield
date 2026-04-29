@@ -1991,7 +1991,9 @@ async function markBookingPaid(id) {
 
 // CANTEEN LOGIC
 async function renderCanteen() {
+  console.log('>>> renderCanteen CALLED');
   const table = document.getElementById('canteen-table');
+  console.log('>>> table element:', table);
   if (table) table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">Đang tải dữ liệu căng tin...</td></tr>';
 
   try {
