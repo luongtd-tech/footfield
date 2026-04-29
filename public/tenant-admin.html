@@ -1284,7 +1284,7 @@ function myCustomers(){return(db.customers||[]).filter(c=>c.tenant_id===TENANT_I
 function myFields(){return(db.fields||[]).filter(f=>f.tenant_id===TENANT_ID);}
 function getField(id){return myFields().find(f=>f.id===id)||{};}
 function fieldStatusBadge(s){const m={available:'<span class="badge badge-green">✅ Sẵn sàng</span>',maintenance:'<span class="badge badge-yellow">🔧 Bảo trì</span>',occupied:'<span class="badge badge-red">🔴 Đang dùng</span>'};return m[s]||s;}
-function bkStatusBadge(s){const m={confirmed:'<span class="badge badge-blue">✓ Xác nhận</span>',pending:'<span class="badge badge-yellow">⏳ Chờ xác nhận</span>',completed:'<span class="badge badge-green">✅ Hoàn thành</span>',cancelled:'<span class="badge badge-red">✗ Đã hủy</span>'};return m[s]||s;}
+function bkStatusBadge(s){const m={confirmed:'<span class="badge badge-blue">✓ Xác nhận</span>',pending:'<span class="badge badge-yellow">⏳ Chờ xác nhận</span>',arrived:'<span class="badge badge-purple">🏃 Đã đến sân</span>',completed:'<span class="badge badge-green">✅ Hoàn thành</span>',cancelled:'<span class="badge badge-red">✗ Đã hủy</span>'};return m[s]||s;}
 function custBadge(s){const m={vip:'<span class="badge badge-yellow">⭐ VIP</span>',regular:'<span class="badge badge-blue">👤 Thường</span>',new:'<span class="badge badge-green">🌟 Mới</span>'};return m[s]||s;}
 function pmBadge(s){const m={cash:'💵 Tiền mặt',transfer:'🏦 Chuyển khoản',vnpay:'🔵 VNPay'};return m[s]||s;}
 function tkStatusBadge(s){const m={open:'<span class="badge badge-yellow">⏳ Đang chờ</span>',processing:'<span class="badge badge-blue">⚙️ Đang xử lý</span>',resolved:'<span class="badge badge-green">✅ Đã xong</span>'};return m[s]||s;}
@@ -2292,6 +2292,12 @@ async function confirmPayment() {
           })
         });
       }
+      // Cập nhật trạng thái thành Hoàn thành
+      await fetch(`${API_BASE_URL}/api/bookings/${bId}/status`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: 'completed' })
+      });
       alert('✅ Thanh toán thành công! Tổng: ' + fmt(finalAmount));
       showPage('dashboard');
     } else {
@@ -2758,11 +2764,11 @@ async function doCheckin(){
         }
     }
 
-    // 3. Thực hiện check-in (Cập nhật 'completed')
+    // 3. Thực hiện check-in (Cập nhật 'arrived' - Đã đến sân)
     const updateRes = await fetch(`${API_BASE_URL}/api/bookings/${bk.id}/status`, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ status: 'completed' })
+      body: JSON.stringify({ status: 'arrived' })
     });
 
     if (updateRes.ok) {
