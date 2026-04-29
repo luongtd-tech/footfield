@@ -52,9 +52,43 @@ const tenantController = {
   updateTenant: async (req, res) => {
     try {
       const { id } = req.params;
-      const result = await Tenant.update(id, req.body);
+      const data = req.body;
+      
+      // Log for debugging
+      console.log('Updating tenant:', id, 'Data:', data);
+      
+      // Check if tenant exists
+      const existingTenant = await Tenant.findById(id);
+      if (!existingTenant) {
+        return res.status(404).json({ success: false, message: 'Không tìm thấy nhà thuê' });
+      }
+      
+      // Validate required fields
+      if (!data.name || data.name.trim() === '') {
+        return res.status(400).json({ success: false, message: 'Tên cơ sở không được để trống' });
+      }
+      
+      // Filter out undefined/null values and empty strings for optional fields
+      // Also skip empty password to avoid overwriting existing password
+      const cleanData = {};
+      Object.keys(data).forEach(key => {
+        if (data[key] !== undefined && data[key] !== null) {
+          if (key === 'password' && data[key].trim() === '') {
+            // Skip empty password
+            return;
+          }
+          cleanData[key] = data[key];
+        }
+      });
+      
+      if (Object.keys(cleanData).length === 0) {
+        return res.status(400).json({ success: false, message: 'Không có dữ liệu để cập nhật' });
+      }
+      
+      const result = await Tenant.update(id, cleanData);
       res.json({ success: true, message: 'Tenant updated successfully' });
     } catch (error) {
+      console.error('Error updating tenant:', error);
       res.status(500).json({ success: false, message: 'Error updating tenant', error: error.message });
     }
   },

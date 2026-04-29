@@ -483,7 +483,7 @@ tr:hover td{background:rgba(22,163,74,.02);}
   <div class="sidebar">
     <div class="sidebar-logo">
       <div class="logo-row">
-        <div class="logo-icon-box">⚽</div>
+        <div class="logo-icon-box" id="side-logo">⚽</div>
         <div>
           <div class="logo-name" id="side-facility-name">...</div>
           <div class="logo-sub">Hệ thống quản lý</div>
@@ -3051,6 +3051,23 @@ function syncGlobalUI(t){
   document.querySelectorAll('#side-facility-name').forEach(el=>el.textContent=t.name||'VinhUniFootBall');
   document.querySelectorAll('.tenant-nm').forEach(el=>el.textContent=t.owner||'Chủ cơ sở');
   document.querySelectorAll('.tenant-ava').forEach(el=>el.textContent=(t.name||'V').substring(0,1).toUpperCase());
+  
+  // Update logo
+  const logoEl = document.getElementById('side-logo');
+  if (logoEl) {
+    if (t.logo) {
+      if (t.logo.startsWith('http') || t.logo.startsWith('/') || t.logo.startsWith('data:')) {
+        // Logo is an image URL
+        logoEl.innerHTML = `<img src="${t.logo}" style="width:100%;height:100%;object-fit:cover;border-radius:12px;" onerror="this.outerHTML='⚽'">`;
+      } else {
+        // Logo is emoji or text
+        logoEl.textContent = t.logo;
+      }
+    } else {
+      // Fallback to first letter of name
+      logoEl.textContent = (t.name || 'V').substring(0,1).toUpperCase();
+    }
+  }
 }
 
 function updateSidebarBadges(stats) {
