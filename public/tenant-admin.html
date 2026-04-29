@@ -1383,9 +1383,6 @@ async function initApp(){
   linkObj.searchParams.set('tenant', TENANT_ID);
   if(previewBtn) previewBtn.href = linkObj.href;
 
-  // Load canteen services
-  await loadCanteenData();
-  
   // Ẩn loading overlay sau khi tất cả dữ liệu đã tải xong
   if (loadingOverlay) {
     loadingOverlay.classList.add('hidden');
