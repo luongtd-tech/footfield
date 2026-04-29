@@ -1342,7 +1342,8 @@ function showPage(name){
   if(name === 'dashboard') loadDashboardData();
   
   const renders={fields:renderFields,schedule:renderSchedule,customers:renderCustomers,finance:renderFinance,checkin:renderCheckin,payment:renderPayment,invoice:renderInvoicePage,notifications:renderNotifications,settings:renderSettings,staff:renderStaff,monitoring:renderMonitoring,canteen:renderCanteen};
-  if(renders[name])renders[name]();
+  const renderFn = renders[name] || (typeof window !== 'undefined' && window['render' + name.charAt(0).toUpperCase() + name.slice(1)]);
+  if(renderFn) renderFn();
   
   // Custom logic for marking notifications as read
   if(name === 'notifications') markAllNotifsRead();
