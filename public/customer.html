@@ -382,12 +382,10 @@
     }
 
     /* =============================================
-   PAGE HERO (Fields page) — ✅ FIX: dùng biến
+   PAGE HERO (Fields page) — nền trắng
    ============================================= */
     .page-hero {
-      background:
-        linear-gradient(135deg, var(--hero-bg-start), var(--hero-bg-end)),
-        var(--hero-bg-image) center/cover no-repeat;
+      background: #ffffff;
       padding: 48px 5%;
       text-align: center;
       position: relative;
@@ -1398,7 +1396,7 @@
       }
     }
     
-    /* Override Zalo Chat Widget position - moved to bottom-left */
+    /* Override Zalo Chat Widget position - above chat button */
     .zalo-chat-widget,
     .zalo-chat-widget iframe,
     div[class*="zalo-chat-widget"] iframe,
@@ -1406,8 +1404,8 @@
     #zalo-chat-widget iframe,
     div[class*="zalo-chat-widget"] {
       bottom: 92px !important;
-      left: 20px !important;
-      right: auto !important;
+      right: 20px !important;
+      left: auto !important;
     }
   </style>
 </head>
