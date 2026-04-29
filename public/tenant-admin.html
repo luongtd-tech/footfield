@@ -1998,8 +1998,8 @@ async function renderCanteen() {
     console.log('Loading canteen data for TENANT_ID:', TENANT_ID);
     alert('Debug: TENANT_ID = ' + TENANT_ID);
     await loadCanteenData();
-    console.log('Loaded services:', db.services);
-    alert('Debug: Loaded ' + (db.services?.length || 0) + ' services');
+    console.log('After loadCanteenData, db.services:', db.services);
+    console.log('db.services type:', typeof db.services, 'isArray:', Array.isArray(db.services));
     if (!table) {
       console.error('Table element not found');
       return;
@@ -2009,11 +2009,16 @@ async function renderCanteen() {
     let servicesData = [];
     if (Array.isArray(db.services)) {
       servicesData = db.services;
+      console.log('Using db.services directly, length:', servicesData.length);
     } else if (db.services && Array.isArray(db.services.data)) {
       servicesData = db.services.data;
+      console.log('Using db.services.data, length:', servicesData.length);
     } else if (db.services && typeof db.services === 'object') {
       // If it's a single object, wrap in array
       servicesData = [db.services];
+      console.log('Wrapped single object');
+    } else {
+      console.error('db.services is not valid:', db.services);
     }
 
     console.log('Services data to display:', servicesData);
