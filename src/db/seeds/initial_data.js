@@ -15,9 +15,9 @@ exports.seed = function(knex) {
     .then(function () {
       // Inserts seed entries for packages
       return knex('packages').insert([
-        { id: 'pkg1', name: 'Gói Cơ Bản', price_monthly: 299000, price_yearly: 2990000, max_fields: 3, features: 'Quản lý lịch đặt sân, Báo cáo doanh thu, Hỗ trợ email', color: '#6c757d', popular: false },
-        { id: 'pkg2', name: 'Gói Tiêu Chuẩn', price_monthly: 599000, price_yearly: 5990000, max_fields: 8, features: 'Tất cả Gói Cơ Bản, QR Check-in, Thu tiền đa phương thức, In hóa đơn, Hỗ trợ chat', color: '#0d6efd', popular: true },
-        { id: 'pkg3', name: 'Gói Cao Cấp', price_monthly: 999000, price_yearly: 9990000, max_fields: 999, features: 'Tất cả Gói Tiêu Chuẩn, Không giới hạn sân, API tích hợp, Hỗ trợ 24/7, Trang khách hàng tùy chỉnh', color: '#198754', popular: false }
+        { id: 'pkg1', name: 'Gói Cơ Bản', price_monthly: 299000, price_yearly: 2990000, max_fields: 3, features: 'Dashboard, Quản lý sân, Lịch đặt sân, Nhân viên, Khách hàng, Báo cáo cơ bản', color: '#6c757d', popular: false },
+        { id: 'pkg2', name: 'Gói Tiêu Chuẩn', price_monthly: 599000, price_yearly: 5990000, max_fields: 8, features: 'Tất cả Gói Cơ Bản, QR Check-in, Thu tiền đa phương thức, In hóa đơn, Quản lý căng tin', color: '#0d6efd', popular: true },
+        { id: 'pkg3', name: 'Gói Cao Cấp', price_monthly: 999000, price_yearly: 9990000, max_fields: 999, features: 'Tất cả Gói Tiêu Chuẩn, Không giới hạn sân, Tài chính nâng cao, Giám sát sân (Camera), API tích hợp, Hỗ trợ 24/7', color: '#198754', popular: false }
       ]);
     })
     .then(function(){

@@ -908,9 +908,9 @@ tr:hover td { background:rgba(0,212,170,.03); }
     <div class="form-row">
       <div class="input-group"><label>Gói dịch vụ</label>
         <select id="edit-nt-pkg">
-          <option value="pkg1">Gói Cơ Bản - 299k/tháng</option>
-          <option value="pkg2">Gói Tiêu Chuẩn - 599k/tháng</option>
-          <option value="pkg3">Gói Cao Cấp - 999k/tháng</option>
+          <option value="pkg1">Gói Cơ Bản (3 sân) - 299k/tháng</option>
+          <option value="pkg2">Gói Tiêu Chuẩn (8 sân + Tiện ích) - 599k/tháng</option>
+          <option value="pkg3">Gói Cao Cấp (Không giới hạn + Nâng cao) - 999k/tháng</option>
         </select>
       </div>
       <div class="input-group"><label>Chu kỳ thanh toán</label>
@@ -952,9 +952,9 @@ tr:hover td { background:rgba(0,212,170,.03); }
     <div class="form-row">
       <div class="input-group"><label>Gói dịch vụ</label>
         <select id="nt-pkg">
-          <option value="pkg1">Gói Cơ Bản - 299k/tháng</option>
-          <option value="pkg2" selected>Gói Tiêu Chuẩn - 599k/tháng</option>
-          <option value="pkg3">Gói Cao Cấp - 999k/tháng</option>
+          {{#db.packages}}
+          <option value="{{id}}">{{name}} ({{max_fields}} sân) - {{price}}k/{{cycle}}</option>
+          {{/db.packages}}
         </select>
       </div>
       <div class="input-group"><label>Chu kỳ thanh toán</label>
