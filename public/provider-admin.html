@@ -397,9 +397,62 @@ tr:hover td { background:rgba(0,212,170,.03); }
   #invoice-print-content { padding: 0 !important; }
   .stat-card, .card, .btn { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
 }
+
+/* ===== PAGE LOADING OVERLAY ===== */
+#page-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: var(--bg);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+#page-loading-overlay.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.page-loader {
+  text-align: center;
+}
+
+.page-loader-spinner {
+  width: 50px;
+  height: 50px;
+  border: 4px solid var(--border);
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 16px;
+}
+
+.page-loader-text {
+  color: var(--text2);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
 </style>
 </head>
 <body>
+
+<!-- PAGE LOADING OVERLAY -->
+<div id="page-loading-overlay">
+  <div class="page-loader">
+    <div class="page-loader-spinner"></div>
+    <div class="page-loader-text">Đang tải...</div>
+  </div>
+</div>
 
 <div class="sidebar-overlay" onclick="toggleSidebar()"></div>
 
@@ -1065,6 +1118,8 @@ function showPage(name) {
 
 // ===== INIT APP =====
 async function initApp() {
+  const loadingOverlay = document.getElementById('page-loading-overlay');
+  
   const now = new Date();
   document.getElementById('current-date').textContent = now.toLocaleDateString('vi-VN', {weekday:'short',day:'2-digit',month:'2-digit',year:'numeric'});
   
@@ -1102,6 +1157,11 @@ async function initApp() {
     renderDashboard();
   } catch (error) {
     console.error('Error loading dashboard data:', error);
+  } finally {
+    // Ẩn loading overlay sau khi dữ liệu đã tải xong (hoặc có lỗi)
+    if (loadingOverlay) {
+      loadingOverlay.classList.add('hidden');
+    }
   }
 }
 
