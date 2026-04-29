@@ -1380,9 +1380,20 @@ async function initApp(){
 
 async function loadCanteenData() {
   try {
+    console.log('Fetching services from:', `${API_BASE_URL}/api/services/tenant/${TENANT_ID}`);
     const res = await fetch(`${API_BASE_URL}/api/services/tenant/${TENANT_ID}`);
-    db.services = await res.json();
-  } catch (err) { console.error('Error loading services:', err); }
+    if (!res.ok) {
+      console.error('API error:', res.status, res.statusText);
+      db.services = [];
+      return;
+    }
+    const data = await res.json();
+    console.log('API response:', data);
+    db.services = data;
+  } catch (err) {
+    console.error('Error loading services:', err);
+    db.services = [];
+  }
 }
 
 function copyStoreLink() {
@@ -1965,10 +1976,27 @@ async function renderCanteen() {
   if (table) table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">Đang tải dữ liệu căng tin...</td></tr>';
 
   try {
+    console.log('Loading canteen data for TENANT_ID:', TENANT_ID);
     await loadCanteenData();
-    if (!table) return;
-    const servicesData = Array.isArray(db.services) ? db.services : [];
-    
+    console.log('Loaded services:', db.services);
+    if (!table) {
+      console.error('Table element not found');
+      return;
+    }
+
+    // Handle both array and object response formats
+    let servicesData = [];
+    if (Array.isArray(db.services)) {
+      servicesData = db.services;
+    } else if (db.services && Array.isArray(db.services.data)) {
+      servicesData = db.services.data;
+    } else if (db.services && typeof db.services === 'object') {
+      // If it's a single object, wrap in array
+      servicesData = [db.services];
+    }
+
+    console.log('Services data to display:', servicesData);
+
     if (servicesData.length === 0) {
       table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">Chưa có dịch vụ nào</td></tr>';
       return;
@@ -1976,7 +2004,7 @@ async function renderCanteen() {
 
     table.innerHTML = servicesData.map(s => `
       <tr>
-        <td><strong>${s.name}</strong></td>
+        <td><strong>${s.name || 'Không tên'}</strong></td>
         <td><span class="badge ${s.category==='drink'?'badge-blue':'badge-gray'}">${s.category==='drink'?'Nước/Đồ ăn':'Đồ thuê/Khác'}</span></td>
         <td><strong style="font-family:var(--mono)">${fmt(Number(s.price) || 0)}</strong></td>
         <td>${s.unit || ''}</td>
@@ -1987,12 +2015,12 @@ async function renderCanteen() {
       </tr>
     `).join('');
   } catch (err) {
-    console.error(err);
+    console.error('Error in renderCanteen:', err);
     if (table) table.innerHTML = `<tr><td colspan="5" style="color:red;text-align:center;padding:20px;">Lỗi hiển thị: ${err.message}</td></tr>`;
   }
 }
 
-function openServiceModal(id) {
+async function openServiceModal(id) {
   const modal = document.getElementById('modal-service');
   const title = document.getElementById('service-modal-title');
   const saveBtn = document.getElementById('service-save-btn');
@@ -2004,6 +2032,10 @@ function openServiceModal(id) {
   document.getElementById('service-category').value = 'drink';
 
   if (id) {
+    // Đảm bảo services đã được load
+    if (!db.services || !Array.isArray(db.services)) {
+      await loadCanteenData();
+    }
     const s = (db.services || []).find(x => String(x.id) === String(id));
     if (s) {
       title.textContent = '✏️ Chỉnh sửa món';
