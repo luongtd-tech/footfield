@@ -505,13 +505,13 @@ tr:hover td{background:rgba(22,163,74,.02);}
       <div class="nav-section">Quản lý sân</div>
       <div class="nav-item" onclick="showPage('fields')"><span>⚽</span> Quản lý sân bóng</div>
       <div class="nav-item" onclick="showPage('schedule')"><span>📅</span> Lịch đặt sân<span class="nav-badge" id="nb-pending">1</span></div>
-      <div class="nav-item" onclick="showPage('monitoring')"><span>📷</span> Giám sát sân</div>
+      <div class="nav-item" onclick="showPage('monitoring')" id="nav-monitoring"><span>📷</span> Giám sát sân</div>
       <div class="nav-section">Nhân sự & Khách hàng</div>
       <div class="nav-item" onclick="showPage('staff')"><span>👔</span> Quản lý nhân viên</div>
       <div class="nav-item" onclick="showPage('customers')"><span>👥</span> Quản lý khách hàng</div>
       <div class="nav-section" id="nav-finance-sec">Thu chi</div>
       <div class="nav-item" onclick="showPage('finance')" id="nav-finance"><span>💰</span> Quản lý tài chính</div>
-      <div class="nav-item" onclick="showPage('canteen')"><span>🥤</span> Quản lý căng tin</div>
+      <div class="nav-item" onclick="showPage('canteen')" id="nav-canteen"><span>🥤</span> Quản lý căng tin</div>
       <div class="nav-section" id="nav-util-sec">Tiện ích</div>
       <div class="nav-item" onclick="showPage('checkin')" id="nav-checkin"><span>📱</span> Check-in QR</div>
       <div class="nav-item" onclick="showPage('payment')" id="nav-payment"><span>💳</span> Thu tiền</div>
@@ -1212,8 +1212,8 @@ const INACTIVITY_LIMIT = 5 * 60 * 1000; // 5 phút
 
 const PKG_FEATURES = {
   'pkg1': { name: 'Cơ Bản', max_fields: 3, extras: [] },
-  'pkg2': { name: 'Tiêu Chuẩn', max_fields: 8, extras: ['checkin', 'payment', 'invoice'] },
-  'pkg3': { name: 'Cao Cấp', max_fields: 999, extras: ['checkin', 'payment', 'invoice', 'advanced_finance'] }
+  'pkg2': { name: 'Tiêu Chuẩn', max_fields: 8, extras: ['checkin', 'payment', 'invoice', 'canteen'] },
+  'pkg3': { name: 'Cao Cấp', max_fields: 999, extras: ['checkin', 'payment', 'invoice', 'canteen', 'finance', 'monitoring'] }
 };
 
 function applyPackageRestrictions(tenant) {
@@ -1223,21 +1223,35 @@ function applyPackageRestrictions(tenant) {
   // Update package label in sidebar
   document.querySelectorAll('.tenant-pkg').forEach(el => el.textContent = `📦 Gói ${pkg.name} · FootField`);
 
-  // Hide/Show Extra features
-  const allExtras = ['checkin', 'payment', 'invoice'];
-  allExtras.forEach(feat => {
+  // Hide/Show Extra features based on package
+  const utilExtras = ['checkin', 'payment', 'invoice'];
+  utilExtras.forEach(feat => {
     const navItem = document.getElementById(`nav-${feat}`);
-    const topBtn = document.getElementById(`top-btn-${feat}`); // Try to find topbar buttons too
+    const topBtn = document.getElementById(`top-btn-${feat}`);
     const isVisible = pkg.extras.includes(feat);
     
     if (navItem) navItem.style.display = isVisible ? 'flex' : 'none';
     if (topBtn) topBtn.style.display = isVisible ? 'inline-flex' : 'none';
   });
 
-  // Hide utility section if no extras are visible
-  const hasAnyExtra = allExtras.some(f => pkg.extras.includes(f));
+  // Hide/Show Canteen feature
+  const canteenNav = document.getElementById('nav-canteen');
+  if (canteenNav) canteenNav.style.display = pkg.extras.includes('canteen') ? 'flex' : 'none';
+
+  // Hide/Show Finance feature
+  const financeNav = document.getElementById('nav-finance');
+  const financeSec = document.getElementById('nav-finance-sec');
+  if (financeNav) financeNav.style.display = pkg.extras.includes('finance') ? 'flex' : 'none';
+  if (financeSec) financeSec.style.display = (pkg.extras.includes('finance') || pkg.extras.includes('canteen')) ? 'block' : 'none';
+
+  // Hide/Show Monitoring feature
+  const monitoringNav = document.getElementById('nav-monitoring');
+  if (monitoringNav) monitoringNav.style.display = pkg.extras.includes('monitoring') ? 'flex' : 'none';
+
+  // Hide utility section if no utility extras are visible
+  const hasAnyUtilExtra = utilExtras.some(f => pkg.extras.includes(f));
   const utilSec = document.getElementById('nav-util-sec');
-  if (utilSec) utilSec.style.display = hasAnyExtra ? 'block' : 'none';
+  if (utilSec) utilSec.style.display = hasAnyUtilExtra ? 'block' : 'none';
 
   // Field Limit Check for UI
   const currentCount = (db.fields || []).length;
