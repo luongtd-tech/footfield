@@ -1695,10 +1695,12 @@ function openEditPackageModal(id) {
 }
 
 async function saveEditPackage() {
+  const id = document.getElementById('edit-pkg-id').value;
   const priceM = parseFloat(document.getElementById('edit-pkg-price-m').value) || 0;
   const priceY = parseFloat(document.getElementById('edit-pkg-price-y').value) || 0;
   const maxFields = parseInt(document.getElementById('edit-pkg-max').value) || 0;
 
+  if (!id) return alert('Không tìm thấy ID gói dịch vụ');
   if (priceM < 0 || priceY < 0) return alert('Giá gói không được nhỏ hơn 0');
 
   const data = {
