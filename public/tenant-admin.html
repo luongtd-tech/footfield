@@ -2022,13 +2022,16 @@ async function renderCanteen() {
     }
 
     console.log('Services data to display:', servicesData);
+    console.log('Table element:', table);
+    console.log('Table innerHTML before:', table?.innerHTML?.substring(0, 100));
 
     if (servicesData.length === 0) {
+      console.log('No services to display');
       table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">Chưa có dịch vụ nào</td></tr>';
       return;
     }
 
-    table.innerHTML = servicesData.map(s => `
+    const html = servicesData.map(s => `
       <tr>
         <td><strong>${s.name || 'Không tên'}</strong></td>
         <td><span class="badge ${s.category==='drink'?'badge-blue':'badge-gray'}">${s.category==='drink'?'Nước/Đồ ăn':'Đồ thuê/Khác'}</span></td>
@@ -2040,6 +2043,9 @@ async function renderCanteen() {
         </td>
       </tr>
     `).join('');
+    console.log('Generated HTML:', html.substring(0, 200));
+    table.innerHTML = html;
+    console.log('Table innerHTML after:', table.innerHTML.substring(0, 200));
   } catch (err) {
     console.error('Error in renderCanteen:', err);
     if (table) table.innerHTML = `<tr><td colspan="5" style="color:red;text-align:center;padding:20px;">Lỗi hiển thị: ${err.message}</td></tr>`;
