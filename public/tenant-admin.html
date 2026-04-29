@@ -2136,6 +2136,7 @@ function addServiceToCurrentPayment() {
     }
     renderCurrentPaymentServices();
     updatePayAmount();
+    if (selectedPayMethod === 'transfer') updateQRImage();
   }
 }
 
@@ -2156,6 +2157,7 @@ function removeServiceFromPayment(idx) {
   currentSelectedServices.splice(idx, 1);
   renderCurrentPaymentServices();
   updatePayAmount();
+  if (selectedPayMethod === 'transfer') updateQRImage();
 }
 
 function updatePayAmount() {
