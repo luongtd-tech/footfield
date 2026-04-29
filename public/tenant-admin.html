@@ -2259,7 +2259,7 @@ async function confirmPayment() {
 
   if (selectedPayMethod === 'vnpay') {
     try {
-      const vnRes = await fetch(`${API_BASE_URL}/api/vnpay/create-url`, {
+      const vnRes = await fetch(`${API_BASE_URL}/api/payment/vnpay/create-url`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ amount: finalAmount, bookingId: bId, orderInfo: `Thanh toan dat san FootField #${bId}` })
