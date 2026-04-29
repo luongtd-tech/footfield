@@ -2218,6 +2218,12 @@ if (savedUser) {
   } catch(e) {
     console.error('Session error', e);
   }
+} else {
+  // User chưa đăng nhập - ẩn loading overlay để hiển thị trang đăng nhập
+  const loadingOverlay = document.getElementById('page-loading-overlay');
+  if (loadingOverlay) {
+    loadingOverlay.classList.add('hidden');
+  }
 }
 
 // CAPACITOR & WEB NOTIFICATIONS
