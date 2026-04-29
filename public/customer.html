@@ -1398,7 +1398,7 @@
       }
     }
     
-    /* Override Zalo Chat Widget position to sit above AI Chatbot */
+    /* Override Zalo Chat Widget position - moved to bottom-left */
     .zalo-chat-widget,
     .zalo-chat-widget iframe,
     div[class*="zalo-chat-widget"] iframe,
@@ -1406,7 +1406,8 @@
     #zalo-chat-widget iframe,
     div[class*="zalo-chat-widget"] {
       bottom: 92px !important;
-      right: 20px !important;
+      left: 20px !important;
+      right: auto !important;
     }
   </style>
 </head>
@@ -2163,7 +2164,7 @@
         ['👤 Họ và tên', name],
         ['📞 SĐT', phone],
         ['📝 Ghi chú', document.getElementById('bk-note').value || '(Không có)'],
-        ['💰 Tổng tiền', `<strong style="color:var(--green);font-size:16px">${price.toLocaleString()} ₫</strong>`],
+        ['💰 Tổng tiền', `<strong style="color:var(--green);font-size:16px">${price.toLocaleString('vi-VN')} ₫</strong>`],
       ];
 
       document.getElementById('confirm-summary').innerHTML = rows.map(([label, val]) =>
@@ -2552,7 +2553,7 @@
       const db = await loadDB();
       const field = db.fields?.find(f => f.id === fieldId);
       const price = (field?.price_per_hour || 0) * duration;
-      document.getElementById('bk-price').textContent = price.toLocaleString() + ' ₫';
+      document.getElementById('bk-price').textContent = price.toLocaleString('vi-VN') + ' ₫';
       document.getElementById('bk-price-detail').textContent = `${duration} giờ × ${formatPrice(field?.price_per_hour)}₫`;
       currentBooking.price = price;
     }
@@ -2680,7 +2681,7 @@
     <div class="result-row"><span class="result-row-label">Ngày</span><span class="result-row-val">${new Date(booking.date).toLocaleDateString('vi-VN')}</span></div>
     <div class="result-row"><span class="result-row-label">Giờ</span><span class="result-row-val">${booking.start_time} – ${booking.end_time}</span></div>
     <div class="result-row"><span class="result-row-label">Khách hàng</span><span class="result-row-val">${booking.customer_name}</span></div>
-    <div class="result-row"><span class="result-row-label">Tổng tiền</span><span class="result-row-val">${booking.total_price.toLocaleString()}₫</span></div>
+    <div class="result-row"><span class="result-row-label">Tổng tiền</span><span class="result-row-val">${booking.total_price.toLocaleString('vi-VN')}₫</span></div>
   `;
       showPage('result');
 
@@ -2910,7 +2911,7 @@
           <div><div class="lookup-label">Ngày</div><div class="lookup-val">${new Date(b.date).toLocaleDateString('vi-VN')}</div></div>
           <div><div class="lookup-label">Giờ</div><div class="lookup-val">${b.start_time}–${b.end_time}</div></div>
           <div><div class="lookup-label">Khách</div><div class="lookup-val">${b.customer_name}</div></div>
-          <div><div class="lookup-label">Giá</div><div class="lookup-val">${b.total_price.toLocaleString()}₫</div></div>
+          <div><div class="lookup-label">Giá</div><div class="lookup-val">${b.total_price.toLocaleString('vi-VN')}₫</div></div>
           <div><div class="lookup-label">SĐT</div><div class="lookup-val">${b.customer_phone}</div></div>
         </div>
       </div>
@@ -3077,7 +3078,7 @@
            <div>⏰ Giờ: <strong style="color:var(--text)">${booking.start_time} - ${booking.end_time}</strong></div>
            <div>👤 Khách: <strong style="color:var(--text)">${booking.customer_name}</strong></div>
            <div>📞 SĐT: <strong style="color:var(--text)">${booking.customer_phone}</strong></div>
-           <div style="color:var(--green); font-weight:700; font-size:15px; margin-top:8px; text-align:center;">Tổng: ${booking.total_price.toLocaleString()}₫</div>
+           <div style="color:var(--green); font-weight:700; font-size:15px; margin-top:8px; text-align:center;">Tổng: ${booking.total_price.toLocaleString('vi-VN')}₫</div>
         </div>
         <button class="btn-book-full" style="padding:10px; margin-top:12px; font-size:13px; width:100%" onclick="window.location.reload()">🔄 Làm mới lịch</button>
       `;
