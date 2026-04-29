@@ -1996,8 +1996,10 @@ async function renderCanteen() {
 
   try {
     console.log('Loading canteen data for TENANT_ID:', TENANT_ID);
+    alert('Debug: TENANT_ID = ' + TENANT_ID);
     await loadCanteenData();
     console.log('Loaded services:', db.services);
+    alert('Debug: Loaded ' + (db.services?.length || 0) + ' services');
     if (!table) {
       console.error('Table element not found');
       return;
