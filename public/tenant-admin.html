@@ -1403,6 +1403,14 @@ async function loadCanteenData() {
     }
     const data = await res.json();
     console.log('API response:', data);
+    console.log('TENANT_ID:', TENANT_ID);
+    // Debug: check if data is array and has items
+    if (!Array.isArray(data)) {
+      console.error('Expected array but got:', typeof data, data);
+      alert('Debug: API không trả về mảng. Xem console để biết chi tiết.');
+    } else if (data.length === 0) {
+      console.log('No services found for tenant:', TENANT_ID);
+    }
     db.services = data;
   } catch (err) {
     console.error('Error loading services:', err);
