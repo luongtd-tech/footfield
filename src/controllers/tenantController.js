@@ -85,7 +85,10 @@ const tenantController = {
         return res.status(400).json({ success: false, message: 'Không có dữ liệu để cập nhật' });
       }
       
+      console.log('Clean data for update:', cleanData);
+      
       const result = await Tenant.update(id, cleanData);
+      console.log('Update result:', result);
       res.json({ success: true, message: 'Tenant updated successfully' });
     } catch (error) {
       console.error('Error updating tenant:', error);
