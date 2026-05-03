@@ -1383,6 +1383,9 @@ async function initApp(){
   linkObj.searchParams.set('tenant', TENANT_ID);
   if(previewBtn) previewBtn.href = linkObj.href;
 
+  // Pre-load canteen data
+  loadCanteenData();
+
   // Ẩn loading overlay sau khi tất cả dữ liệu đã tải xong
   if (loadingOverlay) {
     loadingOverlay.classList.add('hidden');
@@ -1404,6 +1407,40 @@ async function loadCanteenData() {
     db.services = [];
   }
 }
+
+async function renderCanteen() {
+  const table = document.getElementById('canteen-table');
+  if (!table) return;
+  
+  table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">⏳ Đang tải dữ liệu căng tin...</td></tr>';
+
+  try {
+    if (!db.services) await loadCanteenData();
+    const servicesData = Array.isArray(db.services) ? db.services : [];
+
+    if (servicesData.length === 0) {
+      table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3);">🥤 Chưa có dịch vụ nào được thêm</td></tr>';
+      return;
+    }
+
+    table.innerHTML = servicesData.map(s => `
+      <tr>
+        <td><strong>${s.name || 'Không tên'}</strong></td>
+        <td><span class="badge ${s.category==='drink'?'badge-blue':'badge-gray'}">${s.category==='drink'?'Nước/Đồ ăn':'Đồ thuê/Khác'}</span></td>
+        <td><strong style="font-family:var(--mono)">${fmt(Number(s.price) || 0)}</strong></td>
+        <td>${s.unit || ''}</td>
+        <td>
+          <button class="btn btn-sm btn-secondary" onclick="openServiceModal('${s.id}')">✏️</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteService('${s.id}')">🗑️</button>
+        </td>
+      </tr>
+    `).join('');
+  } catch (err) {
+    console.error('Error in renderCanteen:', err);
+    table.innerHTML = `<tr><td colspan="5" style="color:var(--red);text-align:center;padding:20px;">❌ Lỗi hiển thị: ${err.message}</td></tr>`;
+  }
+}
+
 
 function copyStoreLink() {
   const linkObj = new URL('customer.html', window.location.href);
@@ -1979,40 +2016,6 @@ async function markBookingPaid(id) {
   } catch (error) { console.error(error); }
 }
 
-// CANTEEN LOGIC
-async function renderCanteen() {
-  const table = document.getElementById('canteen-table');
-  if (!table) return;
-  
-  table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">⏳ Đang tải dữ liệu căng tin...</td></tr>';
-
-  try {
-    await loadCanteenData();
-    
-    const servicesData = Array.isArray(db.services) ? db.services : [];
-
-    if (servicesData.length === 0) {
-      table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3);">🥤 Chưa có dịch vụ nào được thêm</td></tr>';
-      return;
-    }
-
-    table.innerHTML = servicesData.map(s => `
-      <tr>
-        <td><strong>${s.name || 'Không tên'}</strong></td>
-        <td><span class="badge ${s.category==='drink'?'badge-blue':'badge-gray'}">${s.category==='drink'?'Nước/Đồ ăn':'Đồ thuê/Khác'}</span></td>
-        <td><strong style="font-family:var(--mono)">${fmt(Number(s.price) || 0)}</strong></td>
-        <td>${s.unit || ''}</td>
-        <td>
-          <button class="btn btn-sm btn-secondary" onclick="openServiceModal('${s.id}')">✏️</button>
-          <button class="btn btn-sm btn-danger" onclick="deleteService('${s.id}')">🗑️</button>
-        </td>
-      </tr>
-    `).join('');
-  } catch (err) {
-    console.error('Error in renderCanteen:', err);
-    table.innerHTML = `<tr><td colspan="5" style="color:var(--red);text-align:center;padding:20px;">❌ Lỗi hiển thị: ${err.message}</td></tr>`;
-  }
-}
 
 async function openServiceModal(id) {
   const modal = document.getElementById('modal-service');
