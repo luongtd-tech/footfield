@@ -1345,28 +1345,31 @@ function doLogout(){
 }
 
 // NAV
-const pageTitles={dashboard:'Dashboard',fields:'Quản lý sân bóng',schedule:'Lịch đặt sân',customers:'Quản lý khách hàng',finance:'Quản lý tài chính',checkin:'Check-in QR',payment:'Thu tiền',invoice:'In hóa đơn',notifications:'Thông báo hệ thống',settings:'Cài đặt hệ thống',canteen:'Quản lý căng tin'};
+const pageTitles={dashboard:'Dashboard',fields:'Quản lý sân bóng',schedule:'Lịch đặt sân',customers:'Quản lý khách hàng',finance:'Quản lý tài chính',checkin:'Check-in QR',payment:'Thu tiền',invoice:'In hóa đơn',notifications:'Thông báo hệ thống',settings:'Cài đặt hệ thống',canteen:'Quản lý căng tin',staff:'Quản lý nhân viên',support:'Hỗ trợ & Báo lỗi',monitoring:'Giám sát sân trực tuyến'};
 function showPage(name){
-  alert('DEBUG: showPage called with: ' + name);
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n=>{if(n.textContent.includes(pageTitles[name]))n.classList.add('active');});
+  
+  const targetPage = document.getElementById('page-'+name);
+  if (targetPage) targetPage.classList.add('active');
+
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.getAttribute('onclick')?.includes(`'${name}'`)) n.classList.add('active');
+  });
+
   document.getElementById('topbar-title').textContent=pageTitles[name] || name;
   
   if(name === 'dashboard') loadDashboardData();
   
-  const renders={fields:renderFields,schedule:renderSchedule,customers:renderCustomers,finance:renderFinance,checkin:renderCheckin,payment:renderPayment,invoice:renderInvoicePage,notifications:renderNotifications,settings:renderSettings,staff:renderStaff,monitoring:renderMonitoring,canteen:renderCanteen};
+  const renders={fields:renderFields,schedule:renderSchedule,customers:renderCustomers,finance:renderFinance,checkin:renderCheckin,payment:renderPayment,invoice:renderInvoicePage,notifications:renderNotifications,settings:renderSettings,staff:renderStaff,monitoring:renderMonitoring,canteen:renderCanteen,support:renderSupport};
   const renderFn = renders[name] || (typeof window !== 'undefined' && window['render' + name.charAt(0).toUpperCase() + name.slice(1)]);
   if(renderFn) renderFn();
   
-  // Custom logic for marking notifications as read
   if(name === 'notifications') markAllNotifsRead();
 }
 
 // INIT
 async function initApp(){
-  alert('DEBUG: initApp called!');
   const loadingOverlay = document.getElementById('page-loading-overlay');
   
   const now=new Date();
@@ -1411,12 +1414,8 @@ async function loadCanteenData() {
 }
 
 async function renderCanteen() {
-  alert('DEBUG: renderCanteen called!');
   const table = document.getElementById('canteen-table');
-  if (!table) {
-    alert('DEBUG: table element NOT FOUND!');
-    return;
-  }
+  if (!table) return;
   
   table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">⏳ Đang tải dữ liệu căng tin...</td></tr>';
 
@@ -3250,51 +3249,6 @@ async function submitTicket() {
   }
 }
 
-// NAVIGATION
-function showPage(pageId) {
-  // Hide all pages
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  // Show target page
-  document.getElementById('page-' + pageId).classList.add('active');
-  
-  // Update sidebar active state
-  document.querySelectorAll('.nav-item').forEach(item => {
-    item.classList.remove('active');
-    if (item.getAttribute('onclick')?.includes(`'${pageId}'`)) {
-      item.classList.add('active');
-    }
-  });
-
-  // Specific render calls
-  if (pageId === 'fields') renderFields();
-  if (pageId === 'schedule') renderSchedule();
-  if (pageId === 'customers') renderCustomers();
-  if (pageId === 'finance') renderFinance();
-  if (pageId === 'support') renderSupport();
-  if (pageId === 'staff') renderStaff();
-  if (pageId === 'settings') renderSettings();
-  if (pageId === 'notifications') renderNotifications();
-  if (pageId === 'checkin') renderCheckin();
-  if (pageId === 'payment') renderPayment();
-  if (pageId === 'invoice') renderInvoicePage();
-  
-  // Update topbar title
-  const titles = {
-    'dashboard': 'Dashboard',
-    'fields': 'Quản lý sân bóng',
-    'schedule': 'Lịch đặt sân',
-    'customers': 'Quản lý khách hàng',
-    'finance': 'Quản lý tài chính',
-    'checkin': 'Check-in QR',
-    'payment': 'Thu tiền',
-    'invoice': 'In hóa đơn',
-    'notifications': 'Thông báo hệ thống',
-    'support': 'Hỗ trợ & Báo lỗi',
-    'settings': 'Cài đặt hệ thống',
-    'staff': 'Quản lý nhân viên'
-  };
-  document.getElementById('topbar-title').textContent = titles[pageId] || 'Hệ thống';
-}
 
 // STAFF LOGIC
 async function renderStaff() {
