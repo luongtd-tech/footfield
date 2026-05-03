@@ -1347,6 +1347,7 @@ function doLogout(){
 // NAV
 const pageTitles={dashboard:'Dashboard',fields:'Quản lý sân bóng',schedule:'Lịch đặt sân',customers:'Quản lý khách hàng',finance:'Quản lý tài chính',checkin:'Check-in QR',payment:'Thu tiền',invoice:'In hóa đơn',notifications:'Thông báo hệ thống',settings:'Cài đặt hệ thống',canteen:'Quản lý căng tin'};
 function showPage(name){
+  alert('DEBUG: showPage called with: ' + name);
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('page-'+name).classList.add('active');
@@ -1365,6 +1366,7 @@ function showPage(name){
 
 // INIT
 async function initApp(){
+  alert('DEBUG: initApp called!');
   const loadingOverlay = document.getElementById('page-loading-overlay');
   
   const now=new Date();
@@ -1409,8 +1411,12 @@ async function loadCanteenData() {
 }
 
 async function renderCanteen() {
+  alert('DEBUG: renderCanteen called!');
   const table = document.getElementById('canteen-table');
-  if (!table) return;
+  if (!table) {
+    alert('DEBUG: table element NOT FOUND!');
+    return;
+  }
   
   table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">⏳ Đang tải dữ liệu căng tin...</td></tr>';
 
