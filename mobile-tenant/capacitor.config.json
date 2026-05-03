@@ -1,9 +1,0 @@
-{
-  "appId": "tech.luongtd.footfield.tenant",
-  "appName": "FootField Tenant",
-  "webDir": "../public",
-  "server": {
-    "url": "https://footfield.onrender.com/tenant-admin.html",
-    "cleartext": true
-  }
-}
