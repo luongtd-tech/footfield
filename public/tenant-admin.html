@@ -1116,9 +1116,11 @@ tr:hover td{background:rgba(22,163,74,.02);}
     </div>
     <div class="input-group" style="margin-bottom:14px;"><label>Loại</label>
       <select id="service-category">
-        <option value="drink">Nước uống / Đồ ăn</option>
-        <option value="rental">Thuê đồ (Giày, áo...)</option>
-        <option value="other">Dịch vụ khác</option>
+        <option value="drink">Nước uống</option>
+        <option value="food">Đồ ăn nhanh</option>
+        <option value="rental">Thuê đồ (Giày, áo, bóng...)</option>
+        <option value="medical">Y tế (Băng keo, xịt lạnh...)</option>
+        <option value="other">Dịch vụ khác (Trọng tài, quay phim...)</option>
       </select>
     </div>
     <div class="modal-footer">
@@ -1431,8 +1433,10 @@ async function renderCanteen(force = false) {
     table.innerHTML = servicesData.map(s => {
       let catLabel = 'Khác';
       let badgeClass = 'badge-gray';
-      if (s.category === 'drink') { catLabel = 'Nước uống / Đồ ăn'; badgeClass = 'badge-blue'; }
-      else if (s.category === 'rental') { catLabel = 'Thuê đồ'; badgeClass = 'badge-gray'; }
+      if (s.category === 'drink') { catLabel = 'Nước uống'; badgeClass = 'badge-blue'; }
+      else if (s.category === 'food') { catLabel = 'Đồ ăn'; badgeClass = 'badge-green'; }
+      else if (s.category === 'rental') { catLabel = 'Thuê đồ'; badgeClass = 'badge-orange'; }
+      else if (s.category === 'medical') { catLabel = 'Y tế'; badgeClass = 'badge-red'; }
       else if (s.category === 'other') { catLabel = 'Dịch vụ khác'; badgeClass = 'badge-gray'; }
 
       return `
