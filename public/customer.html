@@ -9,6 +9,9 @@
     href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap"
     rel="stylesheet">
   <script src="https://sp.zalo.me/plugins/sdk.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+  <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/vn.js"></script>
   <style>
     /* ========================================
    IMAGE CUSTOMIZATION GUIDE
@@ -1521,7 +1524,7 @@
               </div>
               <div class="input-group">
                 <label>Ngày chơi</label>
-                <input type="date" id="bk-date" min="2026-03-18" value="2026-03-28" onchange="updateTimeSlots()">
+                <input type="text" id="bk-date" placeholder="Chọn ngày...">
               </div>
             </div>
             <div class="form-row">
@@ -3101,6 +3104,20 @@
           }
       }, 200);
     }
+
+    // Initialize Flatpickr for Customer Page
+    document.addEventListener('DOMContentLoaded', function() {
+      flatpickr("#bk-date", {
+        dateFormat: "Y-m-d",
+        altInput: true,
+        altFormat: "d/m/Y",
+        locale: "vn",
+        defaultDate: new Date(),
+        onChange: function(selectedDates, dateStr, instance) {
+          if (typeof updateTimeSlots === 'function') updateTimeSlots();
+        }
+      });
+    });
   </script>
 
   <!-- ZALO WIDGETS -->
