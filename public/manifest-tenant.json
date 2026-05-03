@@ -1,0 +1,21 @@
+{
+  "name": "Footfield Tenant",
+  "short_name": "Tenant",
+  "description": "Quản lý sân bóng dành cho ban quản lý",
+  "start_url": "/tenant-admin.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#16a34a",
+  "icons": [
+    {
+      "src": "/images/field-logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/images/field-logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}

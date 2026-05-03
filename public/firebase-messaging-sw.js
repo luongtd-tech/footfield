@@ -23,3 +23,9 @@ messaging.onBackgroundMessage((payload) => {
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
+
+// Required for PWA Installability (PWABuilder checks for a fetch listener)
+self.addEventListener('fetch', function(event) {
+  // Trình duyệt sẽ tự động xử lý request (Bypass)
+  // Nhưng bắt buộc phải có listener này để đạt chuẩn PWA
+});

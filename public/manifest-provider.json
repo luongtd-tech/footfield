@@ -1,0 +1,21 @@
+{
+  "name": "Footfield Provider",
+  "short_name": "Provider",
+  "description": "Quản trị hệ thống Footfield",
+  "start_url": "/provider-admin.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/images/field-logo.jpg",
+      "sizes": "192x192",
+      "type": "image/jpeg"
+    },
+    {
+      "src": "/images/field-logo.jpg",
+      "sizes": "512x512",
+      "type": "image/jpeg"
+    }
+  ]
+}
