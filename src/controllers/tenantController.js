@@ -1,4 +1,6 @@
 const Tenant = require('../models/Tenant');
+const pushNotifier = require('../utils/pushNotifier');
+
 
 const tenantController = {
   getAllTenants: async (req, res) => {
@@ -102,6 +104,10 @@ const tenantController = {
       const { status } = req.body;
       const result = await Tenant.updateStatus(id, status);
       res.json({ success: true, message: 'Tenant status updated successfully' });
+
+      // Notify Tenant about status change
+      let statusMsg = status === 'active' ? 'được kích hoạt' : status === 'inactive' ? 'tạm ngưng' : 'được cập nhật';
+      pushNotifier.sendToTenant(id, '🏬 Trạng thái Cơ sở', `Cơ sở của bạn đã ${statusMsg} bởi quản trị viên.`);
     } catch (error) {
       res.status(500).json({ success: false, message: 'Error updating tenant status', error: error.message });
     }

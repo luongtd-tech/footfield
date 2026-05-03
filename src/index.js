@@ -114,33 +114,6 @@ app.get('/booking', (req, res) => {
     res.sendFile(path.join(__dirname, '../public/customer.html'));
 });
 
-// Debug DB structure & Emergency Fix
-app.get('/api/debug-db', async (req, res) => {
-  try {
-    // Thử sửa bảng trực tiếp tại đây
-    let fixLog = [];
-    try {
-      await db.query("ALTER TABLE notifications ADD COLUMN tenant_id VARCHAR(50) AFTER id");
-      fixLog.push("Added tenant_id");
-    } catch (e) { fixLog.push("tenant_id error: " + e.message); }
-
-    try {
-      await db.query("ALTER TABLE notifications ADD COLUMN is_read TINYINT(1) DEFAULT 0 AFTER type");
-      fixLog.push("Added is_read");
-    } catch (e) { fixLog.push("is_read error: " + e.message); }
-
-    const [columns] = await db.query('DESCRIBE notifications');
-    const [tables] = await db.query('SHOW TABLES');
-    res.json({ 
-      message: 'Database checked and fix applied', 
-      fix_log: fixLog,
-      tables: tables.map(t => Object.values(t)[0]),
-      notifications_columns: columns 
-    });
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
 
 // Test DB Connection
 

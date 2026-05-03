@@ -62,11 +62,14 @@ exports.createBooking = async (req, res) => {
     const newBooking = await Booking.create(bookingData);
 
     // ✅ Sync Customer Data
-    const { customer_name, customer_phone, total_price } = newBooking;
+    const { customer_name, customer_phone, total_price, fcm_token } = newBooking;
     let customer = await Customer.findByPhone(tenant_id, customer_phone);
+    let customerId;
+
     if (!customer) {
+      customerId = `c_${Date.now()}`;
       await Customer.create({
-        id: `c_${Date.now()}`,
+        id: customerId,
         tenant_id,
         name: customer_name,
         phone: customer_phone,
@@ -74,13 +77,21 @@ exports.createBooking = async (req, res) => {
         total_spent: total_price,
         last_visit: date,
         status: 'new',
-        joined: new Date().toISOString().slice(0, 10)
+        joined: new Date().toISOString().slice(0, 10),
+        fcm_token: fcm_token // Save token for first-time customer
       });
     } else {
+      customerId = customer.id;
+      // Update stats and token if provided
+      const updateData = { total_price, last_visit: date };
+      if (fcm_token) updateData.fcm_token = fcm_token;
       await Customer.updateStats(customer.id, total_price, date);
+      if (fcm_token) {
+        await db.query('UPDATE customers SET fcm_token = ? WHERE id = ?', [fcm_token, customerId]);
+      }
     }
 
-    res.status(201).json(newBooking);
+    res.status(201).json({ ...newBooking, customer_id: customerId });
 
     // Notify Tenant about new booking
     pushNotifier.sendToTenant(
@@ -93,21 +104,6 @@ exports.createBooking = async (req, res) => {
   }
 };
 
-exports.updateBookingStatus = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
-    const success = await Booking.updateStatus(id, status);
-    if (success) {
-      res.json({ success: true, message: 'Booking status updated' });
-    } else {
-      res.status(404).json({ success: false, message: 'Booking not found' });
-    }
-  } catch (error) {
-    res.status(500).json({ message: 'Error updating booking status', error: error.message });
-  }
-};
-
 exports.updateBookingPayment = async (req, res) => {
   try {
     const { id } = req.params;
@@ -115,6 +111,22 @@ exports.updateBookingPayment = async (req, res) => {
     const success = await Booking.updatePayment(id, paid, payment_method);
     if (success) {
       res.json({ success: true, message: 'Booking payment updated' });
+
+      // Notify Customer about payment
+      if (paid) {
+        const booking = await Booking.findById(id);
+        if (booking && booking.customer_phone) {
+          const db = require('../config/database');
+          const [customers] = await db.query('SELECT id FROM customers WHERE phone = ? AND tenant_id = ?', [booking.customer_phone, booking.tenant_id]);
+          if (customers.length > 0) {
+            pushNotifier.sendToCustomer(
+              customers[0].id,
+              '💵 Xác nhận thanh toán',
+              `Thanh toán cho đơn đặt sân ${booking.qr_code} đã được xác nhận.`
+            );
+          }
+        }
+      }
     } else {
       res.status(404).json({ success: false, message: 'Booking not found' });
     }
@@ -131,14 +143,26 @@ exports.updateBookingStatus = async (req, res) => {
     if (success) {
       res.json({ success: true, message: `Booking status updated to ${status}` });
       
-      // Get booking details to notify tenant
       const booking = await Booking.findById(id);
       if (booking) {
+        // Notify Tenant (internal tracking)
         pushNotifier.sendToTenant(
           booking.tenant_id,
           '🔔 Cập nhật trạng thái!',
           `Đơn đặt sân ${id} đã chuyển sang trạng thái: ${status}.`
         );
+
+        // Notify Customer (if status is confirmed or completed/cancelled)
+        const db = require('../config/database');
+        const [customers] = await db.query('SELECT id FROM customers WHERE phone = ? AND tenant_id = ?', [booking.customer_phone, booking.tenant_id]);
+        if (customers.length > 0) {
+          let statusMsg = status === 'confirmed' ? 'được xác nhận' : status === 'completed' ? 'đã hoàn thành' : status === 'cancelled' ? 'bị hủy' : 'được cập nhật';
+          pushNotifier.sendToCustomer(
+            customers[0].id,
+            '⚽ Cập nhật lịch đặt sân',
+            `Lịch đặt sân ${booking.qr_code} của bạn đã ${statusMsg}.`
+          );
+        }
       }
     } else {
       res.status(404).json({ message: 'Booking not found' });

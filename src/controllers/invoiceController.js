@@ -1,5 +1,6 @@
 const Invoice = require('../models/Invoice');
 const mailService = require('../config/mail');
+const pushNotifier = require('../utils/pushNotifier');
 
 const invoiceController = {
   getAllInvoices: async (req, res) => {
@@ -54,6 +55,14 @@ const invoiceController = {
       
       if (result.affectedRows > 0) {
         res.json({ success: true, message: 'Invoice status updated successfully' });
+
+        // Notify Tenant about invoice status change
+        const invoices = await Invoice.getAll();
+        const invoice = invoices.find(i => i.id === id);
+        if (invoice && invoice.tenant_id) {
+          let statusMsg = status === 'paid' ? 'đã được thanh toán' : status === 'overdue' ? 'đã quá hạn' : `chuyển sang trạng thái: ${status}`;
+          pushNotifier.sendToTenant(invoice.tenant_id, '💳 Cập nhật Hóa đơn', `Hóa đơn ${id} của bạn ${statusMsg}.`);
+        }
       } else {
         res.status(404).json({ success: false, message: 'Invoice not found' });
       }

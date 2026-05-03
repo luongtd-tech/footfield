@@ -1,4 +1,6 @@
 const Ticket = require('../models/Ticket');
+const pushNotifier = require('../utils/pushNotifier');
+
 
 const ticketController = {
   getAllTickets: async (req, res) => {
@@ -16,6 +18,14 @@ const ticketController = {
       const { status } = req.body;
       const result = await Ticket.updateStatus(id, status);
       res.json({ success: true, message: 'Ticket status updated successfully' });
+
+      // Notify Tenant about ticket status change
+      const tickets = await Ticket.getAll();
+      const ticket = tickets.find(t => t.id === id);
+      if (ticket && ticket.tenant_id) {
+        let statusMsg = status === 'resolved' ? 'đã được giải quyết' : status === 'in_progress' ? 'đang được xử lý' : 'đã cập nhật trạng thái';
+        pushNotifier.sendToTenant(ticket.tenant_id, '🎫 Cập nhật Phiếu hỗ trợ', `Phiếu hỗ trợ ${id} của bạn ${statusMsg}.`);
+      }
     } catch (error) {
       res.status(500).json({ success: false, message: 'Error updating ticket status', error: error.message });
     }
@@ -35,6 +45,9 @@ const ticketController = {
       });
       
       res.json({ success: true, message: 'Ticket created successfully', id });
+
+      // Notify Admin about new ticket
+      pushNotifier.sendToAdmin('🎫 Yêu cầu hỗ trợ mới', `Nhà thuê ${tenant_name} vừa gửi phiếu hỗ trợ: ${subject}`);
     } catch (error) {
       res.status(500).json({ success: false, message: 'Error creating ticket', error: error.message });
     }

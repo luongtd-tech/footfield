@@ -5,10 +5,12 @@ const db = require('../config/database');
 if (process.env.FIREBASE_SERVICE_ACCOUNT) {
   try {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
-    });
-    console.log('Firebase Admin initialized');
+    if (!admin.apps.length) {
+      admin.initializeApp({
+        credential: admin.credential.cert(serviceAccount)
+      });
+      console.log('Firebase Admin initialized');
+    }
   } catch (err) {
     console.error('Failed to initialize Firebase Admin:', err.message);
   }
@@ -38,7 +40,7 @@ const pushNotifier = {
   sendToAdmin: async (title, body, data = {}) => {
     try {
       const [rows] = await db.query('SELECT fcm_token FROM admins WHERE fcm_token IS NOT NULL');
-      const tokens = rows.map(r => r.fcm_token);
+      const tokens = rows.map(r => r.fcm_token).filter(t => t);
       if (tokens.length > 0) {
         const message = {
           notification: { title, body },
@@ -51,6 +53,24 @@ const pushNotifier = {
       }
     } catch (error) {
       console.error('Error sending push to admin:', error);
+    }
+  },
+
+  sendToCustomer: async (customerId, title, body, data = {}) => {
+    try {
+      const [rows] = await db.query('SELECT fcm_token FROM customers WHERE id = ?', [customerId]);
+      if (rows.length > 0 && rows[0].fcm_token) {
+        const message = {
+          notification: { title, body },
+          data: data,
+          token: rows[0].fcm_token
+        };
+        const response = await admin.messaging().send(message);
+        console.log('Successfully sent push to customer:', response);
+        return response;
+      }
+    } catch (error) {
+      console.error('Error sending push to customer:', error);
     }
   }
 };
