@@ -1446,7 +1446,8 @@ async function renderCanteen(force = false) {
           <button class="btn btn-sm btn-danger" onclick="deleteService('${s.id}')">🗑️</button>
         </td>
       </tr>
-    `).join('');
+    `;
+    }).join('');
   } catch (err) {
     console.error('Error in renderCanteen:', err);
     table.innerHTML = `<tr><td colspan="5" style="color:var(--red);text-align:center;padding:20px;">❌ Lỗi hiển thị: ${err.message}</td></tr>`;
