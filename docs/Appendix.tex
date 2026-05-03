@@ -1,5 +1,43 @@
 \section*{APPENDIX}
-\phantomsection\addcontentsline{toc}{section}{\numberline{} APPENDIX}
-\setcounter{section}{1}
-\setcounter{subsection}{0}
-\section*{Appendix 1}\label{pl:dac}
+\addcontentsline{toc}{section}{\numberline{}APPENDIX}
+
+\subsection*{Appendix A: Project Directory Structure}
+The FootField platform is organized into a modular architecture to separate concerns between the backend logic, frontend assets, and mobile bridge configurations.
+
+\begin{verbatim}
+footfield-main/
+|-- android-tenant/      # Capacitor Native Android Project
+|-- docs/                # LaTeX Documentation & Figures
+|-- public/              # Frontend Portal Assets (HTML, CSS, JS)
+|   |-- css/             # Modular Design System (shared.css)
+|   |-- js/              # Client-side Logic (shared.js)
+|   |-- images/          # UI Resources
+|-- src/                 # Node.js Backend Source
+|   |-- controllers/     # Request Handling Logic
+|   |-- db/              # Database Migrations & Seeds
+|   |-- models/          # MySQL Data Schemas (Knex.js)
+|   |-- routes/          # API Endpoint Definitions
+|   |-- services/        # Third-party Integrations (AI, VNPay)
+|   |-- utils/           # Helper Utilities (FCM, Logger)
+|-- package.json         # Dependency Management
+|-- README.md            # Project Overview
+\end{verbatim}
+
+\subsection*{Appendix B: Key Implementation Highlights}
+
+\textbf{1. AI Virtual Assistant System Prompt:}
+The following prompt is used to configure the Google Gemini AI behavior, ensuring it stays within the context of a football field booking assistant:
+
+\begin{verbatim}
+"You are a professional assistant for the FootField platform. 
+Your goal is to help customers book football fields. 
+You must always use the available tools (check_availability, 
+create_booking) to fetch real-time data before answering. 
+If a user asks about pricing, refer to the get_pricing tool. 
+Be polite, concise, and stay in character."
+\end{verbatim}
+
+\begin{minipage}{\textwidth}
+\textbf{2. VNPay Security Hash Implementation:}
+The system ensures transaction integrity by generating a secure HMAC-SHA512 hash for every payment request, preventing unauthorized data tampering.
+\end{minipage}

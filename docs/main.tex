@@ -1,14 +1,16 @@
-% This template is translated by Trang Nguyen Minh and Hanh Nguyen Hong, from BKIC 611 lab with love <3
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\documentclass{article} % 
+% This template is translated by LuongTD from K63 CNTTCLC - Vinh University
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\documentclass[oneside]{article} % 
 \usepackage[utf8]{inputenc}
 \usepackage[T5]{fontenc} % Vietnamese
 \usepackage[fontsize=13pt]{scrextend} % Set fontsize=13pt
 %\usepackage[paperheight=29.7cm,paperwidth=21cm,right=2cm,left=3cm,top=2cm,bottom=2.5cm]{geometry}% Chuẩn A4, căn lề phải, trái, trên, dưới.
-\usepackage[paperheight=29.7cm,paperwidth=21cm,right=2cm,left=3cm,top=2cm,bottom=2.5cm,twoside]{geometry}% Chuẩn A4, căn lề phải, trái, trên, dưới.
+\usepackage[paperheight=29.7cm,paperwidth=21cm,right=2cm,left=3cm,top=2cm,bottom=2.5cm]{geometry}% Chuẩn A4, căn lề phải, trái, trên, dưới.
 \usepackage{mathptmx} % Time New Roman
 \usepackage{graphicx} 
 \usepackage{float} 
+\usepackage[protrusion=false,expansion=false]{microtype}
+\usepackage{tabularx}
 \usepackage{tikz}
 \usetikzlibrary{calc} 
 \usepackage{indentfirst} 
@@ -31,7 +33,7 @@
 
 \renewcommand{\figurename}{\fontsize{12pt}{0pt}\selectfont \bfseries Figure}
 \renewcommand{\thefigure}{\thesection.\arabic{figure}}
-\usepackage[font=bf]{caption}
+\usepackage[font=bf, justification=centering]{caption}
 \captionsetup[figure]{labelsep=space}
 
 \renewcommand{\tablename}{\fontsize{12pt}{0pt}\selectfont \bfseries Table}
@@ -79,6 +81,7 @@
 }
 
 \begin{document}
+\pagenumbering{roman}
 
 \input{Cover page} 
 
@@ -112,7 +115,8 @@
 
 \input{Duty roster} 
 
-\pagenumbering{arabic} % Đánh số thứ tự 1,2,3...
+\newpage
+\pagenumbering{arabic} % Đánh số thứ tự 1,2,3... cho các chương nội dung
 
 \input{Chapter 1}
 \newpage

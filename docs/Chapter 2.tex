@@ -7,6 +7,8 @@
 
 This chapter provides an in-depth review of the underlying technologies and architectural paradigms that form the foundation of the FootField platform. It explores the principles of Software as a Service (SaaS), modern web development frameworks, artificial intelligence integration, and cross-platform mobile development.
 
+
+
 \subsection{Software as a Service (SaaS) and Multi-Tenant Architecture}
 Software as a Service (SaaS) is a cloud computing model where software applications are hosted by a third-party provider and made available to customers over the internet. Unlike the traditional on-premises software model, SaaS eliminates the need for organizations to install and run applications on their own computers or data centers, thereby reducing hardware acquisition, provisioning, and maintenance costs \cite{saas_architecture}.
 
@@ -36,7 +38,9 @@ While traditional chatbots rely on rigid, pre-programmed decision trees (e.g., "
 
 To overcome this, the project utilizes a relatively new paradigm known as \textbf{Function Calling} (or Tool Use). The workflow is as follows:
 \begin{enumerate}
+    \begin{sloppypar}
     \item \textbf{Definition:} The backend developer defines a set of functions (e.g., \texttt{check\_availability}, \texttt{create\_booking}) and provides the LLM with a JSON schema describing what these functions do and what parameters they require.
+    \end{sloppypar}
     \item \textbf{Inference:} The user sends a message (e.g., "Book a 7-a-side field for tomorrow at 18:00"). The LLM analyzes the text, recognizes that the user wants to book a field, and instead of replying with text, it outputs a structured JSON object requesting the backend to execute the \texttt{create\_booking} function with the extracted parameters.
     \item \textbf{Execution:} The Node.js backend intercepts this request, executes the corresponding SQL query via Knex.js, and obtains the result (e.g., success or failure).
     \item \textbf{Resolution:} The backend sends the result back to the LLM. The LLM then synthesizes a natural language response (e.g., "I have successfully booked the 7-a-side field for you!") and presents it to the user.
@@ -44,6 +48,13 @@ To overcome this, the project utilizes a relatively new paradigm known as \textb
 This mechanism bridges the gap between conversational AI and deterministic software execution.
 
 \subsection{Cross-Platform Mobile Development with Capacitor}
-To provide facility staff with a tool to rapidly verify customer bookings on the field, a mobile application is required. Developing native applications separately for iOS (using Swift) and Android (using Kotlin) requires maintaining two separate codebases, which is highly resource-intensive.
-
 Ionic Capacitor solves this problem by providing a cross-platform native runtime \cite{capacitor}. It allows developers to build mobile applications using standard web technologies (HTML, CSS, JavaScript). Capacitor acts as a bridge; it wraps the web application in a native WebView and exposes a set of JavaScript APIs that can communicate with native device hardware. In the context of the FootField platform, Capacitor is used to grant the web-based Tenant Admin dashboard access to the device's native camera, enabling the implementation of a high-speed QR code scanner for customer check-ins without the need for native code development.
+
+\subsection{Cloud Storage and Persistent Media Management}
+Deploying applications on Platform-as-a-Service (PaaS) providers like Render often involves working with ephemeral file systems. To achieve data persistence, the platform integrates with Cloudinary, a cloud-based media management service. By using the Cloudinary SDK, the backend automatically uploads files to the cloud and stores only the permanent URL in the MySQL database, ensuring that media assets remain accessible indefinitely.
+
+\subsection{Real-time Alerts via Firebase Cloud Messaging (FCM)}
+To ensure facility staff are immediately notified of new bookings, the platform utilizes Firebase Cloud Messaging (FCM). The backend utilizes the Firebase Admin SDK to trigger push notifications based on specific system events (e.g., successful payment). These notifications are delivered to the mobile application via a persistent connection, providing the "real-time" responsiveness required for a commercial service.
+
+\subsection{Native Printing and Hardware Bridging}
+The platform leverages the \texttt{cordova-plugin-printer} within the Capacitor environment to establish a bridge between the web interface and the mobile operating system's printing services. This allows the Tenant Admin dashboard to trigger native print dialogs and communicate with Bluetooth or Wi-Fi thermal printers directly from the mobile application.

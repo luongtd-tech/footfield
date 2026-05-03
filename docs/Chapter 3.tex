@@ -8,7 +8,6 @@
 This chapter translates the conceptual goals of the FootField platform into concrete engineering specifications. It details the functional requirements, identifies system actors, presents use case scenarios, and outlines the architectural and database designs.
 
 \subsection{Requirements Analysis}
-\subsubsection{Functional Requirements}
 The platform is designed to serve three distinct primary actors, each with specific privileges and functional needs:
 
 \textbf{1. Provider Admin (Super Admin):}
@@ -37,21 +36,60 @@ The platform is designed to serve three distinct primary actors, each with speci
 \subsubsection{Non-Functional Requirements}
 \begin{itemize}
     \item \textbf{Data Security:} Strict isolation of tenant data using the \texttt{tenant\_id} foreign key in all relevant database queries.
-    \item \textbf{Performance:} API response times must remain under 500ms for standard database queries to ensure a seamless booking experience.
+    \item \textbf{Performance:} API response times must remain under 500ms for standard database queries.
     \item \textbf{Availability:} The system must maintain 99.9\% uptime, facilitated by cloud-native deployment on Render and Aiven.
 \end{itemize}
+
+
+\begin{table}[htbp]
+\centering
+\begin{tabularx}{\textwidth}{|l|l|l|X|}
+\hline
+\rowcolor{LightCyan}
+\textbf{Plan Tier} & \textbf{Monthly Price} & \textbf{Field Limit} & \textbf{Key Features} \\ \hline
+Basic & 299,000 VND & Max 3 Fields & Dashboard, Field Mgmt, Basic Reports \\ \hline
+Standard & 599,000 VND & Max 8 Fields & QR Check-in, Invoice Printing, Canteen Mgmt \\ \hline
+Premium & 999,000 VND & Unlimited & AI Assistant, Camera Integration, Advanced CRM \\ \hline
+\end{tabularx}
+\caption{FootField SaaS Platform: Subscription Tiers and Features}
+\label{tab:saas_tiers}
+\end{table}
+
+\begin{table}[htbp]
+\centering
+\begin{tabularx}{\textwidth}{|X|c|c|c|}
+\hline
+\rowcolor{LightCyan}
+\textbf{Functional Capability} & \textbf{Provider} & \textbf{Tenant} & \textbf{Customer} \\ \hline
+Manage Tenants \& Packages & [x] & [ ] & [ ] \\ \hline
+Configure Fields \& Pricing & [ ] & [x] & [ ] \\ \hline
+Conversational AI Booking & [ ] & [x] & [x] \\ \hline
+Process VNPay Payments & [ ] & [ ] & [x] \\ \hline
+Native QR Check-in & [ ] & [x] & [ ] \\ \hline
+View Revenue Analytics & [x] & [x] & [ ] \\ \hline
+\end{tabularx}
+\caption{Actor-Role Permission Matrix}
+\label{tab:permissions}
+\end{table}
+
+
+
 
 \subsection{Use Case Scenarios}
 
 To visualize the interactions between the actors and the system, a comprehensive Use Case Diagram is established.
 
-% [PLACEHOLDER FOR USE CASE DIAGRAM]
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=0.9\textwidth]{Figures/usecase_diagram.png}
-%     \caption{General Use Case Diagram for FootField System}
-%     \label{fig:usecase}
-% \end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.58\textwidth]{Figures/usecase_diagram.png}
+    \caption[General Use Case Diagram]{General Use Case Diagram for FootField SaaS Ecosystem}
+    \label{fig:usecase}
+\end{figure}
+
+
+
+
+
 
 \subsubsection{Detailed Use Case: AI-Assisted Booking}
 \begin{itemize}
@@ -68,6 +106,23 @@ To visualize the interactions between the actors and the system, a comprehensive
         \item The system generates a booking record with "Pending" status and returns a payment link.
     \end{enumerate}
 \end{itemize}
+
+\begin{table}[htbp]
+\centering
+\begin{tabularx}{\textwidth}{|l|l|X|}
+\hline
+\rowcolor{LightCyan}
+\textbf{Tool Name} & \textbf{Parameters} & \textbf{System Action} \\ \hline
+\texttt{check\_availability} & date, time & Queries the database for unoccupied slots on a specific date. \\ \hline
+\texttt{create\_booking} & name, phone, date, time, field\_id & Inserts a new booking record and triggers the VNPay link generation. \\ \hline
+\texttt{get\_pricing} & field\_id & Retrieves hourly rates and available promotions for a specific field. \\ \hline
+\end{tabularx}
+\caption{AI Service: Tool-Calling Schema Definitions}
+\label{tab:ai_tools}
+\end{table}
+
+
+
 
 \subsubsection{Detailed Use Case: QR Code Check-in}
 \begin{itemize}
@@ -87,14 +142,22 @@ To visualize the interactions between the actors and the system, a comprehensive
 \subsection{Database Design and ERD}
 
 The database is built on a robust relational model to ensure data integrity. The core of the multi-tenant architecture is the enforcement of the \texttt{tenant\_id} relationship.
+\begin{figure}[htbp]
+    \centering
+    \rotatebox{90}{
+        \begin{minipage}{0.95\textheight}
+            \centering
+            \includegraphics[width=1\textwidth]{Figures/erd_diagram.png}
+            \caption[Entity-Relationship Diagram]{Optimized Entity-Relationship Diagram (ERD) with Multi-tenant isolation}
+            \label{fig:erd}
+        \end{minipage}
+    }
+\end{figure}
 
-% [PLACEHOLDER FOR ERD DIAGRAM]
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=1\textwidth]{Figures/erd_diagram.png}
-%     \caption{Entity-Relationship Diagram (ERD)}
-%     \label{fig:erd}
-% \end{figure}
+
+
+
+
 
 \subsubsection{Table Schemas}
 \textbf{1. Table: tenants}
@@ -128,22 +191,24 @@ The database is built on a robust relational model to ensure data integrity. The
 
 Sequence diagrams illustrate the dynamic interaction between system components over time. Two critical workflows are defined below.
 
-% [PLACEHOLDER FOR AI SEQUENCE DIAGRAM]
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=0.9\textwidth]{Figures/seq_ai_booking.png}
-%     \caption{Sequence Diagram: AI-Assisted Booking Workflow}
-%     \label{fig:seq_ai}
-% \end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\textwidth]{Figures/seq_ai_booking.png}
+    \caption[AI Booking Sequence]{Sequence Diagram: AI-Assisted Booking Workflow with LLM Function Calling}
+    \label{fig:seq_ai}
+\end{figure}
+
+
 
 The \textbf{AI Booking Sequence} involves the Customer (Client), the Node.js Server, the MySQL Database, and the Google Gemini API. The server acts as an intermediary, utilizing Function Calling to execute database reads/writes on behalf of the AI before returning the final natural language response to the client.
 
-% [PLACEHOLDER FOR VNPAY SEQUENCE DIAGRAM]
-% \begin{figure}[H]
-%     \centering
-%     \includegraphics[width=0.9\textwidth]{Figures/seq_vnpay.png}
-%     \caption{Sequence Diagram: VNPay Payment Integration}
-%     \label{fig:seq_vnpay}
-% \end{figure}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\textwidth]{Figures/seq_vnpay.png}
+    \caption[VNPay Payment Sequence]{Sequence Diagram: Secure VNPay Payment Handshake and IPN \mbox{Callback}}
+    \label{fig:seq_vnpay}
+\end{figure}
+
+
 
 The \textbf{VNPay Sequence} demonstrates the secure payment handshake. Upon booking creation, the server generates a signed VNPay URL. The client is redirected to VNPay to enter payment details. Crucially, VNPay sends an asynchronous IPN (Instant Payment Notification) callback to the Node.js server to verify the transaction independently of the client-side redirect, ensuring that the booking status is updated securely.

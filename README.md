@@ -1,111 +1,125 @@
-# FootField - Hệ Thống Quản Lý Sân Bóng Đá Toàn Diện (SaaS)
+# FootField - Hệ Thống Quản Lý Sân Bóng Đá Toàn Diện (SaaS Platform)
 
-FootField là một nền tảng SaaS (Software as a Service) B2B2C cung cấp giải pháp chuyển đổi số toàn diện cho lĩnh vực quản lý và cho thuê sân bóng đá nhân tạo. Hệ thống giúp kết nối Chủ nền tảng (Provider), Chủ sân bóng (Tenant) và Người chơi (Customer) trong một hệ sinh thái duy nhất.
-
-## 🌟 Tính Năng Nổi Bật
-
-### 1. Dành Cho Chủ Nền Tảng (Provider Admin)
-- **Quản lý đa cơ sở (Multi-tenant):** Quản lý tập trung hàng trăm sân bóng (Tenant) trên cùng một hệ thống với hệ thống ID định danh riêng biệt.
-- **Quản lý gói dịch vụ (Packages):** Thiết lập các gói thuê bao (Cơ bản, Tiêu chuẩn, Cao cấp) và tự động giới hạn số lượng sân, tiện ích cho từng gói.
-- **Báo cáo doanh thu SaaS:** Theo dõi doanh thu từ việc bán gói dịch vụ phần mềm theo chu kỳ tháng/năm.
-- **Hệ thống Ticket:** Tiếp nhận và xử lý báo lỗi, yêu cầu hỗ trợ trực tiếp từ các chủ sân.
-
-### 2. Dành Cho Chủ Sân Bóng (Tenant Admin)
-- **Quản lý sân bãi:** Thiết lập cấu hình sân (Sân 5, 7, 11), định giá linh hoạt, trạng thái hoạt động/bảo trì.
-- **Quản lý lịch đặt sân thông minh:** Giao diện lưới thời gian (Time-grid) trực quan, chống trùng lịch (Conflict prevention).
-- **Check-in tự động (Mobile App):** Tích hợp quét mã QR bằng Camera Native trên Android để nhận sân và đối chiếu hóa đơn nhanh chóng.
-- **CRM Quản lý khách hàng:** Phân hạng khách hàng tự động (VIP), theo dõi tần suất đặt sân và quản lý công nợ.
-- **Tài chính & Thống kê:** Tính toán tỷ lệ lấp đầy sân (Occupancy rate), tổng hợp doanh thu theo ngày/tháng, và bản xem trước in hóa đơn hóa đơn.
-- **Vận hành (Nhân sự):** Quản lý tài khoản và theo dõi lịch làm việc của đội ngũ nhân viên phục vụ sân.
-
-### 3. Dành Cho Khách Hàng (Customer Storefront)
-- **Giao diện đặt sân hiện đại:** Tìm kiếm sân, xem hình ảnh, tiện ích, và kiểm tra khung giờ trống theo thời gian thực. (Thay đổi UI/Theme động theo từng cơ sở).
-- **Chatbot AI Trợ lý ảo (Gemini):** Tích hợp Google Gemini AI hỗ trợ khách hàng tư vấn giá, kiểm tra giờ trống và đặt lịch hoàn toàn qua hội thoại tự nhiên (Function Calling).
-- **Thanh toán trực tuyến (VNPay):** Hỗ trợ thanh toán bảo mật và tự động ghi nhận booking ngay lập tức.
-- **Vé điện tử QR Code:** Tự động sinh mã QR sau khi đặt sân thành công dùng để check-in tại sân.
+FootField là một nền tảng SaaS (Software as a Service) B2B2C mạnh mẽ, cung cấp giải pháp chuyển đổi số toàn diện cho ngành quản lý và cho thuê sân bóng đá. Hệ thống được thiết kế để phục vụ ba đối tượng chính: **Chủ nền tảng (Provider)**, **Chủ sân bóng (Tenant)** và **Người chơi (Customer)** trong một hệ sinh thái đồng nhất, mượt mà.
 
 ---
 
-## 🏗 Kiến Trúc Hệ Thống
+## 🌟 Tính Năng Cốt Lõi
 
-Dự án áp dụng kiến trúc **Monolithic Hybrid** tích hợp cơ chế chia tách dữ liệu **Multi-tenant** dựa trên khóa ngoại `tenant_id` trong cơ sở dữ liệu.
+### 1. Quản Trị Hệ Thống (Provider Admin)
+- **Kiến trúc Multi-tenant:** Quản lý không giới hạn các cơ sở kinh doanh (Tenants) với định danh riêng biệt.
+- **Hệ thống Gói dịch vụ (Subscription):** Linh hoạt thiết lập các gói thuê bao (Basic, Standard, Premium) với cơ chế giới hạn tính năng và số lượng sân tự động.
+- **Báo cáo SaaS chuyên sâu:** Theo dõi doanh thu từ phí dịch vụ phần mềm, biểu đồ tăng trưởng nhà thuê và hiệu suất hệ thống.
+- **Trung tâm hỗ trợ (Ticket System):** Tiếp nhận và phản hồi các yêu cầu hỗ trợ, báo lỗi từ các chủ sân theo thời gian thực.
 
-- **Frontend:** HTML5, Vanilla CSS, JS (Hạn chế framework nặng để tối đa tốc độ tải trang).
-- **Backend:** Node.js, Express.js.
-- **Cơ Sở Dữ Liệu:** MySQL (Sử dụng Knex.js Query Builder để chống SQL Injection).
-- **Mobile Native App:** Ionic Capacitor (Đóng gói Web App thành Android Native App, tích hợp quyền thiết bị).
-- **AI Engine:** Google Gemini 2.5 Flash (Function Calling).
-- **Payment Gateway:** Cổng thanh toán VNPay Sandbox/Prod.
+### 2. Quản Lý Vận Hành (Tenant Admin)
+- **Smart Scheduling:** Giao diện lưới thời gian (Time-grid) trực quan, tự động ngăn chặn trùng lịch và tối ưu hóa tỷ lệ lấp đầy.
+- **Tích hợp Mobile App & QR Check-in:** Sử dụng Camera Native trên Android để quét mã QR nhận sân, đối chiếu hóa đơn tức thì.
+- **In ấn không dây (Native Printing):** Kết nối trực tiếp với máy in nhiệt qua Bluetooth/Wi-Fi để in hóa đơn ngay trên ứng dụng di động.
+- **Quản lý CRM & Tài chính:** Tự động phân hạng khách hàng (VIP), theo dõi công nợ, quản lý dịch vụ căng tin (đồ ăn, nước uống) và thống kê doanh thu chi tiết.
+- **Thông báo đẩy (FCM):** Nhận thông báo thời gian thực khi có khách đặt sân mới hoặc các thay đổi từ hệ thống.
 
-### 📂 Tổ Chức Mã Nguồn (Directory Structure)
+### 3. Trải Nghiệm Khách Hàng (Customer Storefront)
+- **Booking Online 24/7:** Tìm kiếm sân, kiểm tra khung giờ trống và đặt lịch nhanh chóng với giao diện tùy biến theo thương hiệu của từng sân.
+- **Trợ lý ảo AI (Gemini):** Chatbot thông minh hỗ trợ tư vấn giá, tìm giờ trống và thực hiện đặt sân trực tiếp qua ngôn ngữ tự nhiên.
+- **Thanh toán đa phương thức:** Tích hợp cổng thanh toán VNPay (ATM, QR Code, Ví điện tử) với cơ chế xác nhận tự động.
+- **Ví điện tử & QR Ticket:** Lưu trữ vé đặt sân dưới dạng QR Code giúp quá trình check-in tại sân diễn ra trong vài giây.
+
+---
+
+## 🏗 Kiến Trúc Kỹ Thuật
+
+Dự án sử dụng kiến trúc **Modular Monolith** hiện đại, ưu tiên hiệu năng và khả năng bảo trì.
+
+### Tech Stack
+- **Backend:** Node.js (Express), Knex.js (Query Builder).
+- **Frontend:** Vanilla HTML5/JS, CSS3 (Shared Design System).
+- **Database:** MySQL 8.0 (Managed by Aiven).
+- **Mobile:** Ionic Capacitor (Android Native Integration).
+- **AI Engine:** Google Gemini Pro (Function Calling).
+- **Cloud Storage:** Cloudinary (Hybrid Local Fallback).
+- **Messaging:** Firebase Cloud Messaging (FCM).
+- **Signaling:** Socket.io (For Live Monitoring).
+
+### 📂 Cấu Trúc Thư Mục (Optimized)
 
 ```text
 footfield-main/
+├── public/                 # Giao diện Frontend Web
+│   ├── css/                # Hệ thống CSS module (shared.css, portal-specific)
+│   ├── js/                 # Logic JS module (shared.js, portal-specific)
+│   ├── images/             # Tài nguyên hình ảnh hệ thống
+│   ├── customer.html       # Cổng thông tin khách hàng & AI Chatbot
+│   ├── tenant-admin.html   # Cổng quản trị dành cho chủ sân
+│   └── provider-admin.html # Cổng quản trị dành cho chủ nền tảng
 │
-├── public/                 # Tệp tĩnh Frontend (HTML, CSS, JS, Images)
-│   ├── customer.html       # Trang đặt sân (B2C) & Chatbot
-│   ├── tenant-admin.html   # Quản lý sân bóng (B2B)
-│   ├── provider-admin.html # Quản trị tổng hệ thống (Super Admin)
-│   └── payment-result.html # Trang xử lý Callback VNPay
+├── src/                    # Mã nguồn Backend (Layered Architecture)
+│   ├── config/             # Cấu hình DB, Firebase, Cloudinary
+│   ├── controllers/        # Điều phối logic Request/Response
+│   ├── models/             # Định nghĩa Schema và tương tác Database
+│   ├── services/           # Logic nghiệp vụ & Tích hợp API bên thứ 3
+│   ├── routes/             # Định nghĩa API Endpoints
+│   ├── middleware/         # Xác thực JWT, phân quyền, xử lý lỗi
+│   └── utils/              # Tiện ích chung (Push Notification, Formatter)
 │
-├── src/                    # Mã nguồn Backend API (Node.js)
-│   ├── config/             # Thiết lập Database, Constants, Môi trường
-│   ├── controllers/        # Xử lý logic API (Bookings, Tenants, AI, VNPay)
-│   ├── db/                 # Các file Database Migrations & Seeds của Knex
-│   ├── jobs/               # Cron jobs (Ví dụ: tự động đánh dấu hết hạn gói)
-│   ├── middleware/         # Bảo mật (Xác thực JWT), Xử lý lỗi
-│   ├── models/             # Định nghĩa tương tác với MySQL
-│   ├── routes/             # Cấu trúc API Endpoints
-│   └── services/           # Tích hợp dịch vụ bên thứ 3 (aiService, vnpayService)
-│
-├── mobile-provider/        # Android Project (Super Admin App) - Capacitor
-├── mobile-tenant/          # Android Project (Tenant App) - Capacitor
-│
-├── index.js                # Entry point khởi chạy HTTP Server
-├── knexfile.js             # Cấu hình chuỗi kết nối Database cho Knex
-└── package.json            # Quản lý thư viện Node.js
+├── android-tenant/         # Dự án Native Android dành cho Chủ sân
+├── android-provider/       # Dự án Native Android dành cho Chủ nền tảng
+├── scripts/                # Các kịch bản tối ưu hóa và bảo trì hệ thống
+├── docs/                   # Tài liệu kỹ thuật và thiết kế
+└── knexfile.js             # Cấu hình Database Migration
 ```
 
 ---
 
-## 🚀 Hướng Dẫn Triển Khai (Deployment)
+## 🚀 Hướng Dẫn Triển Khai
 
-Dự án được tối ưu để triển khai trọn gói lên nền tảng Cloud.
-
-### 1. Môi trường triển khai Production
-- **Backend & Frontend Host:** Dịch vụ Web Service Serverless/PaaS trên **Render** (Node.js Environment).
-- **Database:** Cụm máy chủ MySQL Managed Service được lưu trữ độc lập trên **Aiven**.
-
-### 2. Thiết lập Biến Môi Trường (`.env`)
-Đảm bảo thêm các khóa sau vào cấu hình Environment Variables trên bảng điều khiển của **Render**:
+### 1. Thiết lập Môi trường (.env)
+Tạo tệp `.env` tại thư mục gốc với các thông số sau:
 
 ```env
 PORT=3000
-# Aiven MySQL Connection
-DB_HOST=mysql-xxx-xxx.aivencloud.com
-DB_PORT=xxxx
-DB_USER=avnadmin
-DB_PASSWORD=your_aiven_password
+# Database (Aiven/MySQL)
+DB_HOST=your_host
+DB_USER=your_user
+DB_PASSWORD=your_password
 DB_NAME=footfield_db
 
-# Security & Services
-JWT_SECRET=your_super_secret_jwt_key
-GEMINI_API_KEY=your_google_gemini_api_key
+# AI & Storage
+GEMINI_API_KEY=your_gemini_key
+CLOUDINARY_URL=cloudinary://api_key:api_secret@cloud_name
 
-# VNPay Payment Gateway
-VNP_TMN_CODE=your_vnpay_tmn_code
-VNP_HASH_SECRET=your_vnpay_hash_secret
-VNP_URL=https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
-VNP_RETURN_URL=https://<your-render-domain>.onrender.com/payment-result.html
+# Firebase (JSON string)
+FIREBASE_SERVICE_ACCOUNT={"project_id": "...", ...}
+
+# Payments (VNPay)
+VNP_TMN_CODE=your_code
+VNP_HASH_SECRET=your_secret
 ```
 
-### 3. Quy trình Build Android Native App (AAB/APK)
-Vì ứng dụng di động lấy giao diện Web trực tiếp từ Render Host (Load URL), khi bạn cập nhật code Frontend, ứng dụng Android tự động thay đổi. 
-Bạn **chỉ cần Build lại ứng dụng Android** qua Android Studio nếu:
-1. Có thay đổi về cấu hình Native (như Logo ứng dụng, Splash Screen).
-2. Có thay đổi về quyền hệ thống trong file `AndroidManifest.xml` (Ví dụ: cấp lại quyền `android.permission.CAMERA`).
+### 2. Cài đặt & Khởi chạy
+```bash
+# Cài đặt phụ thuộc
+npm install
 
-**Các bước Build App:**
-1. Mở thư mục `mobile-tenant/android` (hoặc `mobile-provider`) bằng **Android Studio**.
-2. Đợi Gradle đồng bộ (Sync).
-3. Chọn menu **Build > Generate Signed Bundle / APK** để tạo file phát hành lên Google Play hoặc cài đặt nội bộ.
+# Chạy Migration để tạo cấu trúc DB
+npx knex migrate:latest
+
+# Khởi chạy server (Development)
+npm run dev
+```
+
+### 3. Build Ứng dụng Di động
+1. Mở thư mục `android-tenant` (hoặc `android-provider`) bằng **Android Studio**.
+2. Đảm bảo cấu hình `capacitor.config.ts` trỏ đúng vào Domain API của bạn.
+3. Build Signed APK/AAB để phát hành.
+
+---
+
+## 🛡 Bảo Mật & Tối Ưu
+- **SQL Injection:** Ngăn chặn tuyệt đối thông qua Knex.js.
+- **XSS & CSRF:** Đã được xử lý qua cấu hình Middleware và bảo mật tiêu chuẩn.
+- **Asset Unification:** Sử dụng hệ thống Design System tập trung giúp giảm 70% nợ kỹ thuật CSS/JS.
+- **Hybrid Storage:** Cơ chế tự động chuyển đổi giữa lưu trữ cục bộ và Cloudinary đảm bảo dữ liệu không bị mất trên các nền tảng PaaS như Render.
+
+---
+© 2026 FootField Platform. Phát triển bởi đội ngũ công nghệ vì cộng đồng bóng đá.

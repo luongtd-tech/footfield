@@ -18,30 +18,31 @@ Ensuring the reliability of a financial and scheduling system is paramount. The 
 \subsection{Cloud Deployment Architecture}
 The FootField platform is designed to be fully cloud-native, ensuring high availability and eliminating the need for on-premises server maintenance.
 
-The \textbf{Node.js Application} (encompassing both backend APIs and frontend static files) is deployed on \textbf{Render}, a modern Platform-as-a-Service (PaaS). A Continuous Integration/Continuous Deployment (CI/CD) pipeline is established by linking Render directly to the project's GitHub repository. Any code pushed to the \texttt{main} branch automatically triggers a build and deployment process on Render's servers, ensuring the production environment is always up-to-date with the latest verified code.
+The \textbf{Node.js Application} (encompassing both backend APIs and frontend static files) is deployed on \textbf{Render}, a modern Platform-as-a-Service (PaaS). A Continuous Integration/Continuous Deployment (CI/CD) pipeline is established by linking Render directly to the project's GitHub repository.
 
-The \textbf{MySQL Database} is decoupled from the application server and hosted on \textbf{Aiven}, a specialized Database-as-a-Service (DBaaS) provider. This separation ensures that database compute resources (CPU/RAM) are not competing with the web server. Aiven also provides automated daily backups and point-in-time recovery, safeguarding crucial financial and booking data against accidental loss.
+The \textbf{MySQL Database} is decoupled from the application server and hosted on \textbf{Aiven}, a specialized Database-as-a-Service (DBaaS) provider. This separation ensures that database compute resources are not competing with the web server. Aiven also provides automated daily backups and point-in-time recovery, safeguarding crucial financial and booking data.
 
 \subsection{Evaluation of Results}
 The deployed platform successfully meets the core objectives defined at the project's inception. 
 \begin{enumerate}
     \item The \textbf{Multi-Tenant Architecture} allows the system to seamlessly host multiple sports facilities on a single codebase and database, proving the economic viability of the SaaS model.
     \item The \textbf{AI Chatbot} significantly reduces the manual workload of facility managers. By allowing customers to check availability and book fields autonomously via natural language, the system operates effectively 24/7.
-    \item The \textbf{Capacitor Mobile App} successfully bridges the software-hardware gap, transforming standard smartphones into dedicated QR scanning terminals for rapid on-site check-ins.
+    \item The \textbf{Capacitor Mobile App} successfully bridges the software-hardware gap, transforming standard smartphones into dedicated QR scanning and wireless printing terminals for rapid on-site operations.
+    \item The \textbf{Modular Design Optimization} has significantly improved the platform's performance. By centralizing assets into a shared design system, the system achieved over 80\% reduction in HTML payload size, ensuring snappy performance even on slower mobile networks.
 \end{enumerate}
 
 \subsection{Limitations}
 Despite its successes, the current iteration exhibits certain limitations:
 \begin{itemize}
-    \item \textbf{AI Latency:} Because the AI chatbot relies on the external Google Gemini API, response times can occasionally exceed 2 seconds during peak network congestion, which may momentarily disrupt the conversational flow.
-    \item \textbf{Payment Gateway Exclusivity:} The system currently only integrates VNPay. While popular, the lack of support for other major e-wallets (e.g., MoMo, ZaloPay) or international credit cards limits user payment options.
+    \item \textbf{AI Latency:} Because the AI chatbot relies on the external Google Gemini API, response times can occasionally exceed 2 seconds during peak network congestion.
+    \item \textbf{Payment Gateway Exclusivity:} The system currently only integrates VNPay.
 \end{itemize}
 
 \subsection{Future Work}
 To evolve FootField into a comprehensive enterprise solution, several future development paths have been identified:
 \begin{itemize}
-    \item \textbf{IoT Smart Lighting Integration:} Developing hardware relays connected to the booking database. This would allow the system to automatically turn on the football field floodlights exactly when a booked session begins and turn them off when it ends, drastically reducing electricity waste.
-    \item \textbf{Machine Learning Analytics:} Implementing predictive models to analyze historical booking data. This would enable the system to automatically suggest dynamic pricing strategies (e.g., increasing prices during predicted high-demand hours) to maximize revenue for facility owners.
+    \item \textbf{IoT Smart Lighting Integration:} Developing hardware relays connected to the booking database. This would allow the system to automatically turn on the football field floodlights exactly when a booked session begins.
+    \item \textbf{Machine Learning Analytics:} Implementing predictive models to analyze historical booking data for dynamic pricing strategies.
 \end{itemize}
 
 \subsection{Conclusion}
