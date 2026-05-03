@@ -1428,10 +1428,17 @@ async function renderCanteen(force = false) {
       return;
     }
 
-    table.innerHTML = servicesData.map(s => `
+    table.innerHTML = servicesData.map(s => {
+      let catLabel = 'Khác';
+      let badgeClass = 'badge-gray';
+      if (s.category === 'drink') { catLabel = 'Nước uống / Đồ ăn'; badgeClass = 'badge-blue'; }
+      else if (s.category === 'rental') { catLabel = 'Thuê đồ'; badgeClass = 'badge-gray'; }
+      else if (s.category === 'other') { catLabel = 'Dịch vụ khác'; badgeClass = 'badge-gray'; }
+
+      return `
       <tr>
         <td><strong>${s.name || 'Không tên'}</strong></td>
-        <td><span class="badge ${s.category==='drink'?'badge-blue':'badge-gray'}">${s.category==='drink'?'Nước/Đồ ăn':'Đồ thuê/Khác'}</span></td>
+        <td><span class="badge ${badgeClass}">${catLabel}</span></td>
         <td><strong style="font-family:var(--mono)">${fmt(Number(s.price) || 0)}</strong></td>
         <td>${s.unit || ''}</td>
         <td>
