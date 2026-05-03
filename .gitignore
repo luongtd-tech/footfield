@@ -23,7 +23,14 @@ Thumbs.db
 # Build and Output
 dist/
 build/
+bin/
+obj/
+out/
 *.log
+.gradle/
+**/build/
+**/release/
+**/debug/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
