@@ -1390,25 +1390,15 @@ async function initApp(){
 }
 
 async function loadCanteenData() {
+  if (!TENANT_ID) return;
   try {
-    console.log('Fetching services from:', `${API_BASE_URL}/api/services/tenant/${TENANT_ID}`);
     const res = await fetch(`${API_BASE_URL}/api/services/tenant/${TENANT_ID}`);
     if (!res.ok) {
-      console.error('API error:', res.status, res.statusText);
       db.services = [];
       return;
     }
     const data = await res.json();
-    console.log('API response:', data);
-    console.log('TENANT_ID:', TENANT_ID);
-    // Debug: check if data is array and has items
-    if (!Array.isArray(data)) {
-      console.error('Expected array but got:', typeof data, data);
-      alert('Debug: API không trả về mảng. Xem console để biết chi tiết.');
-    } else if (data.length === 0) {
-      console.log('No services found for tenant:', TENANT_ID);
-    }
-    db.services = data;
+    db.services = Array.isArray(data) ? data : (data && data.data ? data.data : []);
   } catch (err) {
     console.error('Error loading services:', err);
     db.services = [];
@@ -1991,49 +1981,22 @@ async function markBookingPaid(id) {
 
 // CANTEEN LOGIC
 async function renderCanteen() {
-  console.log('>>> renderCanteen CALLED');
   const table = document.getElementById('canteen-table');
-  console.log('>>> table element:', table);
-  if (table) table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">Đang tải dữ liệu căng tin...</td></tr>';
+  if (!table) return;
+  
+  table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">⏳ Đang tải dữ liệu căng tin...</td></tr>';
 
   try {
-    console.log('Loading canteen data for TENANT_ID:', TENANT_ID);
-    alert('Debug: TENANT_ID = ' + TENANT_ID);
     await loadCanteenData();
-    console.log('After loadCanteenData, db.services:', db.services);
-    console.log('db.services type:', typeof db.services, 'isArray:', Array.isArray(db.services));
-    if (!table) {
-      console.error('Table element not found');
-      return;
-    }
-
-    // Handle both array and object response formats
-    let servicesData = [];
-    if (Array.isArray(db.services)) {
-      servicesData = db.services;
-      console.log('Using db.services directly, length:', servicesData.length);
-    } else if (db.services && Array.isArray(db.services.data)) {
-      servicesData = db.services.data;
-      console.log('Using db.services.data, length:', servicesData.length);
-    } else if (db.services && typeof db.services === 'object') {
-      // If it's a single object, wrap in array
-      servicesData = [db.services];
-      console.log('Wrapped single object');
-    } else {
-      console.error('db.services is not valid:', db.services);
-    }
-
-    console.log('Services data to display:', servicesData);
-    console.log('Table element:', table);
-    console.log('Table innerHTML before:', table?.innerHTML?.substring(0, 100));
+    
+    const servicesData = Array.isArray(db.services) ? db.services : [];
 
     if (servicesData.length === 0) {
-      console.log('No services to display');
-      table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">Chưa có dịch vụ nào</td></tr>';
+      table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;color:var(--text3);">🥤 Chưa có dịch vụ nào được thêm</td></tr>';
       return;
     }
 
-    const html = servicesData.map(s => `
+    table.innerHTML = servicesData.map(s => `
       <tr>
         <td><strong>${s.name || 'Không tên'}</strong></td>
         <td><span class="badge ${s.category==='drink'?'badge-blue':'badge-gray'}">${s.category==='drink'?'Nước/Đồ ăn':'Đồ thuê/Khác'}</span></td>
@@ -2045,12 +2008,9 @@ async function renderCanteen() {
         </td>
       </tr>
     `).join('');
-    console.log('Generated HTML:', html.substring(0, 200));
-    table.innerHTML = html;
-    console.log('Table innerHTML after:', table.innerHTML.substring(0, 200));
   } catch (err) {
     console.error('Error in renderCanteen:', err);
-    if (table) table.innerHTML = `<tr><td colspan="5" style="color:red;text-align:center;padding:20px;">Lỗi hiển thị: ${err.message}</td></tr>`;
+    table.innerHTML = `<tr><td colspan="5" style="color:var(--red);text-align:center;padding:20px;">❌ Lỗi hiển thị: ${err.message}</td></tr>`;
   }
 }
 
