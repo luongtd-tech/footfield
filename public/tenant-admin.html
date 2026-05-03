@@ -624,15 +624,15 @@ tr:hover td{background:rgba(22,163,74,.02);}
       <div class="page" id="page-canteen">
         <div class="page-header">
           <div class="ph-row">
-            <h1>Quản lý căng tin 🥤</h1>
-            <button class="btn btn-primary" onclick="openServiceModal()">+ Thêm món mới</button>
+            <h1>Quản lý dịch vụ 🥤</h1>
+            <button class="btn btn-primary" onclick="openServiceModal()">+ Thêm dịch vụ mới</button>
           </div>
           <p>Quản lý danh sách nước uống, đồ ăn và dịch vụ thuê đồ</p>
         </div>
         <div class="card">
           <div class="table-wrap">
             <table>
-              <thead><tr><th>Tên món</th><th>Loại</th><th>Đơn giá</th><th>Đơn vị</th><th>Thao tác</th></tr></thead>
+              <thead><tr><th>Tên dịch vụ</th><th>Loại</th><th>Đơn giá</th><th>Đơn vị</th><th>Thao tác</th></tr></thead>
               <tbody id="canteen-table"></tbody>
             </table>
           </div>
@@ -1413,14 +1413,14 @@ async function loadCanteenData() {
   }
 }
 
-async function renderCanteen() {
+async function renderCanteen(force = false) {
   const table = document.getElementById('canteen-table');
   if (!table) return;
   
-  table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">⏳ Đang tải dữ liệu căng tin...</td></tr>';
+  table.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:20px;">⏳ Đang tải dữ liệu dịch vụ...</td></tr>';
 
   try {
-    if (!db.services) await loadCanteenData();
+    if (!db.services || force) await loadCanteenData();
     const servicesData = Array.isArray(db.services) ? db.services : [];
 
     if (servicesData.length === 0) {
@@ -2040,7 +2040,7 @@ async function openServiceModal(id) {
     }
     const s = (db.services || []).find(x => String(x.id) === String(id));
     if (s) {
-      title.textContent = '✏️ Chỉnh sửa món';
+      title.textContent = '✏️ Chỉnh sửa dịch vụ';
       saveBtn.textContent = '💾 Lưu thay đổi';
       document.getElementById('service-id').value = s.id;
       document.getElementById('service-name').value = s.name;
@@ -2049,7 +2049,7 @@ async function openServiceModal(id) {
       document.getElementById('service-category').value = s.category;
     }
   } else {
-    title.textContent = '🥤 Thêm món mới';
+    title.textContent = '🥤 Thêm dịch vụ mới';
     saveBtn.textContent = '✅ Lưu lại';
   }
   modal.classList.add('show');
@@ -2076,15 +2076,15 @@ async function saveService() {
     });
     if (res.ok) {
       closeModal('modal-service');
-      renderCanteen();
+      renderCanteen(true);
     }
   } catch (error) { alert('Lỗi lưu dịch vụ'); }
 }
 
 async function deleteService(id) {
-  if (!confirm('Xóa món này?')) return;
+  if (!confirm('Xóa dịch vụ này?')) return;
   await fetch(`${API_BASE_URL}/api/services/${id}`, { method: 'DELETE' });
-  renderCanteen();
+  renderCanteen(true);
 }
 
 // PAYMENT UPGRADE
