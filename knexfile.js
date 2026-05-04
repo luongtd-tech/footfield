@@ -4,7 +4,7 @@ require('dotenv').config();
  * @type { Object.<string, import("knex").Knex.Config> }
  */
 module.exports = {
-  // Cấu hình cho môi trường lập trình tại máy (Local)
+  // Cấu hình cho môi trường lập trình tại máy
   development: {
     client: 'mysql2',
     connection: {

@@ -4,7 +4,7 @@ FootField là một nền tảng SaaS (Software as a Service) B2B2C mạnh mẽ,
 
 ---
 
-## 🌟 Tính Năng Cốt Lõi
+## A. Tính Năng Cốt Lõi
 
 ### 1. Quản Trị Hệ Thống (Provider Admin)
 - **Kiến trúc Multi-tenant:** Quản lý không giới hạn các cơ sở kinh doanh (Tenants) với định danh riêng biệt.
@@ -27,7 +27,7 @@ FootField là một nền tảng SaaS (Software as a Service) B2B2C mạnh mẽ,
 
 ---
 
-## 🏗 Kiến Trúc Kỹ Thuật
+## B. Kiến Trúc Kỹ Thuật
 
 Dự án sử dụng kiến trúc **Modular Monolith** hiện đại, ưu tiên hiệu năng và khả năng bảo trì.
 
@@ -41,7 +41,7 @@ Dự án sử dụng kiến trúc **Modular Monolith** hiện đại, ưu tiên 
 - **Messaging:** Firebase Cloud Messaging (FCM).
 - **Signaling:** Socket.io (For Live Monitoring).
 
-### 📂 Cấu Trúc Thư Mục (Optimized)
+### C. Cấu Trúc Thư Mục (Optimized)
 
 ```text
 footfield-main/
@@ -71,7 +71,7 @@ footfield-main/
 
 ---
 
-## 🚀 Hướng Dẫn Triển Khai
+## D. Hướng Dẫn Triển Khai
 
 ### 1. Thiết lập Môi trường (.env)
 Tạo tệp `.env` tại thư mục gốc với các thông số sau:
@@ -115,7 +115,7 @@ npm run dev
 
 ---
 
-## 🛡 Bảo Mật & Tối Ưu
+## E. Bảo Mật & Tối Ưu
 - **SQL Injection:** Ngăn chặn tuyệt đối thông qua Knex.js.
 - **XSS & CSRF:** Đã được xử lý qua cấu hình Middleware và bảo mật tiêu chuẩn.
 - **Asset Unification:** Sử dụng hệ thống Design System tập trung giúp giảm 70% nợ kỹ thuật CSS/JS.
