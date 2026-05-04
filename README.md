@@ -122,4 +122,4 @@ npm run dev
 - **Hybrid Storage:** Cơ chế tự động chuyển đổi giữa lưu trữ cục bộ và Cloudinary đảm bảo dữ liệu không bị mất trên các nền tảng PaaS như Render.
 
 ---
-© 2026 FootField Platform. Phát triển bởi đội ngũ công nghệ vì cộng đồng bóng đá.
+© 2026 FootField Platform. Phát triển bởi luongtd.tech@gmail.com vì cộng đồng bóng đá.
