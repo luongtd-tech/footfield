@@ -1,21 +1,39 @@
 const admin = require('firebase-admin');
 const db = require('../config/database');
 
+const path = require('path');
+
 // Initialize Firebase Admin
-if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+let serviceAccount;
+
+try {
+  // Thử đọc từ file JSON ở thư mục gốc dự án
+  serviceAccount = require(path.join(__dirname, '../../footfield-db573-firebase-adminsdk-fbsvc-a395db14b1.json'));
+} catch (e) {
+  // Nếu không có file, thử lấy từ biến môi trường
+  if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+    try {
+      const normalized = process.env.FIREBASE_SERVICE_ACCOUNT.replace(/\\n/g, '\n');
+      serviceAccount = JSON.parse(normalized);
+    } catch (parseError) {
+      console.error('Failed to parse FIREBASE_SERVICE_ACCOUNT:', parseError.message);
+    }
+  }
+}
+
+if (serviceAccount) {
   try {
-    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
     if (!admin.apps.length) {
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount)
       });
-      console.log('Firebase Admin initialized');
+      console.log('Firebase Admin initialized successfully');
     }
   } catch (err) {
     console.error('Failed to initialize Firebase Admin:', err.message);
   }
 } else {
-  console.log('FIREBASE_SERVICE_ACCOUNT not found in environment');
+  console.log('Firebase Service Account not found. Push notifications disabled.');
 }
 
 const pushNotifier = {

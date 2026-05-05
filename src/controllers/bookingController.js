@@ -60,10 +60,14 @@ exports.createBooking = async (req, res) => {
       }
     }
     
-    const newBooking = await Booking.create(bookingData);
+    // Tách fcm_token ra khỏi bookingData vì bảng bookings không có cột này
+    const { fcm_token, ...dbBookingData } = bookingData;
+    
+    const newBooking = await Booking.create(dbBookingData);
+    newBooking.fcm_token = fcm_token; // Gắn lại để dùng ở bước sau
 
     // ✅ Sync Customer Data
-    const { customer_name, customer_phone, total_price, fcm_token } = newBooking;
+    const { customer_name, customer_phone, total_price } = newBooking;
     let customer = await Customer.findByPhone(tenant_id, customer_phone);
     let customerId;
 
