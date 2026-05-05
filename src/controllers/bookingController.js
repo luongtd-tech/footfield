@@ -1,6 +1,7 @@
 const Booking = require('../models/Booking');
 const Field = require('../models/Field'); 
 const Customer = require('../models/Customer');
+const db = require('../config/database');
 const pushNotifier = require('../utils/pushNotifier');
 
 exports.getBookingsByTenant = async (req, res) => {
@@ -94,11 +95,15 @@ exports.createBooking = async (req, res) => {
     res.status(201).json({ ...newBooking, customer_id: customerId });
 
     // Notify Tenant about new booking
-    pushNotifier.sendToTenant(
-      tenant_id, 
-      '⚽ Đơn đặt sân mới!', 
-      `Khách hàng ${customer_name} vừa đặt sân ${newBooking.field_name} vào lúc ${newBooking.start_time.substring(0,5)}.`
-    );
+    try {
+      await pushNotifier.sendToTenant(
+        tenant_id, 
+        '⚽ Đơn đặt sân mới!', 
+        `Khách hàng ${customer_name} vừa đặt sân ${newBooking.field_name || ''} vào lúc ${newBooking.start_time.substring(0,5)}.`
+      );
+    } catch (e) {
+      console.error('Push notification error:', e);
+    }
   } catch (error) {
     res.status(500).json({ message: 'Error creating booking', error: error.message });
   }
