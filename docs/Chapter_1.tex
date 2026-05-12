@@ -1,5 +1,5 @@
-\section*{CHAPTER 1: INTRODUCTION}
-\addcontentsline{toc}{section}{\numberline{}CHAPTER 1: INTRODUCTION}
+\section*{CHAPTER 1: INTRODUCTION TO THE PROBLEM}
+\addcontentsline{toc}{section}{\numberline{}CHAPTER 1: INTRODUCTION TO THE PROBLEM}
 \setcounter{section}{1}
 \setcounter{subsection}{0}
 \setcounter{figure}{0}
@@ -9,6 +9,26 @@
 In recent years, the sports and recreation industry, particularly the management of artificial football fields, has experienced significant growth. With increasing awareness of health and fitness, the demand for accessible sports facilities has surged. In urban areas, artificial football fields serve as primary venues for amateur leagues, corporate team-building events, and casual recreational matches. 
 
 Despite this rapid expansion in demand, the operational management of these facilities remains predominantly traditional and localized. Facility owners often operate independently, lacking standardized software to manage their daily workflows. The reliance on manual processes not only increases the administrative burden but also limits the scalability of the business. The motivation for this project stems from the urgent need to bridge the gap between traditional sports facility management and modern cloud-based software solutions, thereby democratizing access to enterprise-grade management tools for small and medium-sized sports facility owners.
+
+\subsection{Competitive Analysis}
+To understand the unique value proposition of FootField, it is necessary to compare it with the current market alternatives available to sport facility owners.
+
+\begin{table}[htbp]
+\centering
+\begin{tabularx}{\textwidth}{|l|X|X|X|}
+\hline
+\rowcolor{LightCyan}
+\textbf{Feature} & \textbf{Traditional Logs} & \textbf{Generic ERP} & \textbf{FootField (SaaS)} \\ \hline
+Multi-tenant & No & Partial & Full Native \\ \hline
+AI Assistant & No & No & 24/7 Gemini Bot \\ \hline
+Mobile Check-in & No & Complex & Native QR App \\ \hline
+Payment Sync & Manual & Semi-auto & Full VNPAY Sync \\ \hline
+Setup Cost & Low & High (Custom) & Low (Subscription) \\ \hline
+\end{tabularx}
+\caption{Comparison Matrix: FootField vs Market Alternatives}
+\end{table}
+
+Traditional physical ledgers offer zero data visibility and are prone to loss or damage. Generic ERP systems, while powerful, are often too complex and expensive for small facility owners. FootField sits in the "sweet spot" by providing industry-specific tools (like the booking grid and AI assistant) with the low-cost benefits of a multi-tenant SaaS model.
 
 \subsection{Problem Statement}
 The current landscape of football field management is plagued by several critical inefficiencies:
@@ -34,6 +54,17 @@ The scope of this project encompasses the development of three interconnected mo
 
 However, the project is subject to certain limitations. Currently, the AI chatbot is dependent on the Google Gemini API, which introduces external network latency and relies on a constant internet connection. Furthermore, the payment integration is strictly limited to the VNPay Sandbox environment for demonstration purposes, and the system does not yet support hardware integrations such as IoT-enabled smart lighting for the football fields.
 
+\subsection{Project Deliverables}
+The project results in a suite of integrated software components, each serving a specific role in the ecosystem:
+\begin{enumerate}
+    \item \textbf{Backend Core (Node.js):} A high-performance API server with integrated multi-tenant security and external service handlers (AI, Payment).
+    \item \textbf{Provider Management Portal (Web):} An administrative dashboard for the platform owner to manage global settings and tenant accounts.
+    \item \textbf{Tenant Business Portal (Web):} A comprehensive ERP-lite system for football field owners to manage their operations.
+    \item \textbf{Customer Storefront (Responsive Web):} A public-facing booking engine optimized for both desktop and mobile browsers.
+    \item \textbf{Staff Utility App (Android):} A native mobile application built with Capacitor for on-field operations like scanning and printing.
+    \item \textbf{Technical Documentation:} This comprehensive thesis document and the associated source code documentation.
+\end{enumerate}
+
 \subsection{Research Methodology}
 The development of the FootField platform follows the Agile Software Development Life Cycle (SDLC). This methodology allows for iterative development, continuous testing, and rapid adaptation to changing requirements. 
 The project follows a structured agile methodology, divided into key sprints as shown in the table below:
@@ -56,18 +87,36 @@ The project follows a structured agile methodology, divided into key sprints as 
 \label{tab:requirements}
 \end{table}
 
-The process was divided into several sprints:
+\subsection{Project Organization and Management}
+The FootField project was managed using the Scrum framework, an iterative and incremental Agile methodology. The project was organized into five distinct sprints, each with its own set of goals and deliverables.
+
 \begin{itemize}
-    \item \textbf{Sprint 1:} Requirements gathering, system architecture design, and database schema formulation.
-    \item \textbf{Sprint 2:} Backend API development using Node.js and implementation of the multi-tenant data isolation logic.
-    \item \textbf{Sprint 3:} Frontend development for the administration dashboards and the customer booking interface.
-    \item \textbf{Sprint 4:} Integration of third-party services, specifically the Google Gemini AI for natural language processing and VNPay for payment processing.
-    \item \textbf{Sprint 5:} Packaging the web application into a native mobile wrapper using Capacitor, followed by extensive system testing and cloud deployment.
+    \item \textbf{Product Owner:} Responsible for defining the product vision and prioritizing the product backlog.
+    \item \textbf{Scrum Master:} Ensures that the team adheres to Scrum values and practices, facilitating sprint planning and daily stand-ups.
+    \item \textbf{Development Team:} Responsible for the technical implementation of the platform, including backend, frontend, and mobile components.
 \end{itemize}
 
-\subsection{Structure of the Thesis}
-The remainder of this thesis is structured as follows:
-\textbf{Chapter 2} provides the theoretical background, reviewing the technologies and architectural paradigms utilized in the project. 
-\textbf{Chapter 3} delves into the system analysis and design, presenting use case diagrams, sequence diagrams, and the database schema. 
-\textbf{Chapter 4} details the implementation phase, showcasing the core algorithms, API integrations, and the resulting user interfaces. 
-Finally, \textbf{Chapter 5} discusses the deployment process, evaluates the system's performance, and outlines conclusions and future development directions.
+\subsection{Risk Management}
+Developing a complex SaaS platform involving AI and financial transactions involves several risks. The following mitigation strategies were implemented:
+
+\begin{table}[htbp]
+\centering
+\begin{tabularx}{\textwidth}{|l|X|X|}
+\hline
+\rowcolor{LightCyan}
+\textbf{Risk Category} & \textbf{Potential Impact} & \textbf{Mitigation Strategy} \\ \hline
+Data Breach & Unauthorized access to sensitive customer/tenant data. & Implementation of strict multi-tenant logic and row-level isolation. \\ \hline
+API Failure & Dependence on external Gemini or VNPAY APIs. & Implementation of robust error handling and fallback mechanisms. \\ \hline
+Scalability & System slowdown during peak booking hours. & Use of Aiven's managed DB with auto-scaling and Render's load balancing. \\ \hline
+Mobile Compatibility & Issues on specific Android hardware. & Use of Capacitor's standardized bridge and cross-device testing. \\ \hline
+\end{tabularx}
+\caption{Project Risk Assessment and Mitigation Matrix}
+\end{table}
+\subsection{Expected Contributions}
+The successful completion of the FootField platform is expected to yield several significant contributions to both the academic field and the sports management industry:
+
+\begin{itemize}
+    \item \textbf{Technical Contribution:} Demonstrating a viable architecture for multi-tenant SaaS applications using open-source technologies like Node.js and MySQL. The project provides a blueprint for integrating conversational AI into deterministic business workflows via LLM function calling.
+    \item \textbf{Economic Contribution:} By lowering the barrier to entry for digital transformation, FootField enables small football facility owners to compete with larger franchises through enterprise-grade management tools at a fraction of the cost.
+    \item \textbf{Operational Contribution:} Automating the booking and check-in lifecycle reduces administrative overhead and minimizes human error, directly leading to improved revenue consistency and customer satisfaction.
+\end{itemize}

@@ -14,8 +14,8 @@
 \usepackage{tikz}
 \usetikzlibrary{calc} 
 \usepackage{indentfirst} 
-\renewcommand{\baselinestretch}{1.2} % Line space 1.2
-\setlength{\parskip}{6pt} % Spacing after
+\renewcommand{\baselinestretch}{1.6} % Line space 1.6
+\setlength{\parskip}{12pt} % Spacing after paragraphs
 \setlength{\parindent}{1cm} % Set khoảng cách thụt đầu dòng mỗi đoạn
 \usepackage{titlesec} 
 \setcounter{secnumdepth}{4} % 4 Heading
@@ -81,11 +81,13 @@
 }
 
 \begin{document}
+\renewcommand{\labelitemi}{-}
+
 \pagenumbering{roman}
 
-\input{Cover page} 
+\input{Cover_page} 
 
-\input{G-T topic} 
+\input{GT_topic} 
 
 \input{Preface} 
 
@@ -113,20 +115,16 @@
 
 \input{Abstract} 
 
-\input{Duty roster} 
+\input{Duty_roster} 
 
 \newpage
 \pagenumbering{arabic} % Đánh số thứ tự 1,2,3... cho các chương nội dung
 
-\input{Chapter 1}
+\input{Chapter_1}
 \newpage
-\input{Chapter 2}
+\input{Chapter_2}
 \newpage
-\input{Chapter 3}
-\newpage
-\input{Chapter 4}
-\newpage
-\input{Chapter 5}
+\input{Chapter_3}
 \newpage
 
 
