@@ -349,7 +349,7 @@ price\_monthly & DECIMAL & Not Null & Subscription fee. \\ \hline
 \hline
 \rowcolor{LightCyan}
 \textbf{Column} & \textbf{Data Type} & \textbf{Constraint} & \textbf{Description} \\ \hline
-vnp\_txn\_ref & VARCHAR(100) & Primary Key & Unique VNPAY reference. \\ \hline
+vnp\_txn\_ref & VARCHAR(100) & Primary Key & Unique transaction reference code (VNPay reference or BANK\_[id] for VietQR bank transfers). \\ \hline
 booking\_id & INT & Foreign Key & Associated booking ID. \\ \hline
 amount & DECIMAL & Not Null & Final paid amount. \\ \hline
 bank\_code & VARCHAR(20) & Not Null & Issuing bank. \\ \hline

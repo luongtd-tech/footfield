@@ -61,6 +61,7 @@ Socket.io is used as the signaling server. The workflow for establishing a live 
 \texttt{/api/chatbot/query} & POST & Processes natural language queries via Gemini AI. & Customer \\ \hline
 \texttt{/api/fields} & GET & Retrieves field list filtered by \texttt{tenant\_id}. & Tenant/Cust \\ \hline
 \texttt{/api/payment/vnpay} & POST & Generates secure VNPay payment URLs. & Customer \\ \hline
+\texttt{/api/payment/webhook/bank} & POST & Receives bank transfer webhooks (VietQR) for auto-reconciliation. & Public \\ \hline
 \texttt{/api/checkin} & POST & Validates QR codes and updates booking status. & Tenant Admin \\ \hline
 \end{tabularx}
 \caption{Core Backend API Endpoints and Access Control Policies}
@@ -178,8 +179,10 @@ IT-01 & Create Booking -> QR. & QR code generated matches booking ID. & Passed \
 IT-02 & Payment -> Confirm. & Status updates to 'confirmed' on IPN receive. & Passed \\ \hline
 IT-03 & Scan QR -> Complete. & Status updates to 'completed' and prints receipt. & Passed \\ \hline
 IT-04 & Notification -> Push. & Mobile app receives push on new booking. & Passed \\ \hline
+IT-05 & VietQR Webhook -> Auto Confirm. & Booking is auto-confirmed when bank webhook received. & Passed \\ \hline
 \end{tabularx}
 \caption{Integration Test Cases for System Workflows}
+\label{tab:integration_tests}
 \end{table}
 
 \subsubsection{User Acceptance Testing (UAT)}
@@ -220,6 +223,7 @@ As the platform scales and hosts dozens of tenants, query performance becomes cr
 \texttt{bookings} & \texttt{(tenant\_id, date)} & Optimized for daily schedule grid rendering. \\ \hline
 \texttt{bookings} & \texttt{(qr\_code)} & Ensures instant check-in verification at the facility gate. \\ \hline
 \texttt{payments} & \texttt{(vnp\_txn\_ref)} & Required for fast processing of VNPay IPN callbacks. \\ \hline
+\texttt{payments} & \texttt{(booking\_id)} & Essential for fast payment lookup and transaction reconciliation. \\ \hline
 \end{tabularx}
 \caption{Strategic Indexing Implementation for Scalability}
 \end{table}
@@ -256,7 +260,7 @@ The deployed platform successfully meets the core objectives defined at the proj
 Despite its successes, the current iteration exhibits certain limitations:
 \begin{itemize}
     \item \textbf{AI Latency:} Because the AI chatbot relies on the external Google Gemini API, response times can occasionally exceed 2 seconds during peak network congestion.
-    \item \textbf{Payment Gateway Exclusivity:} The system currently only integrates VNPay.
+    \item \textbf{Payment Gateway Limitations:} While the system supports both VNPay and automated VietQR bank transfer webhooks, it is still operating in a sandbox and testing environment without direct commercial bank contracts.
 \end{itemize}
 
 \subsection{Future Work}

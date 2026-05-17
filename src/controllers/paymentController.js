@@ -183,3 +183,112 @@ exports.vnpayIpn = async (req, res) => {
         res.status(200).json({ RspCode: '99', Message: 'Unknown error' });
     }
 };
+
+exports.bankTransferWebhook = async (req, res) => {
+    try {
+        console.log("👉 Received bank transfer webhook payload:", JSON.stringify(req.body));
+        
+        let transactions = [];
+        
+        // 1. Phân tích cú pháp dữ liệu (Parse payload dynamically)
+        if (req.body.data && Array.isArray(req.body.data)) {
+            // Định dạng Casso / PayOS
+            transactions = req.body.data.map(item => ({
+                id: item.id || item.transactionId,
+                amount: item.amount,
+                description: item.description || item.content || ''
+            }));
+        } else if (req.body.transferAmount !== undefined) {
+            // Định dạng SePay
+            transactions = [{
+                id: req.body.id,
+                amount: req.body.transferAmount,
+                description: req.body.content || ''
+            }];
+        } else if (req.body.description !== undefined) {
+            // Định dạng custom test webhook
+            transactions = [{
+                id: req.body.id || Date.now(),
+                amount: req.body.amount || 0,
+                description: req.body.description || ''
+            }];
+        }
+
+        const pushNotifier = require('../utils/pushNotifier');
+        const Booking = require('../models/Booking');
+
+        for (const tx of transactions) {
+            const desc = tx.description || '';
+            const amount = tx.amount || 0;
+            
+            // Tìm mã booking dạng bk_xxxxxxx trong nội dung chuyển khoản
+            const match = desc.match(/FootField\s*#\s*(bk_[a-zA-Z0-9_]+)/i) || desc.match(/#(bk_[a-zA-Z0-9_]+)/i);
+            
+            if (match) {
+                const bookingId = match[1];
+                console.log(`🔍 Found potential booking ID: ${bookingId} in transaction description.`);
+
+                // 2. Tìm đơn đặt sân trong Database
+                const booking = await Booking.findById(bookingId);
+                if (booking) {
+                    if (booking.paid) {
+                        console.log(`ℹ️ Booking ${bookingId} is already paid. Skipping.`);
+                        continue;
+                    }
+
+                    // 3. Cập nhật trạng thái thanh toán của đơn hàng thành công
+                    // Đánh dấu là paid=1, payment_method='transfer' (chuyển khoản)
+                    await Booking.updatePayment(bookingId, 1, 'transfer');
+                    
+                    // Cập nhật cả status thành 'confirmed' (tự động duyệt lịch khi đã thanh toán)
+                    await Booking.updateStatus(bookingId, 'confirmed');
+
+                    console.log(`✅ Automatically confirmed booking ${bookingId} for amount ${amount}đ.`);
+
+                    // 4. Lưu vết giao dịch vào bảng payments
+                    try {
+                        await db.query(
+                            "INSERT INTO payments (vnp_txn_ref, booking_id, amount, bank_code, status) VALUES (?, ?, ?, ?, 'success')",
+                            [`BANK_${tx.id || Date.now()}`, bookingId, amount, 'BANK_TRANSFER', 'success']
+                        );
+                    } catch (dbErr) {
+                        console.error("⚠️ Failed to log transaction in payments table:", dbErr.message);
+                    }
+
+                    // 5. Gửi Push Notification thời gian thực cho Khách hàng & Chủ sân (Tenant)
+                    try {
+                        // Thông báo cho Tenant (Chủ sân)
+                        await pushNotifier.sendToTenant(
+                            booking.tenant_id,
+                            '💰 Đã nhận tiền chuyển khoản!',
+                            `Đơn đặt sân #${bookingId} của khách hàng ${booking.customer_name} đã được thanh toán thành công qua VietQR (${amount.toLocaleString()}đ).`,
+                            { bookingId: bookingId, type: 'payment_success' }
+                        );
+
+                        // Thông báo cho Customer (Khách hàng)
+                        const [customers] = await db.query('SELECT id FROM customers WHERE phone = ? AND tenant_id = ?', [booking.customer_phone, booking.tenant_id]);
+                        if (customers.length > 0) {
+                            await pushNotifier.sendToCustomer(
+                                customers[0].id,
+                                '✅ Thanh toán thành công!',
+                                `Lịch đặt sân #${bookingId} của bạn đã được xác nhận thanh toán thành công qua VietQR. Cảm ơn bạn!`,
+                                { bookingId: bookingId, type: 'payment_success' }
+                            );
+                        }
+                    } catch (pushErr) {
+                        console.error("⚠️ Failed to send real-time push notification:", pushErr.message);
+                    }
+                } else {
+                    console.log(`❌ Booking with ID ${bookingId} not found in database.`);
+                }
+            } else {
+                console.log(`ℹ️ Transaction description "${desc}" does not contain a valid FootField booking ID format.`);
+            }
+        }
+
+        res.status(200).json({ success: true, message: "Webhook processed successfully" });
+    } catch (error) {
+        console.error("🔴 Error processing bank transfer webhook:", error);
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
