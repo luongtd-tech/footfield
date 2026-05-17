@@ -165,11 +165,14 @@ exports.vnpayIpn = async (req, res) => {
             }
 
             // 4. Cập nhật kết quả
+            const bankCode = vnp_Params['vnp_BankCode'] || '';
             if (rspCode === "00") {
                 await db.query("UPDATE bookings SET paid = 1, payment_method = 'vnpay' WHERE id = ?", [bookingId]);
+                await db.query("INSERT INTO payments (vnp_txn_ref, booking_id, amount, bank_code, status) VALUES (?, ?, ?, ?, 'success')", [orderId, bookingId, vnpAmount, bankCode]);
                 res.status(200).json({ RspCode: '00', Message: 'Success' });
             } else {
                 // Thanh toán thất bại
+                await db.query("INSERT INTO payments (vnp_txn_ref, booking_id, amount, bank_code, status) VALUES (?, ?, ?, ?, 'fail')", [orderId, bookingId, vnpAmount, bankCode]);
                 res.status(200).json({ RspCode: '00', Message: 'Payment Failed acknowledged' });
             }
         } else {

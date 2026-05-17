@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "scripts": {
     "start": "knex migrate:latest && node src/index.js",
-    "dev": "start http://localhost:10000 && nodemon src/index.js",
+    "dev": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "knex migrate:latest",
     "seed": "knex seed:run"
@@ -19,6 +19,7 @@
     "@capacitor/cli": "^8.3.1",
     "@capacitor/core": "^8.3.1",
     "@google/generative-ai": "^0.24.1",
+    "bcryptjs": "^3.0.3",
     "cloudinary": "^1.41.3",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",

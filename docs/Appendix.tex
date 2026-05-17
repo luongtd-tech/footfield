@@ -20,7 +20,7 @@ footfield-main/
 \end{verbatim} 
 
 \subsection*{Appendix B: AI Service Implementation Walkthrough} 
-The following code segment illustrates the core integration with Google Gemini 2.5 Flash, specifically focusing on the function-calling mechanism used for natural language bookings. 
+The following code segment illustrates the core integration with Google Gemini 1.5 Flash, specifically focusing on the function-calling mechanism used for natural language bookings. 
 
 \begin{verbatim} 
 // src/services/aiService.js 
@@ -113,7 +113,7 @@ The FootField backend exposes a robust set of RESTful endpoints to facilitate co
 \texttt{/api/bookings} & POST & Create a new pending booking. & Public \\ \hline
 \texttt{/api/bookings/qr} & GET & Verify a QR code and return details. & Staff \\ \hline
 \texttt{/api/vnpay/ipn} & GET & Receive instant payment notifications. & VNPAY \\ \hline
-\texttt{/api/ai/chat} & POST & Send message to Gemini 2.5 Flash. & Public \\ \hline
+\texttt{/api/ai/chat} & POST & Send message to Gemini 1.5 Flash. & Public \\ \hline
 \texttt{/api/analytics} & GET & Fetch revenue data for Chart.js. & Owner \\ \hline
 \end{tabularx}
 \caption{Comprehensive REST API Endpoint Specification}

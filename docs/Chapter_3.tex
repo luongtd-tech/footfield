@@ -77,7 +77,7 @@ Socket.io is used as the signaling server. The workflow for establishing a live 
 The \textbf{Booking Lifecycle} (Figure \ref{fig:lifecycle}) illustrates how the system manages transitions from the initial "Pending" state to the final "Completed" or "Cancelled" states, ensuring data consistency during concurrent booking attempts.
 
 \subsection{AI Integration: Implementing Function Calling}
-The integration of Google Gemini 2.5 Flash is implemented in the \texttt{aiService.js} module. Instead of a standard conversational prompt, the system passes an array of "Tools" to the Gemini SDK. 
+The integration of Google Gemini 1.5 Flash is implemented in the \texttt{aiService.js} module. Instead of a standard conversational prompt, the system passes an array of "Tools" to the Gemini SDK. 
 
 One such tool is the \texttt{check\_availability} function. The JSON schema provided to the AI describes this function:
 \begin{verbatim}

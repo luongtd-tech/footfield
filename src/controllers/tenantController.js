@@ -1,5 +1,6 @@
 const Tenant = require('../models/Tenant');
 const pushNotifier = require('../utils/pushNotifier');
+const bcrypt = require('bcryptjs');
 
 
 const tenantController = {
@@ -44,7 +45,11 @@ const tenantController = {
 
   createTenant: async (req, res) => {
     try {
-      const result = await Tenant.create(req.body);
+      const data = { ...req.body };
+      if (data.password) {
+        data.password = bcrypt.hashSync(data.password, 10);
+      }
+      const result = await Tenant.create(data);
       res.status(201).json({ success: true, message: 'Tenant created successfully' });
     } catch (error) {
       res.status(500).json({ success: false, message: 'Error creating tenant', error: error.message });
@@ -79,7 +84,11 @@ const tenantController = {
             // Skip empty password
             return;
           }
-          cleanData[key] = data[key];
+          if (key === 'password' && data[key].trim() !== '') {
+            cleanData[key] = bcrypt.hashSync(data[key], 10);
+          } else {
+            cleanData[key] = data[key];
+          }
         }
       });
       

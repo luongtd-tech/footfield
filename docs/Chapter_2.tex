@@ -30,7 +30,7 @@ For structured financial and operational data, relational database management sy
 To interact with MySQL securely and efficiently from within the Node.js environment, the project utilizes Knex.js \cite{knexjs}. Knex.js is a "batteries-included" SQL query builder. Unlike Object-Relational Mappers (ORMs) which can sometimes obscure the underlying SQL and lead to performance bottlenecks, a query builder allows developers to write SQL-like syntax in JavaScript. Crucially, Knex.js automatically parametrizes queries, which is the primary defense mechanism against SQL Injection vulnerabilities. It also provides a robust migration system, allowing developers to version-control changes to the database schema.
 
 \subsection{Artificial Intelligence and Function Calling Mechanics}
-The integration of Artificial Intelligence transforms the platform from a passive tool into an active assistant. The platform leverages Google Gemini 2.5 Flash, an advanced Large Language Model (LLM) \cite{gemini_api}. 
+The integration of Artificial Intelligence transforms the platform from a passive tool into an active assistant. The platform leverages Google Gemini 1.5 Flash, an advanced Large Language Model (LLM) \cite{gemini_api}. 
 
 While traditional chatbots rely on rigid, pre-programmed decision trees (e.g., "Press 1 for Booking, Press 2 for Support"), LLMs utilize Natural Language Processing (NLP) to understand the semantic intent behind a user's unstructured input. However, an LLM on its own is a "closed system"; it can generate text but cannot interact with external databases.
 
@@ -376,6 +376,39 @@ paid & BOOLEAN & Default: 0 & Payment verification flag. \\ \hline
 qr\_code & VARCHAR(100) & Unique & Encrypted ticket string. \\ \hline
 \end{tabularx}
 \caption{Data Dictionary: Bookings Table}
+\end{table}
+
+\textbf{6. Table: \texttt{services}}
+\begin{table}[htbp]
+\centering
+\begin{tabularx}{\textwidth}{|l|l|l|X|}
+\hline
+\rowcolor{LightCyan}
+\textbf{Column} & \textbf{Data Type} & \textbf{Constraint} & \textbf{Description} \\ \hline
+id & INT & Primary Key & Auto-increment ID. \\ \hline
+tenant\_id & VARCHAR(50) & Not Null & Owner of the service. \\ \hline
+name & VARCHAR(255) & Not Null & Name of item (e.g., Water, Ball). \\ \hline
+price & INT & Not Null & Selling price. \\ \hline
+category & VARCHAR(50) & Default: 'drink' & 'drink', 'food', 'rental'. \\ \hline
+stock & INT & Default: 0 & Inventory quantity. \\ \hline
+\end{tabularx}
+\caption{Data Dictionary: Services (Canteen) Table}
+\end{table}
+
+\textbf{7. Table: \texttt{booking\_services}}
+\begin{table}[htbp]
+\centering
+\begin{tabularx}{\textwidth}{|l|l|l|X|}
+\hline
+\rowcolor{LightCyan}
+\textbf{Column} & \textbf{Data Type} & \textbf{Constraint} & \textbf{Description} \\ \hline
+id & INT & Primary Key & Auto-increment ID. \\ \hline
+booking\_id & VARCHAR(50) & Not Null & Associated booking. \\ \hline
+service\_id & INT & Not Null & Associated service item. \\ \hline
+quantity & INT & Not Null & Number of items purchased. \\ \hline
+price\_at\_time & INT & Not Null & Price locked at time of sale. \\ \hline
+\end{tabularx}
+\caption{Data Dictionary: Booking Services (Orders) Table}
 \end{table}
 
 \subsection{System Activity and Workflows}

@@ -2194,9 +2194,7 @@ if (savedUser) {
       updateLastActive(); // Cập nhật lại thời gian khi load trang thành công
       initApp();
       startClock();
-      if (window.Capacitor) {
-        initNotifications();
-      }
+      initNotifications();
     }
   } catch(e) {
     console.error('Session error', e);

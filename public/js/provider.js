@@ -1175,9 +1175,7 @@ if (savedUser) {
       document.getElementById('app').style.display = 'block';
       updateLastActive(); // Cập nhật lại thời gian khi load trang thành công
       initApp();
-      if (window.Capacitor) {
-        initNotifications();
-      }
+      initNotifications();
     }
   } catch(e) {
     console.error('Session error', e);
