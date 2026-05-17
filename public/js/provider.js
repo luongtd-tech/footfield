@@ -984,8 +984,8 @@ function renderTickets() {
     const isBug = t.type === 'bug';
     return `
     <div class="ticket-item" onclick="openTicketDetail('${t.id}')" style="border-left: 4px solid ${prioColor[t.priority]}">
-      <div style="flex:1">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+      <div style="flex:1; min-width:0">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;flex-wrap:wrap">
           ${prioBadge(t.priority)} ${ticketStatusBadge(t.status)}
           <span class="badge ${isBug?'badge-red':'badge-blue'}">${isBug?'🐛 Lỗi hệ thống':'💡 Đề xuất tính năng'}</span>
         </div>
