@@ -1216,16 +1216,18 @@ async function initNotifications() {
     if (permission === 'granted') {
       try {
         const firebaseConfig = {
-          apiKey: "AIzaSyDzfWF3Bt_JRSz1a_PIieo8troLfkglzDE",
-          projectId: "footfield-db573",
-          messagingSenderId: "843846666103",
-          appId: "1:843846666103:web:9446c24d839f2b1be78372"
+          apiKey: "AIzaSyA7wuA3sLG2QL5idrX045wkqDgoSxq-m34",
+          authDomain: "footfield-main.firebaseapp.com",
+          projectId: "footfield-main",
+          storageBucket: "footfield-main.firebasestorage.app",
+          messagingSenderId: "552118678982",
+          appId: "1:552118678982:web:b0c24998138feb37bdeec7"
         };
         
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const messaging = firebase.messaging();
         
-        const currentToken = await messaging.getToken({ vapidKey: 'BKhBnMN02jYjxDRIPwmqiI9Z2nXOYSB34DQZMp_cf-9bA24hx1quLGzn8B8gRiJi-BZ0J2IDjCNt8LTzUcoGcbU' });
+        const currentToken = await messaging.getToken({ vapidKey: 'BPj1vhUSfSh7NcUbhZidEivxWZAnRC9X62r83unqFk7TLZ5szd3tBfkMq7f5mHL8ckj6OPDAdYz86v-RUrxUAko' });
         if (currentToken) {
           const user = JSON.parse(localStorage.getItem('ff_user') || '{}');
           updateFCMToken('admin', user.id, currentToken);

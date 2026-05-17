@@ -8,7 +8,7 @@ let serviceAccount;
 
 try {
   // Thử đọc từ file JSON ở thư mục gốc dự án
-  serviceAccount = require(path.join(__dirname, '../../footfield-db573-firebase-adminsdk-fbsvc-a395db14b1.json'));
+  serviceAccount = require(path.join(__dirname, '../../firebase-service-account.json'));
 } catch (e) {
   // Nếu không có file, thử lấy từ biến môi trường
   if (process.env.FIREBASE_SERVICE_ACCOUNT) {

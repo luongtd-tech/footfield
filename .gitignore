@@ -64,4 +64,4 @@ docs/*.fdb_latexmk
 docs/*.fls
 
 # Firebase service‑account key
-footfield-db573-firebase-adminsdk-fbsvc-a395db14b1.json
+firebase-service-account.json
