@@ -9,8 +9,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "knex migrate:latest",
     "seed": "knex seed:run",
-    "sync:aiven:local": "bash scripts/sync_aiven_to_local.sh",
-    "sync:local:aiven": "bash scripts/sync_local_to_aiven.sh"
+    "sync:aiven:local": "node scripts/sync-db.js aiven-to-local",
+    "sync:local:aiven": "node scripts/sync-db.js local-to-aiven"
   },
   "keywords": [],
   "author": "",
