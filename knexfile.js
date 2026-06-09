@@ -31,10 +31,8 @@ module.exports = {
       user: process.env.DB_USER,
       password: process.env.DB_PASSWORD,
       database: process.env.DB_NAME,
-      // SSL là bắt buộc để kết nối tới các dịch vụ Cloud như Aiven
-      ssl: {
-        rejectUnauthorized: false
-      }
+      // SSL là bắt buộc khi kết nối tới Aiven/Render cloud DB
+      ssl: (process.env.DB_SSL === 'true' || process.env.NODE_ENV === 'production') ? { rejectUnauthorized: false } : false
     },
     pool: {
       min: 2,

@@ -7,7 +7,9 @@ const Tenant = {
     return rows;
   },
   getStats: async () => {
-    const [activeTenants] = await db.query("SELECT COUNT(*) as count FROM tenants WHERE status = 'active'");
+    const activeCondition = "status = 'active' AND end_date >= DATE(DATE_ADD(NOW(), INTERVAL 7 HOUR))";
+    
+    const [activeTenants] = await db.query(`SELECT COUNT(*) as count FROM tenants WHERE ${activeCondition}`);
     const [totalTenants] = await db.query('SELECT COUNT(*) as count FROM tenants');
     const [openTickets] = await db.query("SELECT COUNT(*) as count FROM tickets WHERE status != 'resolved'");
     
@@ -15,14 +17,14 @@ const Tenant = {
     const [newTenants] = await db.query('SELECT COUNT(*) as count FROM tenants WHERE created_at >= DATE_SUB(NOW(), INTERVAL 30 DAY)');
     
     // Thống kê nhà thuê sắp hết hạn (trong 30 ngày tới)
-    const [expiringSoon] = await db.query("SELECT COUNT(*) as count FROM tenants WHERE status = 'active' AND end_date <= DATE_ADD(NOW(), INTERVAL 30 DAY) AND end_date >= NOW()");
+    const [expiringSoon] = await db.query(`SELECT COUNT(*) as count FROM tenants WHERE ${activeCondition} AND end_date <= DATE_ADD(DATE_ADD(NOW(), INTERVAL 7 HOUR), INTERVAL 30 DAY)`);
 
     // Simple revenue calculation (sum of monthly/yearly prices of active tenants)
     const [revenue] = await db.query(`
       SELECT SUM(CASE WHEN billing_cycle = 'monthly' THEN p.price_monthly ELSE p.price_yearly / 12 END) as monthly_revenue
       FROM tenants t
       JOIN packages p ON t.package_id = p.id
-      WHERE t.status = 'active'
+      WHERE t.status = 'active' AND t.end_date >= DATE(DATE_ADD(NOW(), INTERVAL 7 HOUR))
     `);
 
     return {

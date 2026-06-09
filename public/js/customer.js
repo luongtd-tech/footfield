@@ -249,7 +249,7 @@
         </div>
         <div class="field-bottom">
           <div>
-            <div class="field-price">${formatPrice(f.price_per_hour)} ₫</div>
+            <div class="field-price">${formatPrice(f.price_per_hour)} vnđ</div>
             <div class="field-price-sub">/giờ</div>
           </div>
           ${showBookBtn ? `
@@ -343,7 +343,7 @@
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:32px;">
         <div style="background:var(--bg2);padding:20px;border-radius:12px;">
           <h3 style="margin-bottom:16px;">Thông tin chung</h3>
-          <div style="margin-bottom:8px;">💰 Giá: ${formatPrice(field.price_per_hour)} ₫/giờ</div>
+          <div style="margin-bottom:8px;">💰 Giá: ${formatPrice(field.price_per_hour)} vnđ/giờ</div>
           <div style="margin-bottom:8px;">⚽ Loại: ${getFieldTypeName(field.type)}</div>
           <div>📍 Trạng thái: ${field.status === 'available' ? '✅ Sẵn sàng' : '🔧 Bảo trì'}</div>
         </div>
@@ -434,7 +434,7 @@
         ['👤 Họ và tên', name],
         ['📞 SĐT', phone],
         ['📝 Ghi chú', document.getElementById('bk-note').value || '(Không có)'],
-        ['💰 Tổng tiền', `<strong style="color:var(--green);font-size:16px">${price.toLocaleString('vi-VN')} ₫</strong>`],
+        ['💰 Tổng tiền', `<strong style="color:var(--green);font-size:16px">${formatPrice(price)} vnđ</strong>`],
       ];
 
       document.getElementById('confirm-summary').innerHTML = rows.map(([label, val]) =>
@@ -465,7 +465,7 @@
       (db.fields || [])
         .filter(f => f.tenant_id === TENANT_ID && f.status === 'available')
         .forEach(f => {
-          select.innerHTML += `<option value="${f.id}">${f.name} - ${formatPrice(f.price_per_hour)} ₫/giờ</option>`;
+          select.innerHTML += `<option value="${f.id}">${f.name} - ${formatPrice(f.price_per_hour)} vnđ/giờ</option>`;
         });
 
       const staffSelect = document.getElementById('bk-staff');
@@ -816,15 +816,15 @@
       const fieldId = document.getElementById('bk-field').value;
       const duration = parseFloat(document.getElementById('bk-duration').value);
       if (!fieldId || !currentBooking.start_time) {
-        document.getElementById('bk-price').textContent = '0 ₫';
+        document.getElementById('bk-price').textContent = '0 vnđ';
         document.getElementById('bk-price-detail').textContent = 'Chọn sân và giờ để xem giá';
         return;
       }
       const db = await loadDB();
       const field = db.fields?.find(f => f.id === fieldId);
       const price = (field?.price_per_hour || 0) * duration;
-      document.getElementById('bk-price').textContent = price.toLocaleString('vi-VN') + ' ₫';
-      document.getElementById('bk-price-detail').textContent = `${duration} giờ × ${formatPrice(field?.price_per_hour)} ₫`;
+      document.getElementById('bk-price').textContent = formatPrice(price) + ' vnđ';
+      document.getElementById('bk-price-detail').textContent = `${duration} giờ × ${formatPrice(field?.price_per_hour)} vnđ`;
       currentBooking.price = price;
     }
 
@@ -958,7 +958,7 @@
     <div class="result-row"><span class="result-row-label">Ngày</span><span class="result-row-val">${new Date(booking.date).toLocaleDateString('vi-VN')}</span></div>
     <div class="result-row"><span class="result-row-label">Giờ</span><span class="result-row-val">${booking.start_time} – ${booking.end_time}</span></div>
     <div class="result-row"><span class="result-row-label">Khách hàng</span><span class="result-row-val">${booking.customer_name}</span></div>
-    <div class="result-row"><span class="result-row-label">Tổng tiền</span><span class="result-row-val">${booking.total_price.toLocaleString('vi-VN')} ₫</span></div>
+    <div class="result-row"><span class="result-row-label">Tổng tiền</span><span class="result-row-val">${formatPrice(booking.total_price)} vnđ</span></div>
   `;
       showPage('result');
 
@@ -1179,7 +1179,7 @@
           <div><div class="lookup-label">Ngày</div><div class="lookup-val">${new Date(b.date).toLocaleDateString('vi-VN')}</div></div>
           <div><div class="lookup-label">Giờ</div><div class="lookup-val">${b.start_time}–${b.end_time}</div></div>
           <div><div class="lookup-label">Khách</div><div class="lookup-val">${b.customer_name}</div></div>
-          <div><div class="lookup-label">Giá</div><div class="lookup-val">${b.total_price.toLocaleString('vi-VN')} ₫</div></div>
+          <div><div class="lookup-label">Giá</div><div class="lookup-val">${formatPrice(b.total_price)} vnđ</div></div>
           <div><div class="lookup-label">SĐT</div><div class="lookup-val">${b.customer_phone}</div></div>
         </div>
       </div>
@@ -1329,7 +1329,7 @@
            <div>⏰ Giờ: <strong style="color:var(--text)">${booking.start_time} - ${booking.end_time}</strong></div>
            <div>👤 Khách: <strong style="color:var(--text)">${booking.customer_name}</strong></div>
            <div>📞 SĐT: <strong style="color:var(--text)">${booking.customer_phone}</strong></div>
-           <div style="color:var(--green); font-weight:700; font-size:15px; margin-top:8px; text-align:center;">Tổng: ${booking.total_price.toLocaleString('vi-VN')} ₫</div>
+           <div style="color:var(--green); font-weight:700; font-size:15px; margin-top:8px; text-align:center;">Tổng: ${formatPrice(booking.total_price)} vnđ</div>
         </div>
         <button class="btn-book-full" style="padding:10px; margin-top:12px; font-size:13px; width:100%" onclick="window.location.reload()">🔄 Làm mới lịch</button>
       `;

@@ -108,6 +108,15 @@ npx knex migrate:latest
 npm run dev
 ```
 
+### 3. Đồng bộ dữ liệu Aiven ↔ Local
+```bash
+# Aiven -> Local
+npm run sync:aiven:local
+
+# Local -> Aiven
+npm run sync:local:aiven
+```
+
 ### 3. Build Ứng dụng Di động
 1. Mở thư mục `android-tenant` (hoặc `android-provider`) bằng **Android Studio**.
 2. Đảm bảo cấu hình `capacitor.config.ts` trỏ đúng vào Domain API của bạn.

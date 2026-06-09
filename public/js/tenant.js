@@ -142,6 +142,10 @@ function doLogout(){
 // NAV
 const pageTitles={dashboard:'Dashboard',fields:'Quản lý sân bóng',schedule:'Lịch đặt sân',customers:'Quản lý khách hàng',finance:'Quản lý tài chính',checkin:'Check-in QR',payment:'Thu tiền',invoice:'In hóa đơn',notifications:'Thông báo hệ thống',settings:'Cài đặt hệ thống',canteen:'Quản lý căng tin',staff:'Quản lý nhân viên',support:'Hỗ trợ & Báo lỗi',monitoring:'Giám sát sân trực tuyến'};
 function showPage(name){
+  if (paymentCheckInterval) {
+    clearInterval(paymentCheckInterval);
+    paymentCheckInterval = null;
+  }
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   
@@ -1054,13 +1058,78 @@ function updatePayAmount() {
 
 // Lưu phương thức thanh toán được chọn (tránh dùng regex trên .toString())
 let selectedPayMethod = 'cash';
+let paymentCheckInterval = null;
+
 function selectPay(el, method) {
   document.querySelectorAll('.pay-method').forEach(e => e.classList.remove('selected'));
   el.classList.add('selected');
   selectedPayMethod = method;
   document.getElementById('pay-qr-section').style.display = method === 'transfer' ? 'block' : 'none';
   document.getElementById('vnpay-note').style.display = method === 'vnpay' ? 'block' : 'none';
-  if (method === 'transfer') updateQRImage();
+  
+  if (paymentCheckInterval) {
+    clearInterval(paymentCheckInterval);
+    paymentCheckInterval = null;
+  }
+  
+  if (method === 'transfer') {
+    updateQRImage();
+    startPaymentCheckPolling();
+  }
+}
+
+function startPaymentCheckPolling() {
+  const bkId = document.getElementById('pay-booking').value;
+  if (!bkId) return;
+
+  paymentCheckInterval = setInterval(async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/bookings/${bkId}`);
+      if (response.ok) {
+        const booking = await response.json();
+        if (booking.paid) {
+          clearInterval(paymentCheckInterval);
+          paymentCheckInterval = null;
+          
+          // Tự động hoàn thành giao dịch khi phát hiện đã chuyển khoản thành công
+          const servicesPrice = currentSelectedServices.reduce((sum, s) => sum + (s.price * s.quantity), 0);
+          const bookingPrice = parseInt(document.getElementById('pay-amount').value) || 0;
+          const subtotal = bookingPrice + servicesPrice;
+          let discount = 0;
+          const customer = (db.customers || []).find(c => c.phone === booking.customer_phone);
+          if (customer?.status === 'vip') discount = Math.round(subtotal * 0.1);
+          else if (customer?.status === 'regular') discount = Math.round(subtotal * 0.05);
+          const finalAmount = subtotal - discount;
+
+          // Lưu các dịch vụ căng tin
+          for (const s of currentSelectedServices) {
+            await fetch(`${API_BASE_URL}/api/services/booking`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                booking_id: bkId,
+                service_id: s.service_id,
+                quantity: s.quantity,
+                price_at_time: s.price
+              })
+            });
+          }
+
+          // Cập nhật trạng thái thành Hoàn thành
+          await fetch(`${API_BASE_URL}/api/bookings/${bkId}/status`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'completed' })
+          });
+
+          alert('🎉 Khách hàng đã chuyển khoản thanh toán thành công! Tổng tiền: ' + fmt(finalAmount));
+          showPage('dashboard');
+        }
+      }
+    } catch (e) {
+      console.warn('Error checking payment status:', e);
+    }
+  }, 2000);
 }
 
 function updateQRImage() {
@@ -1080,10 +1149,50 @@ function updateQRImage() {
   const finalAmount = subtotal - discount;
 
   const t = db.tenant || {};
-  const bankId = (t.bank_name || 'MB').toUpperCase();
+  
+  // Normalize bank name for VietQR API
+  const rawBankName = t.bank_name || 'MB';
+  const cleanBankName = rawBankName.toLowerCase().trim()
+    .replace(/ngân hàng/g, '')
+    .replace(/nganhang/g, '')
+    .replace(/\s+/g, '');
+  
+  const bankMap = {
+    'techcombank': 'TCB', 'tcb': 'TCB',
+    'vietcombank': 'VCB', 'vcb': 'VCB',
+    'vietinbank': 'CTG', 'vietin': 'CTG', 'ctg': 'CTG',
+    'agribank': 'VARB', 'varb': 'VARB',
+    'mbbank': 'MB', 'mb': 'MB',
+    'bidv': 'BIDV',
+    'acb': 'ACB',
+    'sacombank': 'STB', 'stb': 'STB',
+    'vpbank': 'VPB', 'vpb': 'VPB',
+    'tpbank': 'TPB', 'tpb': 'TPB',
+    'hdbank': 'HDB', 'hdb': 'HDB',
+    'shb': 'SHB', 'vib': 'VIB',
+    'eximbank': 'EIB', 'eib': 'EIB',
+    'scb': 'SCB', 'msb': 'MSB',
+    'seabank': 'SEAB', 'seab': 'SEAB',
+    'lpbank': 'LPB', 'lpb': 'LPB',
+    'ocb': 'OCB'
+  };
+
+  let bankId = 'MB';
+  let matched = false;
+  for (const key in bankMap) {
+    if (cleanBankName.includes(key)) {
+      bankId = bankMap[key];
+      matched = true;
+      break;
+    }
+  }
+  if (!matched) {
+    bankId = rawBankName.toUpperCase().replace(/\s+/g, '');
+  }
+
   const accNum = t.bank_account || '3036506868';
   const accName = encodeURIComponent(t.bank_holder || 'TRAN DUC LUONG');
-  const memo = encodeURIComponent(`Thanh toan san bong FootField #${bkId}`);
+  const memo = encodeURIComponent(`FootField ${bkId}`);
   document.getElementById('pay-qr-image').src =
     `https://img.vietqr.io/image/${bankId}-${accNum}-compact2.png?amount=${finalAmount}&addInfo=${memo}&accountName=${accName}`;
   document.getElementById('pay-qr-display').textContent = fmt(finalAmount);
@@ -1118,7 +1227,7 @@ async function confirmPayment() {
       const vnRes = await fetch(`${API_BASE_URL}/api/payment/vnpay/create-url`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ amount: finalAmount, bookingId: bId, orderInfo: `Thanh toan dat san FootField #${bId}` })
+        body: JSON.stringify({ amount: finalAmount, bookingId: bId, orderInfo: `FootField ${bId}` })
       });
       const vnData = await vnRes.json();
       if (vnData.paymentUrl) { window.location.href = vnData.paymentUrl; return; }

@@ -12,8 +12,8 @@ const config = {
   queueLimit: 0
 };
 
-// Thêm cấu hình SSL nếu chạy trên Production (Aiven yêu cầu SSL)
-if (process.env.NODE_ENV === 'production') {
+// Thêm cấu hình SSL nếu chạy trên Production hoặc khi bật DB_SSL=true (Aiven yêu cầu SSL)
+if (process.env.DB_SSL === 'true' || process.env.NODE_ENV === 'production') {
   config.ssl = {
     rejectUnauthorized: false
   };

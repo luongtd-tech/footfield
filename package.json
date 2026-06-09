@@ -8,7 +8,9 @@
     "dev": "nodemon src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "migrate": "knex migrate:latest",
-    "seed": "knex seed:run"
+    "seed": "knex seed:run",
+    "sync:aiven:local": "bash scripts/sync_aiven_to_local.sh",
+    "sync:local:aiven": "bash scripts/sync_local_to_aiven.sh"
   },
   "keywords": [],
   "author": "",

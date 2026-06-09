@@ -1,20 +1,19 @@
 #!/bin/bash
 set -euo pipefail
 
-# === Cấu hình Aiven (Cloud) ===
-# Đọc từ các biến AIVEN_DB_* để tránh nhầm với DB_* dùng cho local/dev
-AIVEN_HOST="${AIVEN_DB_HOST:-}"
-AIVEN_PORT="${AIVEN_DB_PORT:-3306}"
-AIVEN_USER="${AIVEN_DB_USER:-}"
-AIVEN_PASS="${AIVEN_DB_PASSWORD:-}"
-AIVEN_DB="${AIVEN_DB_NAME:-defaultdb}"
-
-# === Cấu hình MySQL Local ===
+# === Cấu hình Local ===
 LOCAL_HOST="${LOCAL_DB_HOST:-127.0.0.1}"
 LOCAL_PORT="${LOCAL_DB_PORT:-3306}"
 LOCAL_USER="${LOCAL_DB_USER:-root}"
 LOCAL_PASS="${LOCAL_DB_PASSWORD:-}"
 LOCAL_DB="${LOCAL_DB_NAME:-footfield}"
+
+# === Cấu hình Aiven (Cloud) ===
+AIVEN_HOST="${AIVEN_DB_HOST:-}"
+AIVEN_PORT="${AIVEN_DB_PORT:-3306}"
+AIVEN_USER="${AIVEN_DB_USER:-}"
+AIVEN_PASS="${AIVEN_DB_PASSWORD:-}"
+AIVEN_DB="${AIVEN_DB_NAME:-defaultdb}"
 
 if [ -z "$AIVEN_HOST" ] || [ -z "$AIVEN_USER" ] || [ -z "$AIVEN_PASS" ]; then
   echo "Thiếu biến AIVEN_DB_HOST / AIVEN_DB_USER / AIVEN_DB_PASSWORD. Vui lòng khai báo trong .env hoặc biến môi trường." >&2
@@ -62,12 +61,10 @@ if [ -f "$MYSQLDUMP_BIN.exe" ] && [ -x "$MYSQLDUMP_BIN.exe" ]; then
   MYSQLDUMP_BIN="$MYSQLDUMP_BIN.exe"
 fi
 
-echo "[$(date)] Bắt đầu đồng bộ dữ liệu từ Aiven về Local..."
+echo "[$(date)] Bắt đầu đồng bộ dữ liệu từ Local lên Aiven..."
 
-"$MYSQL_BIN" -h "$LOCAL_HOST" -P "$LOCAL_PORT" -u "$LOCAL_USER" ${LOCAL_PASS:+-p"$LOCAL_PASS"} "$LOCAL_DB" -e "CREATE DATABASE IF NOT EXISTS $LOCAL_DB;" >/dev/null 2>&1 || true
+"$MYSQLDUMP_BIN" -h "$LOCAL_HOST" -P "$LOCAL_PORT" -u "$LOCAL_USER" ${LOCAL_PASS:+-p"$LOCAL_PASS"} \
+  --single-transaction --routines --triggers --set-gtid-purged=OFF "$LOCAL_DB" \
+  | "$MYSQL_BIN" -h "$AIVEN_HOST" -P "$AIVEN_PORT" -u "$AIVEN_USER" -p"$AIVEN_PASS" $MYSQL_SSL "$AIVEN_DB"
 
-"$MYSQLDUMP_BIN" -h "$AIVEN_HOST" -P "$AIVEN_PORT" -u "$AIVEN_USER" -p"$AIVEN_PASS" $MYSQL_SSL \
-  --single-transaction --routines --triggers --set-gtid-purged=OFF "$AIVEN_DB" \
-  | "$MYSQL_BIN" -h "$LOCAL_HOST" -P "$LOCAL_PORT" -u "$LOCAL_USER" ${LOCAL_PASS:+-p"$LOCAL_PASS"} "$LOCAL_DB"
-
-echo "[$(date)] Đồng bộ thành công từ Aiven sang Local!"
+echo "[$(date)] Đồng bộ thành công từ Local lên Aiven!"

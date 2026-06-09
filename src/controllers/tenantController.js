@@ -70,8 +70,8 @@ const tenantController = {
         return res.status(404).json({ success: false, message: 'Không tìm thấy nhà thuê' });
       }
       
-      // Validate required fields
-      if (!data.name || data.name.trim() === '') {
+      // Validate required fields if name is provided
+      if (data.name !== undefined && data.name.trim() === '') {
         return res.status(400).json({ success: false, message: 'Tên cơ sở không được để trống' });
       }
       

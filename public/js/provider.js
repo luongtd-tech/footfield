@@ -223,10 +223,14 @@ function renderDashboard() {
   const totalProjectedRevenueEl = document.getElementById('total-projected-revenue');
   
   if (packageAllocationBars && db.packages) {
-    const totalTenants = (db.tenants || []).length || 1;
+    const activeTenantsList = (db.tenants || []).filter(t => {
+      const todayStr = new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10);
+      return t.status === 'active' && t.end_date >= todayStr;
+    });
+    const totalActive = activeTenantsList.length || 1;
     packageAllocationBars.innerHTML = db.packages.map(pkg => {
-      const count = pkg.tenant_count || 0;
-      const percent = (count / totalTenants * 100).toFixed(0);
+      const count = pkg.active_tenant_count || 0;
+      const percent = (count / totalActive * 100).toFixed(0);
       return `<div class="rev-row">
         <div class="rev-label">${pkg.name}</div>
         <div class="rev-bar-wrap"><div class="rev-bar" style="width:${percent}%;background:${pkg.color}"></div></div>
@@ -247,7 +251,7 @@ function renderDashboard() {
         <td><strong>${t.name}</strong><br><small style="color:var(--text2)">${t.address}</small></td>
         <td>${t.owner}</td>
         <td><span style="color:${t.package_color||'#fff'};font-weight:600">${t.package_name||'N/A'}</span></td>
-        <td>${statusBadge(t.status)}</td>
+        <td>${statusBadge((t.end_date < new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10) && t.status === 'active') ? 'expired' : t.status)}</td>
         <td>${fmtDate(t.end_date)}</td>
         <td><button class="btn btn-sm btn-secondary" onclick="showPage('tenants')">Chi tiết</button></td>
       </tr>`;
@@ -259,9 +263,12 @@ function renderDashboard() {
 function renderTenants() {
   const q = (document.getElementById('tenant-search')||{}).value?.toLowerCase() || '';
   const sf = (document.getElementById('tenant-filter')||{}).value || '';
+  const todayStr = new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const getDisplayStatus = (t) => (t.end_date < todayStr && t.status === 'active') ? 'expired' : t.status;
+  
   const list = (db.tenants || []).filter(t =>
     (!q || t.name.toLowerCase().includes(q) || t.owner.toLowerCase().includes(q)) &&
-    (!sf || t.status === sf)
+    (!sf || getDisplayStatus(t) === sf)
   );
   document.getElementById('tenants-list').innerHTML = list.map(t => {
     // Tự động kiểm tra thời gian thực để hiển thị hết hạn
@@ -389,7 +396,7 @@ function viewTenantDetail(id) {
       <div style="flex:1;">
         <h2 style="margin-bottom:5px;">${t.name}</h2>
         <div style="display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap;">
-          ${statusBadge(t.status)}
+          ${statusBadge((t.end_date < new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10) && t.status === 'active') ? 'expired' : t.status)}
           <span class="badge badge-blue">📦 ${t.package_name || 'N/A'}</span>
         </div>
         <p style="color:var(--text2);font-size:13px;line-height:1.6;">📍 <strong>Địa chỉ:</strong> ${t.address}</p>
@@ -728,27 +735,44 @@ function renderBilling() {
   const q = (document.getElementById('billing-search')||{}).value?.toLowerCase() || '';
   const sf = (document.getElementById('billing-status-filter')||{}).value || '';
 
-  const list = db.invoices.filter(inv => 
-    (!q || inv.tenant_name.toLowerCase().includes(q) || inv.id.toLowerCase().includes(q)) &&
-    (!sf || inv.status === sf)
-  );
+  // Tính trạng thái hiển thị theo thời gian thực (UTC+7)
+  const todayStr = new Date(new Date().getTime() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10);
+  const getInvoiceDisplayStatus = (inv) => {
+    if (inv.status === 'unpaid' && inv.due_date < todayStr) return 'overdue';
+    return inv.status;
+  };
 
-  // Update summary cards (Always based on ALL invoices to show total health)
-  const stats = db.invoiceStats || { paid: {total:0, count:0}, unpaid: {total:0, count:0}, overdue: {total:0, count:0} };
+  const list = db.invoices.filter(inv => {
+    const ds = getInvoiceDisplayStatus(inv);
+    return (!q || inv.tenant_name.toLowerCase().includes(q) || inv.id.toLowerCase().includes(q)) &&
+           (!sf || ds === sf);
+  });
+
+  // Tính toán stats theo thời gian thực thay vì dùng stats từ DB (có thể chưa cập nhật)
+  const realStats = { paid: {total:0, count:0}, unpaid: {total:0, count:0}, overdue: {total:0, count:0} };
+  (db.invoices || []).forEach(inv => {
+    const ds = getInvoiceDisplayStatus(inv);
+    const amount = parseFloat(inv.amount) || 0;
+    if (realStats[ds]) {
+      realStats[ds].total += amount;
+      realStats[ds].count++;
+    }
+  });
   
   const statsCards = document.querySelectorAll('#page-billing .stat-value');
   if (statsCards.length >= 3) {
-    statsCards[0].textContent = (stats.paid.total / 1000000).toFixed(2) + 'M ₫';
-    statsCards[0].nextElementSibling.textContent = stats.paid.count + ' hóa đơn';
+    statsCards[0].textContent = (realStats.paid.total / 1000000).toFixed(2) + 'M ₫';
+    statsCards[0].nextElementSibling.textContent = realStats.paid.count + ' hóa đơn';
     
-    statsCards[1].textContent = (stats.unpaid.total / 1000000).toFixed(2) + 'M ₫';
-    statsCards[1].nextElementSibling.textContent = stats.unpaid.count + ' hóa đơn';
+    statsCards[1].textContent = (realStats.unpaid.total / 1000000).toFixed(2) + 'M ₫';
+    statsCards[1].nextElementSibling.textContent = realStats.unpaid.count + ' hóa đơn';
     
-    statsCards[2].textContent = (stats.overdue.total / 1000000).toFixed(2) + 'M ₫';
-    statsCards[2].nextElementSibling.textContent = stats.overdue.count + ' hóa đơn';
+    statsCards[2].textContent = (realStats.overdue.total / 1000000).toFixed(2) + 'M ₫';
+    statsCards[2].nextElementSibling.textContent = realStats.overdue.count + ' hóa đơn';
   }
 
   document.getElementById('billing-table').innerHTML = list.map(inv => {
+    const displayStatus = getInvoiceDisplayStatus(inv);
     const statusMap = {
       paid: '<span class="badge badge-green">✅ Đã thanh toán</span>',
       unpaid: '<span class="badge badge-yellow">⏳ Chờ thanh toán</span>',
@@ -762,10 +786,10 @@ function renderBilling() {
       <td><strong style="font-family:var(--mono)">${fmt(parseFloat(inv.amount))}</strong></td>
       <td>${inv.billing_cycle==='yearly'?'Hàng năm':'Hàng tháng'}</td>
       <td>${fmtDate(inv.due_date)}</td>
-      <td>${statusMap[inv.status] || inv.status}</td>
+      <td>${statusMap[displayStatus] || displayStatus}</td>
       <td>
         <div style="display:flex;gap:5px;">
-          ${inv.status !== 'paid' ? `<button class="btn btn-sm btn-primary" onclick="updateInvoiceStatus('${inv.id}', 'paid')">✓ Thu tiền</button>` : ''}
+          ${displayStatus !== 'paid' ? `<button class="btn btn-sm btn-primary" onclick="updateInvoiceStatus('${inv.id}', 'paid')">✓ Thu tiền</button>` : ''}
           <button class="btn btn-sm btn-secondary" onclick="printInvoice('${inv.id}')">🖨 In</button>
           <button class="btn btn-sm btn-secondary" onclick="sendInvoice('${inv.id}')">📧 Gửi</button>
         </div>

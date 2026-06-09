@@ -28,6 +28,31 @@ function formatDate(date) {
     return `${y}${m}${d}${h}${min}${s}`;
 }
 
+function normalizeAmount(value) {
+    if (value === null || value === undefined || value === '') return 0;
+    const num = Number(String(value).replace(/[^0-9.-]/g, ''));
+    return Number.isFinite(num) ? num : 0;
+}
+
+function extractBookingId(description) {
+    if (!description) return null;
+
+    const patterns = [
+        /(?:footfield\s*#?\s*|#\s*)(bk[_a-zA-Z0-9-]{2,})/i,
+        /\b(bk[_a-zA-Z0-9-]{2,})\b/i,
+        /\b(booking[_a-zA-Z0-9-]{2,})\b/i
+    ];
+
+    for (const pattern of patterns) {
+        const match = description.match(pattern);
+        if (match) {
+            return match[1].replace(/^#\s*/, '').trim();
+        }
+    }
+
+    return null;
+}
+
 exports.createPaymentUrl = async (req, res) => {
     try {
         const { bookingId, amount, bankCode } = req.body;
@@ -187,25 +212,25 @@ exports.vnpayIpn = async (req, res) => {
 exports.bankTransferWebhook = async (req, res) => {
     try {
         console.log("👉 Received bank transfer webhook payload:", JSON.stringify(req.body));
-        
+
         let transactions = [];
-        
+
         // 1. Phân tích cú pháp dữ liệu (Parse payload dynamically)
-        if (req.body.data && Array.isArray(req.body.data)) {
-            // Định dạng Casso / PayOS
+        if (Array.isArray(req.body?.data)) {
+            // Định dạng SePay / Casso / PayOS
             transactions = req.body.data.map(item => ({
-                id: item.id || item.transactionId,
-                amount: item.amount,
-                description: item.description || item.content || ''
+                id: item.id || item.transactionId || item.referenceCode || item.code || Date.now(),
+                amount: item.amount ?? item.transferAmount ?? item.transfer_amount ?? item.totalAmount ?? 0,
+                description: item.description || item.content || item.memo || item.note || ''
             }));
-        } else if (req.body.transferAmount !== undefined) {
-            // Định dạng SePay
+        } else if (req.body?.transferAmount !== undefined || req.body?.amount !== undefined) {
+            // Định dạng SePay đơn lẻ
             transactions = [{
-                id: req.body.id,
-                amount: req.body.transferAmount,
-                description: req.body.content || ''
+                id: req.body.id || req.body.transactionId || req.body.referenceCode || req.body.code || Date.now(),
+                amount: req.body.transferAmount ?? req.body.amount ?? req.body.transfer_amount ?? 0,
+                description: req.body.content || req.body.description || req.body.memo || req.body.note || ''
             }];
-        } else if (req.body.description !== undefined) {
+        } else if (req.body?.description !== undefined) {
             // Định dạng custom test webhook
             transactions = [{
                 id: req.body.id || Date.now(),
@@ -218,14 +243,12 @@ exports.bankTransferWebhook = async (req, res) => {
         const Booking = require('../models/Booking');
 
         for (const tx of transactions) {
-            const desc = tx.description || '';
-            const amount = tx.amount || 0;
-            
-            // Tìm mã booking dạng bk_xxxxxxx trong nội dung chuyển khoản
-            const match = desc.match(/FootField\s*#\s*(bk_[a-zA-Z0-9_]+)/i) || desc.match(/#(bk_[a-zA-Z0-9_]+)/i);
-            
-            if (match) {
-                const bookingId = match[1];
+            const desc = String(tx.description || '');
+            const amount = normalizeAmount(tx.amount);
+
+            const bookingId = extractBookingId(desc);
+
+            if (bookingId) {
                 console.log(`🔍 Found potential booking ID: ${bookingId} in transaction description.`);
 
                 // 2. Tìm đơn đặt sân trong Database

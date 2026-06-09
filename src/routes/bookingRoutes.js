@@ -8,6 +8,7 @@ router.patch('/:id/status', bookingController.updateBookingStatus);
 router.patch('/:id/payment', bookingController.updateBookingPayment);
 
 router.get('/qr/:code', bookingController.getBookingByQR);
+router.get('/:id', bookingController.getBookingById);
 router.put('/:id/status', bookingController.updateBookingStatus);
 
 module.exports = router;

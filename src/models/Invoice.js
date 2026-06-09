@@ -54,6 +54,41 @@ const Invoice = {
       [id, tenant_id, package_id, amount, billing_cycle, status, due_date, payment_date]
     );
     return result;
+  },
+  // Tự động chuyển hóa đơn 'unpaid' đã quá hạn thanh toán sang 'overdue'
+  updateOverdueInvoices: async () => {
+    const [result] = await db.query(
+      "UPDATE service_invoices SET status = 'overdue' WHERE status = 'unpaid' AND due_date < DATE(DATE_ADD(NOW(), INTERVAL 7 HOUR))"
+    );
+    return result;
+  },
+  // Tự động tạo hóa đơn gia hạn (unpaid) cho nhà thuê đã hết hạn mà chưa có hóa đơn chờ
+  generateRenewalInvoices: async () => {
+    // Tìm các nhà thuê hết hạn (status='expired' hoặc active nhưng end_date < today)
+    // mà chưa có hóa đơn unpaid/overdue cho chu kỳ tiếp theo
+    const [expiredTenants] = await db.query(`
+      SELECT t.id, t.package_id, t.billing_cycle, t.end_date, p.price_monthly, p.price_yearly
+      FROM tenants t
+      JOIN packages p ON t.package_id = p.id
+      WHERE (t.status = 'expired' OR (t.status = 'active' AND t.end_date < DATE(DATE_ADD(NOW(), INTERVAL 7 HOUR))))
+        AND t.id NOT IN (
+          SELECT si.tenant_id FROM service_invoices si 
+          WHERE si.status IN ('unpaid', 'overdue')
+        )
+    `);
+
+    let createdCount = 0;
+    for (const tenant of expiredTenants) {
+      const amount = tenant.billing_cycle === 'yearly' ? tenant.price_yearly : tenant.price_monthly;
+      const dueDate = tenant.end_date; // Hạn thanh toán = ngày hết hạn gói
+
+      await db.query(
+        'INSERT INTO service_invoices (id, tenant_id, package_id, amount, billing_cycle, status, due_date) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        ['INV' + Date.now() + createdCount, tenant.id, tenant.package_id, amount, tenant.billing_cycle, 'overdue', dueDate]
+      );
+      createdCount++;
+    }
+    return { createdCount };
   }
 };
 

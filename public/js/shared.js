@@ -29,7 +29,8 @@ const fmt = (n) => {
 };
 
 function formatPrice(price) {
-  return (price || 0).toLocaleString('vi-VN');
+  const num = Math.round(parseFloat(price) || 0);
+  return num.toLocaleString('vi-VN');
 }
 
 /**

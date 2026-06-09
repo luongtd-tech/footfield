@@ -194,3 +194,17 @@ exports.getBookingByQR = async (req, res) => {
     res.status(500).json({ message: 'Error fetching booking by QR', error: error.message });
   }
 };
+
+exports.getBookingById = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const booking = await Booking.findById(id);
+    if (booking) {
+      res.json(booking);
+    } else {
+      res.status(404).json({ message: 'Booking not found' });
+    }
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching booking', error: error.message });
+  }
+};

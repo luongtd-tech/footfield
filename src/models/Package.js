@@ -5,9 +5,9 @@ const Package = {
     const [rows] = await db.query(`
       SELECT p.*, 
              COUNT(t.id) as tenant_count,
-             SUM(CASE WHEN t.status = 'active' THEN 1 ELSE 0 END) as active_tenant_count,
-             SUM(CASE WHEN t.status = 'active' AND t.billing_cycle = 'monthly' THEN p.price_monthly 
-                      WHEN t.status = 'active' AND t.billing_cycle = 'yearly' THEN p.price_yearly / 12 
+             SUM(CASE WHEN t.status = 'active' AND t.end_date >= DATE(DATE_ADD(NOW(), INTERVAL 7 HOUR)) THEN 1 ELSE 0 END) as active_tenant_count,
+             SUM(CASE WHEN t.status = 'active' AND t.end_date >= DATE(DATE_ADD(NOW(), INTERVAL 7 HOUR)) AND t.billing_cycle = 'monthly' THEN p.price_monthly 
+                      WHEN t.status = 'active' AND t.end_date >= DATE(DATE_ADD(NOW(), INTERVAL 7 HOUR)) AND t.billing_cycle = 'yearly' THEN p.price_yearly / 12 
                       ELSE 0 END) as monthly_revenue
       FROM packages p
       LEFT JOIN tenants t ON p.id = t.package_id
