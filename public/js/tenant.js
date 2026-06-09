@@ -1078,6 +1078,34 @@ function selectPay(el, method) {
   }
 }
 
+function showPaymentToast(message, type = 'success') {
+  let root = document.getElementById('global-toast-root');
+  if (!root) {
+    root = document.createElement('div');
+    root.id = 'global-toast-root';
+    root.className = 'toast-root';
+    document.body.appendChild(root);
+  }
+
+  const toast = document.createElement('div');
+  toast.className = `toast-card toast-${type}`;
+  toast.innerHTML = `
+    <div class="toast-icon">${type === 'error' ? '⚠️' : '✅'}</div>
+    <div class="toast-content">
+      <strong>${type === 'error' ? 'Thông báo' : 'Thanh toán thành công'}</strong>
+      <span>${message}</span>
+    </div>
+  `;
+
+  root.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('show'));
+
+  setTimeout(() => {
+    toast.classList.remove('show');
+    setTimeout(() => toast.remove(), 260);
+  }, 3200);
+}
+
 function startPaymentCheckPolling() {
   const bkId = document.getElementById('pay-booking').value;
   if (!bkId) return;
@@ -1122,7 +1150,7 @@ function startPaymentCheckPolling() {
             body: JSON.stringify({ status: 'completed' })
           });
 
-          alert('🎉 Khách hàng đã chuyển khoản thanh toán thành công! Tổng tiền: ' + fmt(finalAmount));
+          showPaymentToast('Khách hàng đã chuyển khoản thành công. Tổng tiền: ' + fmt(finalAmount));
           showPage('dashboard');
         }
       }
@@ -1261,7 +1289,7 @@ async function confirmPayment() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: 'completed' })
       });
-      alert('✅ Thanh toán thành công! Tổng: ' + fmt(finalAmount));
+      showPaymentToast('Thanh toán đã được xác nhận. Tổng: ' + fmt(finalAmount));
       showPage('dashboard');
     } else {
       alert('❌ Lỗi khi xác nhận thanh toán.');
