@@ -1,15 +1,20 @@
 const nodemailer = require('nodemailer');
+const dns = require('dns');
 require('dotenv').config();
+
+// Ép Node.js ưu tiên IPv4 khi resolve DNS — bắt buộc để hoạt động trên Render
+dns.setDefaultResultOrder('ipv4first');
 
 const transporter = nodemailer.createTransport({
   host: 'smtp.gmail.com',
   port: 587,
-  secure: false, // TLS
-  family: 4,     // Bắt buộc dùng IPv4, tránh lỗi ENETUNREACH trên Render
+  secure: false, // STARTTLS
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  }
+  },
+  socketTimeout: 10000,
+  greetingTimeout: 10000
 });
 
 const mailService = {
