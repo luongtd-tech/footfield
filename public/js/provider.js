@@ -449,7 +449,7 @@ function openEditTenantModal(id) {
   document.getElementById('edit-nt-phone').value = t.phone;
   document.getElementById('edit-nt-address').value = t.address;
   document.getElementById('edit-nt-user').value = t.username;
-  document.getElementById('edit-nt-pass').value = t.password;
+  document.getElementById('edit-nt-pass').value = ''; // Để trống để không ghi đè mật khẩu cũ
   document.getElementById('edit-nt-pkg').value = t.package_id;
   document.getElementById('edit-nt-cycle').value = t.billing_cycle;
   document.getElementById('edit-nt-logo').value = t.logo || '';

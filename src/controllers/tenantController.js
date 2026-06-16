@@ -103,6 +103,15 @@ const tenantController = {
       res.json({ success: true, message: 'Tenant updated successfully' });
     } catch (error) {
       console.error('Error updating tenant:', error);
+      let message = 'Lỗi hệ thống khi cập nhật';
+      if (error.code === 'ER_DUP_ENTRY') {
+        if (error.message.includes('email')) message = 'Email này đã được sử dụng bởi nhà thuê khác';
+        else if (error.message.includes('username')) message = 'Tài khoản (username) này đã tồn tại';
+        else message = 'Thông tin bị trùng lặp';
+        return res.status(400).json({ success: false, message });
+      } else if (error.code === 'ER_DATA_TOO_LONG') {
+        return res.status(400).json({ success: false, message: 'Dữ liệu nhập vào quá dài so với quy định' });
+      }
       res.status(500).json({ success: false, message: 'Error updating tenant', error: error.message });
     }
   },
