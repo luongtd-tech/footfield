@@ -1,37 +1,27 @@
-const nodemailer = require('nodemailer');
-const dns = require('dns');
 require('dotenv').config();
+const { Resend } = require('resend');
 
-// Ép Node.js ưu tiên IPv4 khi resolve DNS — bắt buộc để hoạt động trên Render
-dns.setDefaultResultOrder('ipv4first');
-
-const transporter = nodemailer.createTransport({
-  host: 'smtp.gmail.com',
-  port: 587,
-  secure: false, // STARTTLS
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  socketTimeout: 10000,
-  greetingTimeout: 10000
-});
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 const mailService = {
   sendInvoice: async (to, subject, htmlContent) => {
     try {
-      const mailOptions = {
-        from: process.env.EMAIL_FROM,
-        to: to,
+      const { data, error } = await resend.emails.send({
+        from: process.env.EMAIL_FROM || 'FootField Support <onboarding@resend.dev>',
+        to: [to],
         subject: subject,
         html: htmlContent
-      };
+      });
 
-      const info = await transporter.sendMail(mailOptions);
-      console.log('Email sent: ' + info.response);
-      return { success: true, response: info.response };
+      if (error) {
+        console.error('Resend error:', error);
+        throw new Error(error.message);
+      }
+
+      console.log('Email sent via Resend, id:', data.id);
+      return { success: true, id: data.id };
     } catch (error) {
-      console.error('Email error: ', error);
+      console.error('Email error:', error);
       throw error;
     }
   }
