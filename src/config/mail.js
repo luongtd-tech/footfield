@@ -17,7 +17,9 @@ const mailService = {
   sendInvoice: async (to, subject, htmlContent) => {
     try {
       const { data, error } = await getResend().emails.send({
-        from: process.env.EMAIL_FROM || 'FootField Support <onboarding@resend.dev>',
+        // Resend yêu cầu domain người gửi phải được verify.
+        // Dùng onboarding@resend.dev (luôn hoạt động ở free tier).
+        from: 'FootField Support <onboarding@resend.dev>',
         to: [to],
         subject: subject,
         html: htmlContent
