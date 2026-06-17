@@ -2372,18 +2372,23 @@ async function initNotifications() {
       try {
         // Initialize Firebase for Web (User needs to fill config)
         const firebaseConfig = {
-          apiKey: "AIzaSyA7wuA3sLG2QL5idrX045wkqDgoSxq-m34",
-          authDomain: "footfield-main.firebaseapp.com",
-          projectId: "footfield-main",
-          storageBucket: "footfield-main.firebasestorage.app",
-          messagingSenderId: "552118678982",
-          appId: "1:552118678982:web:b0c24998138feb37bdeec7"
+          apiKey: "AIzaSyDzfWF3Bt_JRSz1a_PIieo8troLfkglzDE",
+          authDomain: "footfield-db573.firebaseapp.com",
+          projectId: "footfield-db573",
+          storageBucket: "footfield-db573.firebasestorage.app",
+          messagingSenderId: "843846666103",
+          appId: "1:843846666103:web:9446c24d839f2b1be78372",
+          measurementId: "G-927XLKSBDH"
         };
         
         if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
         const messaging = firebase.messaging();
         
-        const currentToken = await messaging.getToken({ vapidKey: 'BPj1vhUSfSh7NcUbhZidEivxWZAnRC9X62r83unqFk7TLZ5szd3tBfkMq7f5mHL8ckj6OPDAdYz86v-RUrxUAko' });
+        const registration = await navigator.serviceWorker.ready;
+        const currentToken = await messaging.getToken({ 
+          vapidKey: 'BKhBnMN02jYjxDRIPwmqiI9Z2nXOYSB34DQZMp_cf-9bA24hx1quLGzn8B8gRiJi-BZ0J2IDjCNt8LTzUcoGcbU',
+          serviceWorkerRegistration: registration
+        });
         if (currentToken) {
           updateFCMToken('tenant', TENANT_ID, currentToken);
         }
